@@ -106,6 +106,75 @@ function hide_search(){
     search = document.getElementById("search")
     search.classList.add("visually-hidden")
 }
+
+function printNavBar(id){
+    navdiv = document.createElement("div")
+    title = document.createElement("h3")
+    title.innerHTML = "Menu"
+    navdiv.appendChild(title)
+    if (localStorage.getItem("user") == null){
+        node = document.createElement("h5")
+        node.innerHTML = "Per accedere alle funzionalità complete, effettua il login o registrati"
+        navdiv.append(node)
+
+        node = document.createElement("a")
+        node.innerHTML = "Accedi o registrati"
+        node.href = "/login.html"
+        navdiv.append(node)
+    }else{
+        node = document.createElement("nav")
+        node.classList.add("nav", "flex-column")
+        a = document.createElement("a")
+        a.classList.add("nav-link")
+        a.innerHTML="Home"
+        node.appendChild(a)
+
+        a = document.createElement("a")
+        a.classList.add("nav-link")
+        a.innerHTML="Crea una playlist"
+        node.appendChild(a)
+
+        a = document.createElement("a")
+        a.classList.add("nav-link")
+        a.innerHTML="Gestisci le tue playlist"
+        node.appendChild(a)
+
+        a = document.createElement("a")
+        a.classList.add("nav-link")
+        a.innerHTML="Gestisci il tuo account"
+        node.appendChild(a)
+
+        navdiv.append(node)
+    }
+    document.getElementById(id).append(navdiv)
+}
+
+function addUser(){
+    email = document.getElementById("email").value
+    password = document.getElementById("password").value
+    alert(email, password)
+
+    var data = {
+        email: email,
+        password: password
+    }
+    console.log(data)
+    fetch("http://127.0.0.1:3100/users?apikey=123456", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    }).then(async response => {
+        if (response.ok) {
+            console.log("SIIIIII")
+        } else {
+            response.text().then( text =>
+                alert(text)
+            )
+        }
+    })
+}
 /*
 async function getFile(url){
     try {

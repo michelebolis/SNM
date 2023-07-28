@@ -5,7 +5,7 @@ const crypto = require('crypto')
 var cors = require('cors')
 const express = require('express')
 const path = require('path');
-const uri = "mongodb+srv://pwm:programmazionewebmobile@pwm.0fld6wh.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb+srv://admin:5IwstKczRMmtfJz9@snm.9wgaijz.mongodb.net/?retryWrites=true&w=majority";
 
 const app = express()
 app.use(cors())
@@ -43,14 +43,6 @@ app.get('/users/:id', auth, async function (req, res) {
 })
 
 async function addUser(res, user) {
-    if (user.name == undefined) {
-        res.status(400).send("Missing Name")
-        return
-    }
-    if (user.surname == undefined) {
-        res.status(400).send("Missing Surname")
-        return
-    }
     if (user.email == undefined) {
         res.status(400).send("Missing Email")
         return
@@ -59,18 +51,13 @@ async function addUser(res, user) {
         res.status(400).send("Password is missing or too short")
         return
     }
-    if (user.date == undefined) {
-        res.status(400).send("Date is missing or too short")
-        return
-    }
 
     user.password = hash(user.password)
 
     var pwmClient = await new mongoClient(uri).connect()
     try {
-        var items = await pwmClient.db("pwm").collection('users').insertOne(user)
+        var items = await pwmClient.db("SNM").collection('Users').insertOne(user)
         res.json(items)
-
     }
     catch (e) {
         console.log('catch in test');
@@ -146,7 +133,6 @@ app.get('/users', auth, async function (req, res) {
 
 app.post("/users", auth, function (req, res) {
     addUser(res, req.body)
-
 })
 
 app.post("/login", async (req, res) => {
