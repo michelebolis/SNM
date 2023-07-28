@@ -116,6 +116,9 @@ function printTracksCard(playlist, template, id, startCount){
     }
 }
 
+/**
+ * Visualizza il nodo successivo rispetto a quello del padre
+ */
 function showMore(){
     next = (this.parentNode.nextSibling)
     if (next == null){
@@ -126,25 +129,28 @@ function showMore(){
     }
 }
 
+/**
+ * 
+ * @returns 
+ */
 function printMyPlaylists(){
     if (localStorage.getItem("user") == null){return}
     document.write("QUI CI SONO LE MIE PLAYLIST")
 }
 
+/**
+ * 
+ * @returns 
+ */
 function printFollowedPlaylists(){
     if (localStorage.getItem("user") == null){return}
     document.write("QUI CI SONO LE PLAYLIST CHE SEGUO")
 }
 
-function show_search(){
-    search = document.getElementById("search")
-    search.classList.remove("visually-hidden")
-}
-function hide_search(){
-    search = document.getElementById("search")
-    search.classList.add("visually-hidden")
-}
-
+/**
+ * Funzione che stampa la navbar nel nodo il cui id è passato come argomento
+ * @param {*} id id del nodo in cui stampare la navbar 
+ */
 function printNavBar(id){
     navdiv = document.createElement("div")
     title = document.createElement("h3")
@@ -227,6 +233,10 @@ function addUser(){
     })
 }
 
+/**
+ * Funziome che preleva l'email e la password da due input e fa una richiesta al db 
+ * per verificare se mail e password corrispondo ad un utente 
+ */
 function login(){
     email = document.getElementById("login_email").value
     password = document.getElementById("login_password").value
@@ -250,10 +260,9 @@ function login(){
     })
 }
 
-function save_login(response){
-    console.log(response.text())
-}
-
+/**
+ * Funzione che effettua il logout rimuovendo dal local storage le informazioni dell'utente
+ */
 function logout(){
     localStorage.removeItem("user")
 }
