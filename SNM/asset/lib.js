@@ -65,19 +65,23 @@ function getInfoPlaylist(playlist){
         },
     })
     .then((response) => response.json())
-    .then((searchResults) => 
-        printPlaylist(searchResults)
+    .then(function(searchResults){
+        searchResults=searchResults.items
+        for(let i=0;i<searchResults.length;i++){
+            searchResults[i]=searchResults[i].track
+        }
+        printPlaylist(searchResults, "top")
+    }
     ).catch((e) => console.log(e))
 }
 /**
  * Funzione che stampa le tracks contenente nella playlist, visualizzate con il titolo, immagine della canzone e nome dell'artista
  * @param {Array} playlist Array contenente le track da stampare
  */
-function printPlaylist(playlist){
-    template = document.getElementById('top-template').cloneNode(true)
+function printPlaylist(playlist, idNode){
+    template = document.getElementById(idNode +'-template').cloneNode(true)
     template.classList.remove("visually-hidden")
-    document.getElementById('top').innerHTML=""
-    playlist = playlist.items
+    document.getElementById(idNode).innerHTML=""
     console.log(playlist)
     // button template to clone
     button = document.createElement("button")
@@ -92,26 +96,26 @@ function printPlaylist(playlist){
         //create the row
         row = document.createElement("div")
         row.classList.add("row", "justify-content-center")
-        newid = "topRow" + (i/10)
+        newid = idNode+"Row" + (i/10)
         row.id= newid
-        document.getElementById("top").append(row)
-        printTracksCard(playlist.slice(i,i+10), template, newid, i+1)
+        document.getElementById(idNode).append(row)
+        printTracksCard(playlist.slice(i,i+10), template, newid, idNode, i+1)
         // append the button and hide everything
         document.getElementById(newid).append(newButton)
         document.getElementById(newid).classList.add("visually-hidden")
     }
-    document.getElementById("topRow0").classList.remove("visually-hidden")
-    document.getElementById('top-template').remove()
+    document.getElementById(idNode+"Row0").classList.remove("visually-hidden")
+    //document.getElementById(idNode+'-template').remove()
 }
 
-function printTracksCard(playlist, template, id, startCount){
+function printTracksCard(playlist, template, id, oldid, startCount){
     for (let i=0; i<playlist.length; i++){
         clone = template.cloneNode(true)
-        clone.addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].track.id})
+        clone.addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].id})
         clone.id=id + (i + startCount)
-        clone.getElementsByClassName("card-img-top")[0].src = playlist[i].track.album.images[0].url
-        clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].track.name
-        clone.getElementsByClassName("nome_artista")[0].innerHTML = playlist[i].track.artists[0].name
+        clone.getElementsByClassName("card-img-"+oldid)[0].src = playlist[i].album.images[0].url
+        clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].name
+        clone.getElementsByClassName("nome_artista")[0].innerHTML = playlist[i].artists[0].name
         document.getElementById(id).appendChild(clone)
     }
 }
@@ -171,7 +175,7 @@ async function printTrackInfo(idTrack, idNode){
         div.classList.add("list-group-item", "list-group-item-dark")
         div.innerHTML = "Album: "
         a = document.createElement("a")
-        a.name = info.album.name
+        a.innerHTML = info.album.name
         a.addEventListener("click", function move(){window.location.href="/src/album?"+info.album.id})
         a.classList.add("link")
         div.append(a)
@@ -231,8 +235,18 @@ function msToMinutesAndSeconds(ms) {
     return min + ":" + (sec < 10 ? '0' : '') + sec;
 }
 
-function printTopTrackArtist(id){
-    console.log(id)
+function printTopTrackArtist(idArtist){
+    fetch(`${BASE_URL}artists/${idArtist}/top-tracks?market=ES`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(response => response.json())
+    .then(function(playlist){
+        console.log(playlist)
+        printPlaylist(playlist.tracks, "topTrackArtist")
+    }).catch((e) => console.log(e))
 }
 
 /**
@@ -271,6 +285,12 @@ function printNavBar(id){
     title.innerHTML = "Menu"
     navdiv.appendChild(title)
     if (localStorage.getItem("user") == null){
+        a = document.createElement("a")
+        a.classList.add("nav-link")
+        a.innerHTML="Home"
+        a.href="/"
+        navdiv.appendChild(a)
+
         node = document.createElement("h5")
         node.innerHTML = "Per accedere alle funzionalità complete, effettua il login o registrati"
         navdiv.append(node)
