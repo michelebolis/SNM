@@ -149,11 +149,13 @@ function printNavBar(id){
     document.getElementById(id).append(navdiv)
 }
 
+/**
+ * Funzione che, dati i valori contenuti in due input text con id email e password, crea un nuovo utente nel db
+ * SE si verificano degli errori, li stampa in un alert 
+ */
 function addUser(){
     email = document.getElementById("email").value
     password = document.getElementById("password").value
-    alert(email, password)
-
     var data = {
         email: email,
         password: password
@@ -175,22 +177,40 @@ function addUser(){
         }
     })
 }
-/*
-async function getFile(url){
-    try {
-        const res = await fetch(url);
-        const data = await res.text();
-        console.log(data);
-        return data
-    } catch (err) {
-        console.error(err);
-    }
-}
 
+/**
+ * Funzione che stampa in coda al nodo una card placeholder
+ * @param {String} id id del node dove fare l'append delle card
+ */
 function printCardPlaceholder(id){
-   card = (getFile("cardPlaceholder.html"))
-   console.log(card)
-   document.getElementById(id).append(card)
-    /* document.getElementById(id).append()
-    
-}*/
+    div = document.createElement("div")
+    div.classList.add("card", "col-3")
+
+    node = document.createElement("div")
+    node.classList.add("card-body")
+    title = document.createElement("h5")
+    title.classList.add("card-title", "placeholder-glow")
+    p = document.createElement("p")
+    p.classList.add("card-text", "placeholder-glow")
+
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-7")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-4")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-4")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-6")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-9")
+    p.append(span)
+
+    node.append(title, p)
+    div.append(node)
+
+    document.getElementById(id).append(div)
+}
