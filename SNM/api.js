@@ -34,7 +34,7 @@ app.get('/users/:id', auth, async function (req, res) {
     // Ricerca nel database
     var id = req.params.id
     var pwmClient = await new mongoClient(uri).connect()
-    var user = await pwmClient.db("pwm")
+    var user = await pwmClient.db("SNM")
         .collection('users')
         .find({ "_id": new ObjectId(id) })
         .project({ "password": 0 })
@@ -107,7 +107,7 @@ async function updateUser(res, id, updatedUser) {
             $set: updatedUser
         }
 
-        var item = await pwmClient.db("pwm")
+        var item = await pwmClient.db("SNM")
             .collection('users')
             .updateOne(filter, updatedUserToInsert)
 
@@ -126,7 +126,7 @@ async function updateUser(res, id, updatedUser) {
 
 app.get('/users', auth, async function (req, res) {
     var pwmClient = await new mongoClient(uri).connect()
-    var users = await pwmClient.db("pwm").collection('users').find().project({ "password": 0 }).toArray();
+    var users = await pwmClient.db("SNM").collection('users').find().project({ "password": 0 }).toArray();
     res.json(users)
 
 })
@@ -156,18 +156,16 @@ app.post("/login", async (req, res) => {
             {"password": login.password}
         ]
     }
-    var loggedUser = await pwmClient.db("pwm")
-    .collection('users')
+    var loggedUser = await pwmClient.db("SNM")
+    .collection('Users')
     .findOne(filter);
     console.log(loggedUser)
-
 
     if (loggedUser == null) {
         res.status(401).send("Unauthorized")
     } else {
         res.send({ loggedUser })
     }
-
 }
 )
 

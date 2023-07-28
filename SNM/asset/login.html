@@ -9,17 +9,39 @@
     <script src="lib.js"></script>
 </head>
 <body>
-    <div>
-        <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="email" aria-describedby="emailHelp">
-          <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    <div class="container" >
+      <div class="row" id="userForm">
+        <div class="col-5" id="signin">
+          <h4>Crea un nuovo account</h4>
+          <div class="mb-3">
+            <label for="user" class="form-label">User nickname</label>
+            <input type="text" class="form-control" id="user">
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email">
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password">
+          </div>
+          <button class="btn btn-primary" onclick=addUser()>Submit</button>
         </div>
-        <div class="mb-3">
-          <label for="exampleInputPassword1" class="form-label">Password</label>
-          <input type="password" class="form-control" id="password">
+        <div class="col"></div>
+        
+        <div class="col-5 " id="login">
+          <h4>Accedi</h4>
+          <div class="mb-3">
+            <label for="login_email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="login_email">
+          </div>
+          <div class="mb-3">
+            <label for="login_password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="login_password">
+          </div>
+          <button class="btn btn-primary" onclick="login()">Submit</button>
         </div>
-        <button class="btn btn-primary" onclick=addUser()>Submit</button>
+      </div>
     </div>    
 </body>
 </html>

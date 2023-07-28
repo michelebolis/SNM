@@ -78,6 +78,7 @@ function printPlaylist(playlist){
     template.classList.remove("visually-hidden")
     document.getElementById('top').innerHTML=""
     playlist = playlist.items
+    console.log(playlist)
     // button template to clone
     button = document.createElement("button")
     button.innerHTML="Show more"
@@ -106,6 +107,7 @@ function printPlaylist(playlist){
 function printTracksCard(playlist, template, id, startCount){
     for (let i=0; i<playlist.length; i++){
         clone = template.cloneNode(true)
+        clone.addEventListener("click", function move(){window.location.href = "/track?" + playlist[i].track.id})
         clone.id=id + (i + startCount)
         clone.getElementsByClassName("card-img-top")[0].src = playlist[i].track.album.images[0].url
         clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].track.name
@@ -163,21 +165,32 @@ function printNavBar(id){
         a = document.createElement("a")
         a.classList.add("nav-link")
         a.innerHTML="Home"
+        a.href="/"
         node.appendChild(a)
 
         a = document.createElement("a")
         a.classList.add("nav-link")
         a.innerHTML="Crea una playlist"
+        a.href="/"
         node.appendChild(a)
 
         a = document.createElement("a")
         a.classList.add("nav-link")
         a.innerHTML="Gestisci le tue playlist"
+        a.href="/"
         node.appendChild(a)
 
         a = document.createElement("a")
         a.classList.add("nav-link")
         a.innerHTML="Gestisci il tuo account"
+        a.href="/"
+        node.appendChild(a)
+
+        a = document.createElement("a")
+        a.classList.add("nav-link")
+        a.innerHTML="Logout"
+        a.addEventListener("click", logout)
+        a.href="/"
         node.appendChild(a)
 
         navdiv.append(node)
@@ -212,6 +225,37 @@ function addUser(){
             )
         }
     })
+}
+
+function login(){
+    email = document.getElementById("login_email").value
+    password = document.getElementById("login_password").value
+    var data = {
+        email: email,
+        password: password
+    }
+    fetch("http://127.0.0.1:3100/login?apikey=123456", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    }).then(async response => {
+        if (response.ok) {
+            localStorage.setItem("user", email)
+            window.location.href="/"
+        } else {
+            response.text().then( text => alert(text) )
+        }
+    })
+}
+
+function save_login(response){
+    console.log(response.text())
+}
+
+function logout(){
+    localStorage.removeItem("user")
 }
 
 /**
