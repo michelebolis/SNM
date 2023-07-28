@@ -129,12 +129,126 @@ function showMore(){
     }
 }
 
+async function printTrackInfo(idTrack, idNode){
+    fetch(`${BASE_URL}tracks/${idTrack}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(response => response.json())
+    .then(function(info){
+        console.log(info)
+        node = document.createElement("div")
+        node.classList.add("row", "justify-content-center")
+        title = document.createElement("h3")
+        title.innerHTML = "Titolo: " + info.name
+        node.append(title)
+        
+        left = document.createElement("div")
+        left.classList.add("col-4", "col-sm-12", "col-md-4",)
+        right = document.createElement("ul")
+        right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+        img = document.createElement("img")
+        img.style="width:100%"
+        img.src = info.album.images[1].url
+        left.append(img)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        div.innerHTML="Artisti: "
+        for (let i=0; i<info.artists.length; i++){
+            a = document.createElement("a")
+            a.addEventListener("click", function show(){window.location.href="/src/artist?"+info.artists[i].id})
+            a.innerHTML = info.artists[i].name 
+            a.classList.add("link")
+            div.append(a)
+            i+1<info.artists.length ? div.append(document.createElement("div").innerHTML=" e ") : null
+        }
+        right.append(div)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        div.innerHTML = "Album: "
+        a = document.createElement("a")
+        a.name = info.album.name
+        a.addEventListener("click", function move(){window.location.href="/src/album?"+info.album.id})
+        a.classList.add("link")
+        div.append(a)
+        right.append(div)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        div.innerHTML = "Durata: " + msToMinutesAndSeconds(info.duration_ms)
+        right.append(div)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        div.innerHTML = "Preview: </br>"
+        div.style="vertical-align: middle;"
+        audio = document.createElement("audio")
+        audio.controls="controls"
+        source = document.createElement("source")
+        source.src = info.preview_url
+        source.type = "audio/mpeg"
+        audio.append(source)
+        audio.style="width:100%;"
+        div.append(audio)
+        right.append(div)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        div.innerHTML = "Aggiungi alla playlist: "
+        button = document.createElement("button")
+        button.innerHTML="Aggiungi"
+        button.classList.add("btn", "btn-primary", "btn-light")
+        div.append(button)
+        select = document.createElement("select")
+        select.classList.add("form-select")
+        select.style = "width:50%"
+        option = document.createElement("option")
+        option.innerHTML = "Seleziona una tua playlist"
+        select.append(option)
+        div.append(select)
+        right.append(div)
+
+        node.append(left)
+        node.append(right)
+        document.getElementById(idNode).append(node)
+        printTopTrackArtist(info.artists[0].id)
+    })
+    .catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che restituisce il tempo in formato minuti:secondi dati dei millisecondi in input
+ * @param {int} ms millisecondi 
+ * @returns tempo in formato minuti:secondi
+ */
+function msToMinutesAndSeconds(ms) {
+    var min = Math.floor(ms / 60000);
+    var sec = ((ms % 60000) / 1000).toFixed(0);
+    return min + ":" + (sec < 10 ? '0' : '') + sec;
+}
+
+function printTopTrackArtist(id){
+    console.log(id)
+}
+
+/**
+ * Funzione che verifica se un utente sia loggato o meno
+ * @returns true SE l'utente è loggato nell'applicativo, false altrimenti
+ */
+function logged(){
+    return localStorage.getItem("user") == null
+}
+
 /**
  * 
  * @returns 
  */
 function printMyPlaylists(){
-    if (localStorage.getItem("user") == null){return}
+    if (logged()){return}
     document.write("QUI CI SONO LE MIE PLAYLIST")
 }
 
@@ -143,7 +257,7 @@ function printMyPlaylists(){
  * @returns 
  */
 function printFollowedPlaylists(){
-    if (localStorage.getItem("user") == null){return}
+    if (logged()){return}
     document.write("QUI CI SONO LE PLAYLIST CHE SEGUO")
 }
 

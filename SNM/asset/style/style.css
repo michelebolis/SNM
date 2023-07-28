@@ -22,6 +22,8 @@ body{
 }
 .card:hover{
     background: lightskyblue;
+}
+.link{
     cursor: pointer;
 }
 .card img{
