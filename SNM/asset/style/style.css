@@ -1,5 +1,5 @@
 body{
-    background-image: url("/background.png");
+    background-image: url("/img/background.png");
     color: #E9F8F9;
 }
 .container{
@@ -17,6 +17,15 @@ body{
 }
 .card{
     margin: 10px;
+    background: white;
+    transition: background-color 1s ease-out 150ms
+}
+.card:hover{
+    background: lightskyblue;
+    cursor: pointer;
+}
+.card img{
+    margin-top: 5px;
 }
 .show{
     padding: 30px;
@@ -38,4 +47,13 @@ body{
 #btnSearch{
     margin: 5px 0px; 
     width:80%;
+}
+
+
+#userForm{
+   padding: 20px;
+   border:white solid 2px;
+}
+#signin h4, #login h4{
+    text-align: center;
 }
