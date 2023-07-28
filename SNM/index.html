@@ -6,21 +6,13 @@
     <title>SNM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="style/style.css">
-    
+    <script src="lib.js"></script>
 </head>
 <body>
     <div class="container">
-      <script src="lib.js"></script>
         <div class="row">
             <div class="col-3 text-center" id="left_menu">
-                <h3>Menu</h3>
-                Benvenuto nome utente 
-                <nav class="nav flex-column">
-                    <a class="nav-link" href="#">Home</a>
-                    <a class="nav-link" href="#">Crea una playlist</a>
-                    <a class="nav-link" href="#">Gestisci le tue playlist</a>
-                    <a class="nav-link" href="#">Gestisci il tuo account</a>
-                </nav>
+              <script>printNavBar("left_menu")</script> 
             </div>
             <div class="col" id="home">
                 <div class="container " >
@@ -54,7 +46,7 @@
                 </div>
 
                 <div class="container" id="my_playlist">
-                    <script>printMyPlaylists()</script>
+                  <script>printMyPlaylists()</script>
                 </div>
 
                 <div class="container" id="my_playlist_followed">
@@ -64,9 +56,11 @@
                 <div class="container" >
                   <h4>TOP 50 Italia</h4>
                   <div class="row" id="top">
-                      <!--Placeholders cards while loading-->
+                      <!--Placeholders cards while loading
+                                            <script>printCardPlaceholder("top")</script>
                       <script>printCardPlaceholder("top")</script>
-                      <script>printCardPlaceholder("top")</script>
+                      -->
+
                   </div>
                       <div id="top-template" class="visually-hidden card col-3">
                           <img class="card-img-top"/>
