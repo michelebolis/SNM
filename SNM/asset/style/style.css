@@ -3,12 +3,15 @@ body{
     color: #E9F8F9;
 }
 #left_menu{
-    border-right: 2px solid gray;
-    padding-top: 30px;
+    border: 2px solid gray;
+    padding: 30px 0px;
 }
 #home h4{
     border-bottom: 1px solid white;
 }
 #search{
     padding-bottom: 20px;
+}
+.card{
+    margin: 10px;
 }
