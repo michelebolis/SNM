@@ -82,7 +82,7 @@ function printPlaylist(playlist){
         clone = template.cloneNode(true)
         clone.id="top" + i
         clone.getElementsByClassName("card-img-top")[0].src = playlist.items[i].track.album.images[0].url
-        clone.getElementsByClassName("nome_traccia")[0].innerHTML = playlist.items[i].track.name
+        clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+1) + " " +playlist.items[i].track.name
         clone.getElementsByClassName("nome_artista")[0].innerHTML = playlist.items[i].track.artists[0].name
         document.getElementById('top').appendChild(clone)
     }
