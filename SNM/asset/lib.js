@@ -246,6 +246,10 @@ function printTopTrackArtist(idArtist){
     .then(function(playlist){
         console.log(playlist)
         printPlaylist(playlist.tracks, "topTrackArtist")
+        document.getElementById("showMore_0").remove()
+        nomeArtista = document.createElement("h4")
+        nomeArtista.innerHTML = "Top track e feat di "+playlist.tracks[0].artists[0].name
+        document.getElementById("topTrackArtist").prepend(nomeArtista)
     }).catch((e) => console.log(e))
 }
 
