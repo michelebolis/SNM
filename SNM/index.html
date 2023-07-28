@@ -10,77 +10,80 @@
 </head>
 <body>
     <div class="container">
-        <div class="row">
-            <div class="col-12 col-lg-3 col-sm-12 col-xs-12 text-center" id="left_menu">
-              <script>printNavBar("left_menu")</script> 
-            </div>
-            <div class="col" id="home">
-                <div class="container " >
-                    <div class="row justify-content-center"  >
-                      <div class="col-6 text-center" style="border: 2px solid white; border-top: 0px" onmouseover="show_search()" onmouseout="hide_search()">
-                        <label >Ricerca contenuti</label>
-                            <div class="visually-hidden" id="search">
-                              <input type="email" class="form-control" id="floatingInputGrid"> 
-                              <div class="row row-cols-2 "> 
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" checked>
-                                    <label class="form-check-label" for="flexSwitchCheckDefault">Canzone</label>
-                                  </div>
-                                  <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked">
-                                    <label class="form-check-label" for="flexSwitchCheckChecked">Artista</label>
-                                  </div>
-                                  <div class="form-check form-switch ">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDisabled">
-                                    <label class="form-check-label" for="flexSwitchCheckDisabled">Album</label>
-                                  </div>
-                                  <div class="form-check form-switch">
-                                      <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDisabled">
-                                      <label class="form-check-label" for="flexSwitchCheckDisabled">Playlist</label>
-                                  </div>
-                                  <input class="btn btn-light" type="button" value="Ricerca" style="margin: 5px 0px; width:100%;">
-                              </div>
-                            </div>
-                      </div>
+      <div class="row">
+        <div class="col-12 col-lg-3 col-sm-12 col-xs-12 text-center" id="left_menu">
+          <script>printNavBar("left_menu")</script> 
+        </div>
+
+        <div class="col" id="home">
+
+          <div class="container">
+            <div class="row justify-content-center">
+              <div class="col-6 text-center" id="searchMenu" >
+                <h5>Ricerca contenuti</h5>
+                <div id="search">
+                  <input type="text" class="form-control" id="input"> 
+                  <div class="row justify-content-center" id="searchParameters"> 
+                    <div class="form-check form-switch col-10 col-md-5">
+                      <input class="form-check-input" type="checkbox" role="switch" id="song" checked>
+                      <label class="form-check-label" for="song">Canzone</label>
                     </div>
-                </div>
-
-                <div class="container" id="my_playlist">
-                  <script>printMyPlaylists()</script>
-                </div>
-
-                <div class="container" id="my_playlist_followed">
-                  <script>printFollowedPlaylists()</script>
-                </div>
-
-                <div class="container" >
-                  <h4>TOP 50 Italia</h4>
-                  <div class="row justify-content-center" id="top">
-                      <!--Placeholders cards while loading -->
-                      <script>
-                        printCardPlaceholder("top")
-                        printCardPlaceholder("top")
-                        printCardPlaceholder("top")
-                        printCardPlaceholder("top")
-                      </script>
+                    <div class="form-check form-switch col-10 col-md-5">
+                      <input class="form-check-input" type="checkbox" role="switch" id="artist">
+                      <label class="form-check-label" for="artist">Artista</label>
+                    </div>
+                    <div class="form-check form-switch col-10 col-md-5">
+                      <input class="form-check-input" type="checkbox" role="switch" id="album">
+                      <label class="form-check-label" for="album">Album</label>
+                    </div>
+                    <div class="form-check form-switch col-10 col-md-5">
+                      <input class="form-check-input" type="checkbox" role="switch" id="playlist">
+                      <label class="form-check-label" for="playlist">Playlist</label>
+                    </div>
                   </div>
-                      <div id="top-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
-                          <img class="card-img-top"/>
-                          <div class="card-body">
-                              <h5 class="card-title ">
-                              <span class="nome_traccia col-6"></span>
-                              </h5>
-                              <span class="nome_artista"><span><br>
-                              <a class="btn btn-primary">+</a>
-                          </div>
-                      </div>
-                  </div>
-                </div>  
-                <script>getTopCharts()</script>
+                  <input class="btn btn-light" type="button" value="Ricerca" id="btnSearch">
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+          <div class="container" id="my_playlist">
+            <script>printMyPlaylists()</script>
+          </div>
+
+          <div class="container" id="my_playlist_followed">
+            <script>printFollowedPlaylists()</script>
+          </div>
+
+          <div class="container" id="top50">
+            <h4>TOP 50 Italia</h4>
+            <div class="row justify-content-center" id="top">
+              <!--Placeholders cards while loading -->
+              <script>
+                for(let i=0;i<5;i++){
+                  printCardPlaceholder("top")
+                }
+              </script>
+            </div>
+            
+            <!--Template used for the tracks-->
+            <div id="top-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
+              <img class="card-img-top"/>
+              <div class="card-body">
+                <h5 class="card-title ">
+                  <span class="nome_traccia col-6"></span>
+                </h5>
+                <span class="nome_artista"><span><br>
+                <a class="btn btn-primary">+</a>
+              </div>
+            </div>
+
+          </div>
+        </div>  
+        
+        <script>getTopCharts()</script>
+      </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 </body>
 </html>

@@ -81,7 +81,7 @@ function printPlaylist(playlist){
     // button template to clone
     button = document.createElement("button")
     button.innerHTML="Show more"
-    button.classList.add("show")
+    button.classList.add("show", "btn","btn-secondary")
     
     for (let i=0; i<playlist.length; i+=10){
         // create the button to show more element
@@ -90,7 +90,7 @@ function printPlaylist(playlist){
         newButton.addEventListener("click", showMore)
         //create the row
         row = document.createElement("div")
-        row.classList.add("row")
+        row.classList.add("row", "justify-content-center")
         newid = "topRow" + (i/10)
         row.id= newid
         document.getElementById("top").append(row)
@@ -100,6 +100,7 @@ function printPlaylist(playlist){
         document.getElementById(newid).classList.add("visually-hidden")
     }
     document.getElementById("topRow0").classList.remove("visually-hidden")
+    document.getElementById('top-template').remove()
 }
 
 function printTracksCard(playlist, template, id, startCount){
