@@ -107,7 +107,7 @@ function printPlaylist(playlist){
 function printTracksCard(playlist, template, id, startCount){
     for (let i=0; i<playlist.length; i++){
         clone = template.cloneNode(true)
-        clone.addEventListener("click", function move(){window.location.href = "/track?" + playlist[i].track.id})
+        clone.addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].track.id})
         clone.id=id + (i + startCount)
         clone.getElementsByClassName("card-img-top")[0].src = playlist[i].track.album.images[0].url
         clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].track.name
