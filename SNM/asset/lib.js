@@ -77,14 +77,49 @@ function printPlaylist(playlist){
     template = document.getElementById('top-template').cloneNode(true)
     template.classList.remove("visually-hidden")
     document.getElementById('top').innerHTML=""
-    console.log(playlist)
-    for (let i=0; i<playlist.items.length; i++){
+    playlist = playlist.items
+    // button template to clone
+    button = document.createElement("button")
+    button.innerHTML="Show more"
+    button.classList.add("show")
+    
+    for (let i=0; i<playlist.length; i+=10){
+        // create the button to show more element
+        newButton = button.cloneNode(true)
+        newButton.id = "showMore_" + i
+        newButton.addEventListener("click", showMore)
+        //create the row
+        row = document.createElement("div")
+        row.classList.add("row")
+        newid = "topRow" + (i/10)
+        row.id= newid
+        document.getElementById("top").append(row)
+        printTracksCard(playlist.slice(i,i+10), template, newid, i+1)
+        // append the button and hide everything
+        document.getElementById(newid).append(newButton)
+        document.getElementById(newid).classList.add("visually-hidden")
+    }
+    document.getElementById("topRow0").classList.remove("visually-hidden")
+}
+
+function printTracksCard(playlist, template, id, startCount){
+    for (let i=0; i<playlist.length; i++){
         clone = template.cloneNode(true)
-        clone.id="top" + i
-        clone.getElementsByClassName("card-img-top")[0].src = playlist.items[i].track.album.images[0].url
-        clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+1) + " " +playlist.items[i].track.name
-        clone.getElementsByClassName("nome_artista")[0].innerHTML = playlist.items[i].track.artists[0].name
-        document.getElementById('top').appendChild(clone)
+        clone.id=id + (i + startCount)
+        clone.getElementsByClassName("card-img-top")[0].src = playlist[i].track.album.images[0].url
+        clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].track.name
+        clone.getElementsByClassName("nome_artista")[0].innerHTML = playlist[i].track.artists[0].name
+        document.getElementById(id).appendChild(clone)
+    }
+}
+
+function showMore(){
+    next = (this.parentNode.nextSibling)
+    if (next == null){
+        this.innerHTML = "Non ci sono piu elementi da mostrare"
+    }else{
+        next.classList.remove("visually-hidden")
+        this.classList.add("visually-hidden")
     }
 }
 
