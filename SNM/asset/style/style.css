@@ -1,0 +1,14 @@
+body{
+    background-color: #181823; 
+    color: #E9F8F9;
+}
+#left_menu{
+    border-right: 2px solid gray;
+    padding-top: 30px;
+}
+#home h4{
+    border-bottom: 1px solid white;
+}
+#search{
+    padding-bottom: 20px;
+}
