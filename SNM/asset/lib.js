@@ -157,7 +157,7 @@ function printNavBar(id){
 
         node = document.createElement("a")
         node.innerHTML = "Accedi o registrati"
-        node.href = "/login.html"
+        node.href = "/src/login.html"
         navdiv.append(node)
     }else{
         node = document.createElement("nav")
