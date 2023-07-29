@@ -160,7 +160,7 @@ async function printTrackInfo(idTrack, idNode){
         div.innerHTML = "Album: "
         a = document.createElement("a")
         a.innerHTML = info.album.name
-        a.addEventListener("click", function move(){window.location.href="/src/album?"+info.album.id})
+        a.addEventListener("click", function move(){window.location.href="/src/album.html?"+info.album.id})
         a.classList.add("link")
         div.append(a)
         right.append(div)
@@ -316,6 +316,9 @@ function printAlbumArtist(idArtist){
             }
         }
         console.log(onlyalbum)
+        if(onlyalbum.length==0){
+            return
+        }
         h4 = document.createElement("h4")
         h4.innerHTML = "Discografia di " + onlyalbum[0].artists[0].name
         document.getElementById("album").prepend(h4)
@@ -366,7 +369,7 @@ function printAlbumInfo(idAlbum, idNode){
         div.innerHTML = "Autori: "  
         a = document.createElement("a")
         a.innerHTML = album.artists[0].name
-        a.addEventListener("click", function move(){window.location.href="/src/artist.html?"+info.artists[0].id})
+        a.addEventListener("click", function move(){window.location.href="/src/artist.html?"+album.artists[0].id})
         a.classList.add("link")
         div.append(a)
         right.append(div)
@@ -399,7 +402,58 @@ function printAlbumInfo(idAlbum, idNode){
         node.append(right)
         document.getElementById(idNode).append(node)
 
+        printAlbumTrack(album.tracks.items)
     }).catch((e) => console.log(e))
+}
+
+function printAlbumTrack(tracks){
+    console.log(tracks)
+    tracklist = document.createElement("ul")
+    tracklist.classList.add("container", "list-group", "list-group-flush")
+    template = document.createElement("li")
+    template.classList.add("list-group-item", "list-group-item-dark")
+    row = document.createElement("div")
+    row.classList.add("row")
+    col = document.createElement("div")
+    col.classList.add("col")
+    row.append(col, col.cloneNode(true))
+    template.append(row, row.cloneNode(true))
+
+    for(let i=0;i<tracks.length;i++){
+        clone = template.cloneNode(true)
+        clone.childNodes[0].childNodes[0].innerHTML = "#" + (i+1) + " "
+        a = document.createElement("a")
+        a.innerHTML = tracks[i].name
+        a.addEventListener("click", function move(){window.location.href = "/src/track.html?" + tracks[i].id})
+        a.classList.add("link")
+        clone.childNodes[0].childNodes[0].append(a)
+        if(tracks[i].preview_url!=null){
+            audio = document.createElement("audio")
+            audio.style = "width:100%"
+            audio.controls="controls"
+            source = document.createElement("source")
+            source.src = tracks[i].preview_url
+            source.type = "audio/mpeg"
+            audio.append(source)
+            clone.childNodes[0].childNodes[1].append(audio)
+        }
+        if(logged()){
+            clone.childNodes[1].childNodes[0].innerHTML = "Aggiungi in una tua playlist"
+            select = document.createElement("select")
+            select.classList.add("form-select")
+            option = document.createElement("option")
+            option.innerHTML = "Seleziona una tua playlist"
+            select.append(option)
+            clone.childNodes[1].childNodes[1].append(select)
+        }
+        tracklist.append(clone)
+    }
+
+    title = document.createElement("h4")
+    title.innerHTML = "Tracklist dell'album"
+    document.getElementById("albumTrack").append(tracklist)
+    document.getElementById("albumTrack").prepend(title)
+    document.getElementById("albumPlaceholder").remove()
 }
 
 /**
@@ -407,7 +461,7 @@ function printAlbumInfo(idAlbum, idNode){
  * @returns true SE l'utente è loggato nell'applicativo, false altrimenti
  */
 function logged(){
-    return localStorage.getItem("user") == null
+    return localStorage.getItem("user") != null
 }
 
 /**
