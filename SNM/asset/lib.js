@@ -20,24 +20,6 @@ fetch(URL_TOKEN, {
 var access_token = localStorage.getItem("token") // salvo il token nel local storage
 
 /**
- * 
- * @param {String} titoloAlbum titolo dell'album su cui effettuare la ricerca
- */
-function getAlbum(titoloAlbum){
-    fetch(`${BASE_URL}search?type=album&q=${titoloAlbum}`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then((response) => response.json())
-    .then((searchResults) => 
-        document.write(
-        `<pre>${JSON.stringify(searchResults, null, 2)}</pre>`
-        )
-    )      
-}
-/**
  * Funzione che restituisce le 50 track piu ascoltate in Italia
  */
 function getTopCharts(){
@@ -111,11 +93,13 @@ function printPlaylist(playlist, idNode){
 function printTracksCard(playlist, template, id, oldid, startCount){
     for (let i=0; i<playlist.length; i++){
         clone = template.cloneNode(true)
+        clone.classList.add("link")
         clone.addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].id})
         clone.id=id + (i + startCount)
         clone.getElementsByClassName("card-img-"+oldid)[0].src = playlist[i].album.images[0].url
         clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].name
         clone.getElementsByClassName("nome_artista")[0].innerHTML = playlist[i].artists[0].name
+        //clone.getElementsByClassName("nome_artista")[0].addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].artists[0].id})
         document.getElementById(id).appendChild(clone)
     }
 }
@@ -163,7 +147,7 @@ async function printTrackInfo(idTrack, idNode){
         div.innerHTML="Artisti: "
         for (let i=0; i<info.artists.length; i++){
             a = document.createElement("a")
-            a.addEventListener("click", function show(){window.location.href="/src/artist?"+info.artists[i].id})
+            a.addEventListener("click", function show(){window.location.href="/src/artist.html?"+info.artists[i].id})
             a.innerHTML = info.artists[i].name 
             a.classList.add("link")
             div.append(a)
@@ -250,6 +234,104 @@ function printTopTrackArtist(idArtist){
         nomeArtista = document.createElement("h4")
         nomeArtista.innerHTML = "Top track e feat di "+playlist.tracks[0].artists[0].name
         document.getElementById("topTrackArtist").prepend(nomeArtista)
+    }).catch((e) => console.log(e))
+}
+
+function printArtistInfo(idArtist, idNode){
+    fetch(`${BASE_URL}artists/${idArtist}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(response => response.json())
+    .then(function(artist){
+        console.log(artist)
+        node = document.createElement("div")
+        node.classList.add("row", "justify-content-center")
+        title = document.createElement("h3")
+        title.innerHTML = "Artista: " + artist.name
+        node.append(title)
+        
+        left = document.createElement("div")
+        left.classList.add("col-4", "col-sm-12", "col-md-4",)
+        right = document.createElement("ul")
+        right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+        img = document.createElement("img")
+        img.style="width:100%"
+        img.src = artist.images[1].url
+        left.append(img)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        if(artist.genres.length==0){
+            div.innerHTML="Generi: Nessuno"
+        }else{
+            div.innerHTML="Generi: " + artist.genres[0]
+            for (let i=1; i<artist.genres.length; i++){
+                div.innerHTML += ", " + artist.genres[i] 
+            }
+        }
+        right.append(div)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        div.innerHTML = "Follower: "
+        a = document.createElement("a")
+        a.innerHTML = artist.followers.total.toLocaleString('en-US')
+        div.append(a)
+        right.append(div)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        div.innerHTML = "Aggiungi ai preferiti: "
+        button = document.createElement("button")
+        button.innerHTML="Aggiungi"
+        div.append(button)
+        right.append(div)
+
+        node.append(left)
+        node.append(right)
+        document.getElementById(idNode).append(node)
+
+        printTopTrackArtist(idArtist)
+        printAlbumArtist(idArtist)
+    }).catch((e) => console.log(e))
+}
+
+function printAlbumArtist(idArtist){
+    fetch(`${BASE_URL}artists/${idArtist}/albums`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(response => response.json())
+    .then(function(album){
+        album = album.items
+        onlyalbum = []
+        for (let i=0;i<album.length;i++){
+            if (album[i].album_group=="album"){
+                onlyalbum.push(album[i])
+            }
+        }
+        console.log(onlyalbum)
+        h4 = document.createElement("h4")
+        h4.innerHTML = "Discografia di " + onlyalbum[0].artists[0].name
+        document.getElementById("album").prepend(h4)
+        template = document.getElementById("album-template")
+        for (let i=0; i<onlyalbum.length; i++){
+            clone = template.cloneNode(true)
+            clone.classList.add("link")
+            clone.classList.remove("visually-hidden")
+            clone.addEventListener("click", function move(){window.location.href = "/src/album.html?" + onlyalbum[i].id})
+            clone.id=id + (i + 1)
+            clone.getElementsByClassName("card-img-album")[0].src = onlyalbum[i].images[0].url
+            clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +onlyalbum[i].name
+            clone.getElementsByClassName("nome_artista")[0].innerHTML = onlyalbum[i].artists[0].name
+            //clone.getElementsByClassName("nome_artista")[0].addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].artists[0].id})
+            document.getElementById("artistAlbum").append(clone)
+        }
     }).catch((e) => console.log(e))
 }
 
