@@ -335,6 +335,73 @@ function printAlbumArtist(idArtist){
     }).catch((e) => console.log(e))
 }
 
+function printAlbumInfo(idAlbum, idNode){
+    fetch(`${BASE_URL}albums/${idAlbum}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(response => response.json())
+    .then(function(album){
+        console.log(album)
+
+        node = document.createElement("div")
+        node.classList.add("row", "justify-content-center")
+        title = document.createElement("h3")
+        title.innerHTML = "Album: " + album.name
+        node.append(title)
+        
+        left = document.createElement("div")
+        left.classList.add("col-4", "col-sm-12", "col-md-4",)
+        right = document.createElement("ul")
+        right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+        img = document.createElement("img")
+        img.style="width:100%"
+        img.src = album.images[1].url
+        left.append(img)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        div.innerHTML = "Autori: "  
+        a = document.createElement("a")
+        a.innerHTML = album.artists[0].name
+        a.addEventListener("click", function move(){window.location.href="/src/artist.html?"+info.artists[0].id})
+        a.classList.add("link")
+        div.append(a)
+        right.append(div)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        if(album.genres.length==0){
+            div.innerHTML="Generi: Nessuno"
+        }else{
+            div.innerHTML="Generi: " + album.genres[0]
+            for (let i=1; i<album.genres.length; i++){
+                div.innerHTML += ", " + album.genres[i] 
+            }
+        }
+        right.append(div)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        div.innerHTML = "Numero di traccie: " + album.total_tracks
+        right.append(div)
+
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        date = new Date(album.release_date)
+        div.innerHTML = "Data di uscita: " + date.toLocaleDateString('it-IT')
+        right.append(div)
+        right.append(div)
+
+        node.append(left)
+        node.append(right)
+        document.getElementById(idNode).append(node)
+
+    }).catch((e) => console.log(e))
+}
+
 /**
  * Funzione che verifica se un utente sia loggato o meno
  * @returns true SE l'utente è loggato nell'applicativo, false altrimenti
