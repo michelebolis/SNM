@@ -170,19 +170,21 @@ async function printTrackInfo(idTrack, idNode){
         div.innerHTML = "Durata: " + msToMinutesAndSeconds(info.duration_ms)
         right.append(div)
 
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
-        div.innerHTML = "Preview: </br>"
-        div.style="vertical-align: middle;"
-        audio = document.createElement("audio")
-        audio.controls="controls"
-        source = document.createElement("source")
-        source.src = info.preview_url
-        source.type = "audio/mpeg"
-        audio.append(source)
-        audio.style="width:100%;"
-        div.append(audio)
-        right.append(div)
+        if (info.preview_url!=null){
+            div = document.createElement("li")
+            div.classList.add("list-group-item", "list-group-item-dark")
+            div.innerHTML = "Preview: </br>"
+            div.style="vertical-align: middle;"
+            audio = document.createElement("audio")
+            audio.controls="controls"
+            source = document.createElement("source")
+            source.src = info.preview_url
+            source.type = "audio/mpeg"
+            audio.append(source)
+            audio.style="width:100%;"
+            div.append(audio)
+            right.append(div)
+        }
 
         div = document.createElement("li")
         div.classList.add("list-group-item", "list-group-item-dark")
