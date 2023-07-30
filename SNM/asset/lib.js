@@ -20,6 +20,14 @@ fetch(URL_TOKEN, {
 var access_token = localStorage.getItem("token") // salvo il token nel local storage
 
 /**
+ * Funzione che verifica se un utente sia loggato o meno
+ * @returns true SE l'utente è loggato nell'applicativo, false altrimenti
+ */
+function logged(){
+    return localStorage.getItem("user") != null
+}
+
+/**
  * Funzione che restituisce le 50 track piu ascoltate in Italia
  */
 function getTopCharts(){
@@ -59,6 +67,7 @@ function getInfoPlaylist(playlist){
 /**
  * Funzione che stampa le tracks contenente nella playlist, visualizzate con il titolo, immagine della canzone e nome dell'artista
  * @param {Array} playlist Array contenente le track da stampare
+ * @param {String} idNode id del node in cui stampare le track
  */
 function printPlaylist(playlist, idNode){
     template = document.getElementById(idNode +'-template').cloneNode(true)
@@ -81,7 +90,7 @@ function printPlaylist(playlist, idNode){
         newid = idNode+"Row" + (i/10)
         row.id= newid
         document.getElementById(idNode).append(row)
-        printTracksCard(playlist.slice(i,i+10), template, newid, idNode, i+1)
+        printTracksCard(playlist.slice(i,i+10), template, newid, i+1)
         // append the button and hide everything
         document.getElementById(newid).append(newButton)
         document.getElementById(newid).classList.add("visually-hidden")
@@ -90,13 +99,20 @@ function printPlaylist(playlist, idNode){
     //document.getElementById(idNode+'-template').remove()
 }
 
-function printTracksCard(playlist, template, id, oldid, startCount){
+/**
+ * Funzione che scrive le track della playlist mediante card 
+ * @param {Array} playlist array contenente le track
+ * @param {Node} template node di base della card da cui clono
+ * @param {String} id id del node a cui accodare le varie card
+ * @param {int} startCount count da cui far partire il conteggio delle card
+ */
+function printTracksCard(playlist, template, id, startCount){
     for (let i=0; i<playlist.length; i++){
         clone = template.cloneNode(true)
         clone.classList.add("link")
         clone.addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].id})
         clone.id=id + (i + startCount)
-        clone.getElementsByClassName("card-img-"+oldid)[0].src = playlist[i].album.images[0].url
+        clone.getElementsByClassName("card-img")[0].src = playlist[i].album.images[0].url
         clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].name
         clone.getElementsByClassName("nome_artista")[0].innerHTML = playlist[i].artists[0].name
         //clone.getElementsByClassName("nome_artista")[0].addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].artists[0].id})
@@ -117,6 +133,12 @@ function showMore(){
     }
 }
 
+/**
+ * Funzione che stampa le informazioni di una track nel nodo specificato 
+ * e stampa le canzoni migliori dell'artista nel node con id 'topTrackArtist'
+ * @param {String} idTrack id della track di cui richiedo le informazioni
+ * @param {String} idNode id del nodo a cui accodare le informazioni da stampare
+ */
 async function printTrackInfo(idTrack, idNode){
     fetch(`${BASE_URL}tracks/${idTrack}`, {
         headers: {
@@ -205,6 +227,7 @@ async function printTrackInfo(idTrack, idNode){
         node.append(left)
         node.append(right)
         document.getElementById(idNode).append(node)
+
         printTopTrackArtist(info.artists[0].id)
     })
     .catch((e) => console.log(e))
@@ -221,6 +244,10 @@ function msToMinutesAndSeconds(ms) {
     return min + ":" + (sec < 10 ? '0' : '') + sec;
 }
 
+/**
+ * Funzione che stampa le canzoni migliori di un'artista nel node con id 'topTrackArtist'
+ * @param {String} idArtist id dell'artista di cui richiediamo informazioni
+ */
 function printTopTrackArtist(idArtist){
     fetch(`${BASE_URL}artists/${idArtist}/top-tracks?market=ES`, {
         headers: {
@@ -232,13 +259,19 @@ function printTopTrackArtist(idArtist){
     .then(function(playlist){
         console.log(playlist)
         printPlaylist(playlist.tracks, "topTrackArtist")
-        document.getElementById("showMore_0").remove()
+        document.getElementById("showMore_0").remove() // considero che le top track sono sempre 10
         nomeArtista = document.createElement("h4")
         nomeArtista.innerHTML = "Top track e feat di "+playlist.tracks[0].artists[0].name
         document.getElementById("topTrackArtist").prepend(nomeArtista)
     }).catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che stampa le informazioni di un'artista congiuntamente alle sue track migliori ed ai suoi album,
+ * rispettivamente in un node con id 'topTrackArtist' e in un node con id 'artistAlbum'
+ * @param {String} idArtist id dell'artista di cui richiediamo informazioni
+ * @param {String} idNode id del nodo a cui si vogliono accodare le informazioni
+ */
 function printArtistInfo(idArtist, idNode){
     fetch(`${BASE_URL}artists/${idArtist}`, {
         headers: {
@@ -251,46 +284,46 @@ function printArtistInfo(idArtist, idNode){
         console.log(artist)
         node = document.createElement("div")
         node.classList.add("row", "justify-content-center")
+        // titolo
         title = document.createElement("h3")
         title.innerHTML = "Artista: " + artist.name
         node.append(title)
-        
+        // divisione in due sezioni della pagina, a sinistra la foto dell'artista e a destra le informazioni
         left = document.createElement("div")
         left.classList.add("col-4", "col-sm-12", "col-md-4",)
-        right = document.createElement("ul")
-        right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
         img = document.createElement("img")
         img.style="width:100%"
         img.src = artist.images[1].url
         left.append(img)
+        right = document.createElement("ul")
+        right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
 
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
+        li = document.createElement("li")
+        li.classList.add("list-group-item", "list-group-item-dark")
+        li_clone = li.cloneNode(true)
         if(artist.genres.length==0){
-            div.innerHTML="Generi: Nessuno"
+            li_clone.innerHTML="Generi: Nessuno"
         }else{
-            div.innerHTML="Generi: " + artist.genres[0]
+            li_clone.innerHTML="Generi: " + artist.genres[0]
             for (let i=1; i<artist.genres.length; i++){
-                div.innerHTML += ", " + artist.genres[i] 
+                li_clone.innerHTML += ", " + artist.genres[i] 
             }
         }
-        right.append(div)
+        right.append(li_clone)
 
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
-        div.innerHTML = "Follower: "
+        li_clone = li.cloneNode(true)
+        li_clone.innerHTML = "Follower: "
         a = document.createElement("a")
         a.innerHTML = artist.followers.total.toLocaleString('en-US')
-        div.append(a)
-        right.append(div)
+        li_clone.append(a)
+        right.append(li_clone)
 
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
-        div.innerHTML = "Aggiungi ai preferiti: "
+        li_clone = li.cloneNode(true)
+        li_clone.innerHTML = "Aggiungi ai preferiti: "
         button = document.createElement("button")
         button.innerHTML="Aggiungi"
-        div.append(button)
-        right.append(div)
+        li_clone.append(button)
+        right.append(li_clone)
 
         node.append(left)
         node.append(right)
@@ -301,6 +334,10 @@ function printArtistInfo(idArtist, idNode){
     }).catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che stampa gli album dell'artista in un node con id 'artistAlbum'
+ * @param {String} idArtist id dell'artista di cui si richiedono gli album
+ */
 function printAlbumArtist(idArtist){
     fetch(`${BASE_URL}artists/${idArtist}/albums`, {
         headers: {
@@ -311,6 +348,7 @@ function printAlbumArtist(idArtist){
     .then(response => response.json())
     .then(function(album){
         album = album.items
+        // considero solo gli album dell'artista e NON ep o partecipazioni ad altri album
         onlyalbum = []
         for (let i=0;i<album.length;i++){
             if (album[i].album_group=="album"){
@@ -334,12 +372,17 @@ function printAlbumArtist(idArtist){
             clone.getElementsByClassName("card-img-album")[0].src = onlyalbum[i].images[0].url
             clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +onlyalbum[i].name
             clone.getElementsByClassName("nome_artista")[0].innerHTML = onlyalbum[i].artists[0].name
-            //clone.getElementsByClassName("nome_artista")[0].addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].artists[0].id})
             document.getElementById("artistAlbum").append(clone)
         }
     }).catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che stampa le informazioni dell'album nel nodo con id specificato,
+ * congiuntamente con la lista delle track accodate nel nodo con id 'albumTrack'
+ * @param {String} idAlbum id dell'album di cui si cercano le informazioni
+ * @param {String} idNode id del nodo in cui accodare le informazioni
+ */
 function printAlbumInfo(idAlbum, idNode){
     fetch(`${BASE_URL}albums/${idAlbum}`, {
         headers: {
@@ -350,55 +393,52 @@ function printAlbumInfo(idAlbum, idNode){
     .then(response => response.json())
     .then(function(album){
         console.log(album)
-
+        // titolo
         node = document.createElement("div")
         node.classList.add("row", "justify-content-center")
         title = document.createElement("h3")
         title.innerHTML = "Album: " + album.name
         node.append(title)
-        
+        // divisione in due sezioni della pagina, a sinistra la foto dell'album e a destra le informazioni
         left = document.createElement("div")
         left.classList.add("col-4", "col-sm-12", "col-md-4",)
-        right = document.createElement("ul")
-        right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
         img = document.createElement("img")
         img.style="width:100%"
         img.src = album.images[1].url
         left.append(img)
+        right = document.createElement("ul")
+        right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
 
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
-        div.innerHTML = "Autori: "  
+        li = document.createElement("li")
+        li.classList.add("list-group-item", "list-group-item-dark")
+        li_clone = li.cloneNode(true)
+        li_clone.innerHTML = "Autori: "  
         a = document.createElement("a")
         a.innerHTML = album.artists[0].name
         a.addEventListener("click", function move(){window.location.href="/src/artist.html?"+album.artists[0].id})
         a.classList.add("link")
-        div.append(a)
-        right.append(div)
+        li_clone.append(a)
+        right.append(li_clone)
 
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
+        li_clone = li.cloneNode(true)
         if(album.genres.length==0){
-            div.innerHTML="Generi: Nessuno"
+            li_clone.innerHTML="Generi: Nessuno"
         }else{
-            div.innerHTML="Generi: " + album.genres[0]
+            li_clone.innerHTML="Generi: " + album.genres[0]
             for (let i=1; i<album.genres.length; i++){
-                div.innerHTML += ", " + album.genres[i] 
+                li_clone.innerHTML += ", " + album.genres[i] 
             }
         }
-        right.append(div)
+        right.append(li_clone)
 
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
-        div.innerHTML = "Numero di traccie: " + album.total_tracks
-        right.append(div)
+        li_clone = li.cloneNode(true)
+        li_clone.innerHTML = "Numero di traccie: " + album.total_tracks
+        right.append(li_clone)
 
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
+        li_clone = li.cloneNode(true)
         date = new Date(album.release_date)
-        div.innerHTML = "Data di uscita: " + date.toLocaleDateString('it-IT')
-        right.append(div)
-        right.append(div)
+        li_clone.innerHTML = "Data di uscita: " + date.toLocaleDateString('it-IT')
+        right.append(li_clone)
 
         node.append(left)
         node.append(right)
@@ -408,10 +448,15 @@ function printAlbumInfo(idAlbum, idNode){
     }).catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che stampa le track di un album accodandole al nodo con id 'albumTrack'
+ * @param {Array} tracks array contenente le track dell'album
+ */
 function printAlbumTrack(tracks){
     console.log(tracks)
     tracklist = document.createElement("ul")
     tracklist.classList.add("container", "list-group", "list-group-flush")
+    // creo il template degli elementi della lista
     template = document.createElement("li")
     template.classList.add("list-group-item", "list-group-item-dark")
     row = document.createElement("div")
@@ -424,12 +469,13 @@ function printAlbumTrack(tracks){
     for(let i=0;i<tracks.length;i++){
         clone = template.cloneNode(true)
         clone.childNodes[0].childNodes[0].innerHTML = "#" + (i+1) + " "
-        a = document.createElement("a")
-        a.innerHTML = tracks[i].name
-        a.addEventListener("click", function move(){window.location.href = "/src/track.html?" + tracks[i].id})
-        a.classList.add("link")
-        clone.childNodes[0].childNodes[0].append(a)
+            a = document.createElement("a")
+            a.innerHTML = tracks[i].name
+            a.addEventListener("click", function move(){window.location.href = "/src/track.html?" + tracks[i].id})
+            a.classList.add("link")
+            clone.childNodes[0].childNodes[0].append(a)
         if(tracks[i].preview_url!=null){
+            // la preview per alcuna track non è disponibile
             audio = document.createElement("audio")
             audio.style = "width:100%"
             audio.controls="controls"
@@ -440,11 +486,12 @@ function printAlbumTrack(tracks){
             clone.childNodes[0].childNodes[1].append(audio)
         }
         if(logged()){
+            // la possibilità di aggiungere la track ad una playlist è possibile solo SE si è loggati
             clone.childNodes[1].childNodes[0].innerHTML = "Aggiungi in una tua playlist"
             select = document.createElement("select")
             select.classList.add("form-select")
-            option = document.createElement("option")
-            option.innerHTML = "Seleziona una tua playlist"
+                option = document.createElement("option")
+                option.innerHTML = "Seleziona una tua playlist"
             select.append(option)
             clone.childNodes[1].childNodes[1].append(select)
         }
@@ -459,19 +506,11 @@ function printAlbumTrack(tracks){
 }
 
 /**
- * Funzione che verifica se un utente sia loggato o meno
- * @returns true SE l'utente è loggato nell'applicativo, false altrimenti
- */
-function logged(){
-    return localStorage.getItem("user") != null
-}
-
-/**
  * 
  * @returns 
  */
 function printMyPlaylists(){
-    if (logged()){return}
+    if (!logged()){return}
     document.write("QUI CI SONO LE MIE PLAYLIST")
 }
 
@@ -480,7 +519,7 @@ function printMyPlaylists(){
  * @returns 
  */
 function printFollowedPlaylists(){
-    if (logged()){return}
+    if (!logged()){return}
     document.write("QUI CI SONO LE PLAYLIST CHE SEGUO")
 }
 
@@ -493,7 +532,7 @@ function printNavBar(id){
     title = document.createElement("h3")
     title.innerHTML = "Menu"
     navdiv.appendChild(title)
-    if (localStorage.getItem("user") == null){
+    if (!logged()){
         a = document.createElement("a")
         a.classList.add("nav-link")
         a.innerHTML="Home"
@@ -509,6 +548,10 @@ function printNavBar(id){
         node.href = "/src/login.html"
         navdiv.append(node)
     }else{
+        title = document.createElement("h4")
+        title.innerHTML = "Benvenuto " 
+        
+        navdiv.append(title)
         node = document.createElement("nav")
         node.classList.add("nav", "flex-column")
         a = document.createElement("a")
@@ -554,9 +597,11 @@ function printNavBar(id){
 function addUser(){
     email = document.getElementById("email").value
     password = document.getElementById("password").value
+    nickname = document.getElementById("user").value
     var data = {
         email: email,
-        password: password
+        password: password,
+        nickname: nickname
     }
     console.log(data)
     fetch("http://127.0.0.1:3100/users?apikey=123456", {
@@ -567,7 +612,18 @@ function addUser(){
         body: JSON.stringify(data)
     }).then(async response => {
         if (response.ok) {
-            console.log("SIIIIII")
+            localStorage.setItem("user", email)
+            div = document.getElementById("userForm")
+            div.innerHTML = ""
+
+            mess = document.createElement("h4")
+            mess.classList.add("text-center")
+            mess.innerHTML = "Utente creato correttamente, benvenuto!</br>"
+            a = document.createElement("a")
+            a.innerHTML = "Torna alla home"
+            a.href="/"
+            mess.append(a)
+            div.append(mess)
         } else {
             response.text().then( text =>
                 alert(text)
