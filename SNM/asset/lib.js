@@ -171,7 +171,6 @@ async function printTrackInfo(idTrack, idNode){
             a = document.createElement("a")
             a.addEventListener("click", function show(){window.location.href="/src/artist.html?"+info.artists[i].id})
             a.innerHTML = info.artists[i].name 
-            a.classList.add("link")
             div.append(a)
             i+1<info.artists.length ? div.append(document.createElement("div").innerHTML=" e ") : null
         }
@@ -207,22 +206,23 @@ async function printTrackInfo(idTrack, idNode){
             div.append(audio)
             right.append(div)
         }
-
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
-        div.innerHTML = "Aggiungi alla playlist: "
-        button = document.createElement("button")
-        button.innerHTML="Aggiungi"
-        button.classList.add("btn", "btn-primary", "btn-light")
-        div.append(button)
-        select = document.createElement("select")
-        select.classList.add("form-select")
-        select.style = "width:50%"
-        option = document.createElement("option")
-        option.innerHTML = "Seleziona una tua playlist"
-        select.append(option)
-        div.append(select)
-        right.append(div)
+        if (logged()){
+            div = document.createElement("li")
+            div.classList.add("list-group-item", "list-group-item-dark")
+            div.innerHTML = "Aggiungi alla playlist: "
+            button = document.createElement("button")
+            button.innerHTML="Aggiungi"
+            button.classList.add("btn", "btn-primary", "btn-light")
+            div.append(button)
+            select = document.createElement("select")
+            select.classList.add("form-select")
+            select.style = "width:50%"
+            option = document.createElement("option")
+            option.innerHTML = "Seleziona una tua playlist"
+            select.append(option)
+            div.append(select)
+            right.append(div)
+        }
 
         node.append(left)
         node.append(right)
@@ -534,7 +534,7 @@ function printNavBar(id){
     navdiv.appendChild(title)
     if (!logged()){
         a = document.createElement("a")
-        a.classList.add("nav-link")
+        a.classList.add("nav","nav-link")
         a.innerHTML="Home"
         a.href="/"
         navdiv.appendChild(a)
@@ -582,7 +582,7 @@ function printNavBar(id){
         a.classList.add("nav-link")
         a.innerHTML="Logout"
         a.addEventListener("click", logout)
-        a.href="/"
+        a.href=window.location.href
         node.appendChild(a)
 
         navdiv.append(node)
@@ -652,7 +652,7 @@ function login(){
     }).then(async response => {
         if (response.ok) {
             localStorage.setItem("user", email)
-            window.location.href="/"
+            window.location.href = document.referrer
         } else {
             response.text().then( text => alert(text) )
         }
