@@ -563,19 +563,19 @@ function printNavBar(id){
         a = document.createElement("a")
         a.classList.add("nav-link")
         a.innerHTML="Crea una playlist"
-        a.href="/"
+        a.href="/src/newplaylist.html"
         node.appendChild(a)
 
         a = document.createElement("a")
         a.classList.add("nav-link")
         a.innerHTML="Gestisci le tue playlist"
-        a.href="/"
+        a.href="/src/playlist.html"
         node.appendChild(a)
 
         a = document.createElement("a")
         a.classList.add("nav-link")
         a.innerHTML="Gestisci il tuo account"
-        a.href="/"
+        a.href="/src/account.html"
         node.appendChild(a)
 
         a = document.createElement("a")
