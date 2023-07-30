@@ -666,6 +666,30 @@ function logout(){
     localStorage.removeItem("user")
 }
 
+function addPlaylist(){
+    nome = document.getElementById("nome").value
+    owner = window.localStorage.getItem("user")
+    tracks = []
+    var data = {
+        name: nome,
+        owner: owner,
+        tracks: tracks
+    }
+    fetch("http://127.0.0.1:3100/playlist?apikey=123456", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    }).then(async response => {
+        if (response.ok) {
+            console.log("SIIII")
+        } else {
+            response.text().then( text => alert(text) )
+        }
+    })
+}
+
 /**
  * Funzione che stampa in coda al nodo una card placeholder
  * @param {String} id id del node dove fare l'append delle card

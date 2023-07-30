@@ -11,11 +11,23 @@
 <body>
     <script>if(!logged()){window.location.href = "/"}</script>
     <div class="container">
-        <div class="col-12 col-lg-3 col-sm-12 col-xs-12 text-center" id="left_menu">
-            <script>printNavBar("left_menu")</script> 
-        </div>
-
-        <div class="col" id="home">
+        <div class="row">
+            <div class="col-12 col-lg-3 col-sm-12 col-xs-12 text-center" id="left_menu">
+                <script>printNavBar("left_menu")</script> 
+            </div>
+    
+            <div class="col" id="home">
+                <div id="newPlaylist">
+                    <h4>Crea una nuova playlist</h4>
+                    <div>
+                        <div class="mb-3 form-check">
+                            <label for="nome" class="form-label">Nome della playlist</label>
+                            <input type="text" class="form-control" id="nome" autocomplete="off">
+                         </div>
+                        <button type="submit" class="btn btn-primary" onclick="addPlaylist()">Salva la playlist</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>

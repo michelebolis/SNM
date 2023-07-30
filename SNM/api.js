@@ -176,3 +176,27 @@ app.put("/users/:id", auth, function (req, res) {
 app.delete("/users/:id", auth, function (req, res) {
     deleteUser(res, req.params.id)
 })
+
+app.post("/playlist", auth, function (req, res) {
+    addPlaylist(res, req.body)
+})
+
+async function addPlaylist(res, playlist) {
+    if (playlist.name == undefined) {
+        res.status(400).send("Missing name")
+        return
+    }
+    if (playlist.name == "") {
+        res.status(400).send("Missing name")
+        return
+    }
+    var pwmClient = await new mongoClient(uri).connect()
+    try {
+        var items = await pwmClient.db("SNM").collection('Playlists').insertOne(playlist)
+        res.json(items)
+    }
+    catch (e) {
+        console.log('catch in test');
+        res.status(500).send(`Errore generico: ${e}`)
+    };
+}
