@@ -2,7 +2,7 @@ body{
     background-image: url("/img/background.png");
     color: #E9F8F9;
 }
-.container{
+.external-container{
     background-color: #181823; 
     border: 2px solid white;
 }
