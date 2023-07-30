@@ -509,7 +509,7 @@ function printAlbumTrack(tracks){
  * 
  * @returns 
  */
-function printMyPlaylists(idNode){
+function printMyPlaylists(idNode, idTemplate){
     if (!logged()){return}
     user = localStorage.getItem("user")
     fetch("http://127.0.0.1:3100/playlists/"+user+"?apikey=123456", {
@@ -521,15 +521,31 @@ function printMyPlaylists(idNode){
     .then(response => response.json())
     .then(function(playlists){
         console.log(playlists)
+        node = document.getElementById(idNode)
         if (playlists.length==0){
             title = document.createElement("h4")
-            node = document.getElementById(idNode)
             title.innerHTML = "Non hai ancora nessuna playlist, creane una "
             a = document.createElement("a")
             a.href = "/src/newplaylist.html"
             a.innerHTML = "qui"
             title.append(a)
             node.append(title)
+        }else{
+            template = document.getElementById(idTemplate).cloneNode(true)
+            template.classList.remove("visually-hidden")
+            document.getElementById(idTemplate).remove()
+            title = document.createElement("h4")
+            title.innerHTML = "Le tue playlist"
+            node.append(title)
+            row = document.createElement("div")
+            row.classList.add("row")
+            node.append(row)
+            node = row
+            for(let i=0;i<playlists.length;i++){
+                div = template.cloneNode(true)
+                div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
+                node.append(div)
+            }
         }
     }).catch((e) => console.log(e))
 }
