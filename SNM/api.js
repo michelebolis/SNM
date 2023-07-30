@@ -128,7 +128,6 @@ app.get('/users', auth, async function (req, res) {
     var pwmClient = await new mongoClient(uri).connect()
     var users = await pwmClient.db("SNM").collection('users').find().project({ "password": 0 }).toArray();
     res.json(users)
-
 })
 
 app.post("/users", auth, function (req, res) {
@@ -200,3 +199,14 @@ async function addPlaylist(res, playlist) {
         res.status(500).send(`Errore generico: ${e}`)
     };
 }
+
+app.get('/playlists/:user', auth, async function (req, res) {
+    // Ricerca nel database
+    var user = req.params.user
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .find({ "owner": user })
+        .toArray();
+    res.json(playlists)
+})

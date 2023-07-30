@@ -509,9 +509,29 @@ function printAlbumTrack(tracks){
  * 
  * @returns 
  */
-function printMyPlaylists(){
+function printMyPlaylists(idNode){
     if (!logged()){return}
-    document.write("QUI CI SONO LE MIE PLAYLIST")
+    user = localStorage.getItem("user")
+    fetch("http://127.0.0.1:3100/playlists/"+user+"?apikey=123456", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(function(playlists){
+        console.log(playlists)
+        if (playlists.length==0){
+            title = document.createElement("h4")
+            node = document.getElementById(idNode)
+            title.innerHTML = "Non hai ancora nessuna playlist, creane una "
+            a = document.createElement("a")
+            a.href = "/src/newplaylist.html"
+            a.innerHTML = "qui"
+            title.append(a)
+            node.append(title)
+        }
+    }).catch((e) => console.log(e))
 }
 
 /**
