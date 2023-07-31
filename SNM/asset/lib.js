@@ -48,7 +48,7 @@ async function userLogin(user){
  * @returns json contenente l'id del nuovo utente oppure un errore nel formato json {text, status}
  */
 async function postUser(user){
-    return fetch("http://127.0.0.1:3100/users?apikey=123456", {
+    return fetch(MY_BASE_URL+"users?apikey=123456", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -68,7 +68,7 @@ async function postUser(user){
  * @param {*} playlist json contenente la playlist da aggiungere
  */
 async function postPlaylist(playlist) {
-    fetch("http://127.0.0.1:3100/playlist?apikey=123456", {
+    fetch(MY_BASE_URL+"playlist?apikey=123456", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -89,7 +89,7 @@ async function postPlaylist(playlist) {
  * @returns array di json delle sue playlist
  */
 async function getMyPlaylist(id){
-    return fetch("http://127.0.0.1:3100/playlists/"+id+"?apikey=123456", {
+    return fetch(MY_BASE_URL+"playlists/"+id+"?apikey=123456", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -536,6 +536,48 @@ async function printArtistInfo(idArtist, idNode){
     document.getElementById(idNode).append(node)
 }
 
+function printArtists(artists, idNode, idTemplate){
+    template = document.getElementById(idTemplate).cloneNode(true)
+    template.classList.remove("visually-hidden")
+    row = document.createElement("div")
+    row.id=idNode+"Row0"
+    row.classList.add("row", "justify-content-center")
+    for (let i=0; i<artists.length; i++){
+        clone = template.cloneNode(true)
+        clone.classList.add("link")
+
+        clone.addEventListener("click", function move(){window.location.href = "/src/artist.html?" + artists[i].id})
+        clone.getElementsByClassName("card-img")[0].src = artists[i].images[0].url
+        clone.getElementsByClassName("nome_artista")[0].innerHTML = "#" + (i+1) + " " +artists[i].name
+        clone.getElementsByClassName("follower")[0].innerHTML = artists[i].followers.total.toLocaleString('en-US')
+        row.append(clone)
+        if(((i+1)%5==0)&&(i!=0)){
+            if(i+1!=artists.length){
+                // create the button to show more element
+                newButton = document.createElement("button")
+                newButton.id = "showMore_" + i
+                newButton.classList.add("show", "btn","btn-secondary")
+                newButton.addEventListener("click", showMore)
+                newButton.innerHTML= "Show more"
+                row.append(newButton)
+            }
+            document.getElementById(idNode).append(row)
+            //create the row
+            row = document.createElement("div")
+            row.classList.add("row", "justify-content-center", "visually-hidden")
+            newid = idNode+"Row" + (i/5)
+            row.id= newid
+        }else if(i+1==artists.length){
+            document.getElementById(idNode).append(row)
+            //create the row
+            row = document.createElement("div")
+            row.classList.add("row", "justify-content-center", "visually-hidden")
+            newid = idNode+"Row" + (i/5)
+            row.id= newid
+        }
+    }
+}
+
 /**
  * Funzione che stampa gli album dell'artista in un node con id 'artistAlbum'
  * @param {String} idArtist id dell'artista di cui si richiedono gli album
@@ -573,7 +615,7 @@ function printAlbum(albums, idNode, idTemplate){
         clone.classList.add("link")
 
         clone.addEventListener("click", function move(){window.location.href = "/src/album.html?" + albums[i].id})
-        clone.getElementsByClassName("card-img-album")[0].src = albums[i].images[0].url
+        clone.getElementsByClassName("card-img")[0].src = albums[i].images[0].url
         clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +albums[i].name
         clone.getElementsByClassName("nome_artista")[0].innerHTML = albums[i].artists[0].name
         row.append(clone)
@@ -1018,7 +1060,7 @@ async function search(){
         artists = await searchArtist(input)
         artists=artists.artists.items
         console.log(artists)
-        /*
+        
         div = document.createElement("div")
         title = document.createElement("h5")
         title.innerHTML = "Artisti dalla ricerca"
@@ -1028,7 +1070,8 @@ async function search(){
         divResults.classList.add("container")
         div.append(divResults)
         divSearch.append(div)
-        */
+        
+        printArtists(artists, "searchArtist", "artist-template")
     }
     if(radioAlbum.checked){
         albums = await searchAlbum(input)
