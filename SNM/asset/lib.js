@@ -829,13 +829,71 @@ function logout(){
 async function addPlaylist(){
     nome = document.getElementById("nome").value
     owner = window.localStorage.getItem("user")
+    public = document.getElementById("public").checked
+    description = document.getElementById("descrizione").value
     tracks = []
+    tags = []
+    tagsNode = document.getElementsByClassName("tagSpan")
+    if(tags){
+        find=false
+        Array.prototype.forEach.call(tagsNode, function(tag) {
+            tags.push(tag.innerHTML)
+        });
+        if(find){return}
+    }
     var playlist = {
         name: nome,
         owner: owner,
-        tracks: tracks
+        tracks: tracks,
+        public: public,
+        description: description,
+        tags: tags
     }
     await postPlaylist(playlist)
+}
+
+function addTag(){
+    tag = document.getElementById("tagInput").value
+    document.getElementById("tagInput").value=""
+    if (tag!=""){
+        tags = document.getElementsByClassName("tagSpan")
+        if(tags){
+            find=false
+            Array.prototype.forEach.call(tags, function(el) {
+                if(el.innerHTML==tag){
+                    find=true
+                    return
+                }
+            });
+            if(find){return}
+        }
+        newtag = document.createElement("div")
+        newtag.classList.add("col", "tag")
+        a = document.createElement("a")
+        a.innerHTML = "\u2718"
+        a.addEventListener("click", removeTag)
+        div = document.createElement("div")
+        span = document.createElement("span")
+        span.classList.add("tagSpan")
+        span.innerHTML=tag
+        newtag.append(span)
+        newtag.prepend(a)
+        list = document.getElementById("tagList")
+        nessuno = document.getElementById("nessuno")
+        if (nessuno){nessuno.remove()}
+        list.append(newtag)
+    }
+}
+
+function removeTag(){
+    this.parentNode.remove()
+    if (document.getElementsByClassName("tag").length==0){
+        div = document.createElement("div")
+        div.classList.add("col-3")
+        div.innerHTML="Nessuno"
+        div.id="nessuno"
+        list.append(div)
+    }
 }
 
 /**

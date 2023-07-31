@@ -23,8 +23,44 @@
                         <div class="mb-3 form-check">
                             <label for="nome" class="form-label">Nome della playlist</label>
                             <input type="text" class="form-control" id="nome" autocomplete="off">
-                         </div>
-                        <button type="submit" class="btn btn-primary" onclick="addPlaylist()">Salva la playlist</button>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <label for="descrizione" class="form-label">Descrizione</label>
+                            <textarea class="form-control" id="descrizione" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <div class="row ">
+                                <div class="col-9">
+                                    <input type="text" class="form-control" id="tagInput" placeholder="Tag della playlist" autocomplete="off">
+                                </div>
+                                <div class="col">
+                                    <button class="btn btn-primary mb-3" style="width: 100%;" onclick=addTag()>Aggiungi tag</button>
+                                </div>
+                            </div>
+                            <label for="tagList" class="form-label">Lista tag</label>
+                            <div class="container">
+                                <div class="row" id="tagList" >
+                                    <div class="col" id="nessuno">Nessuno</div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div id="visibility" class="form-check">
+                            <label for="visibility" class="form-label">Rendi questa playlist</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="visibility" id="public" checked>
+                                <label class="form-check-label" for="public">
+                                  Pubblica
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="visibility" id="private">
+                                <label class="form-check-label" for="private">
+                                  Privata
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary " onclick="addPlaylist()">Salva la playlist</button>
                     </div>
                 </div>
             </div>
