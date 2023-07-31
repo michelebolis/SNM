@@ -548,6 +548,7 @@ async function printArtistInfo(idArtist, idNode){
 }
 
 function printArtists(artists, idNode, idTemplate){
+    document.getElementById(idNode).innerHTML=""
     template = document.getElementById(idTemplate).cloneNode(true)
     template.classList.remove("visually-hidden")
     row = document.createElement("div")
@@ -613,14 +614,16 @@ async function printAlbumArtist(idArtist){
     }
     console.log(onlyalbum)
     if(onlyalbum.length==0){return}
+
+    printAlbum(onlyalbum, "album", "album-template")
     h4 = document.createElement("h4")
     h4.innerHTML = "Discografia di " + onlyalbum[0].artists[0].name
     document.getElementById("album").prepend(h4)
-    printAlbum(onlyalbum, "album", "album-template")
 }
 
 function printAlbum(albums, idNode, idTemplate){
     template = document.getElementById(idTemplate).cloneNode(true)
+    document.getElementById(idNode).innerHTML=""
     template.classList.remove("visually-hidden")
     row = document.createElement("div")
     row.id=idNode+"Row0"
@@ -805,20 +808,27 @@ async function printMyPlaylists(idNode, idTemplate){
         title.append(a)
         node.append(title)
     }else{
+        printPlaylistCard(playlists, idNode, idTemplate)
         title = document.createElement("h4")
         title.innerHTML = "Le tue playlist"
-        node.append(title)
-        printPlaylistCard(playlists, idNode, idTemplate)
+        node.parentNode.prepend(title)
     }
 }
 
+/**
+ * Funzione che stampa le playlist 
+ * @param {*} playlists array contenente le playlist
+ * @param {*} idNode id dove accodare le playlist 
+ * @param {*} idTemplate id dove reperire il template da utilizzare
+ */
 function printPlaylistCard(playlists, idNode, idTemplate){
     node = document.getElementById(idNode)
+    node.innerHTML=""
     template = document.getElementById(idTemplate).cloneNode(true)
     template.classList.remove("visually-hidden")
     //document.getElementById(idTemplate).remove()
     row = document.createElement("div")
-    row.classList.add("row")
+    row.classList.add("row", "justify-content-center")
     node.append(row)
     node = row
     for(let i=0;i<playlists.length;i++){
@@ -996,6 +1006,9 @@ async function addPlaylist(){
     await postPlaylist(playlist)
 }
 
+/**
+ * Funzione che aggiunge un nuovo tag presente nell'input con id "tagInput" SE non è già presente
+ */
 function addTag(){
     tag = document.getElementById("tagInput").value
     document.getElementById("tagInput").value=""
@@ -1030,6 +1043,9 @@ function addTag(){
     }
 }
 
+/**
+ * Funzione che rimuove il tag selezionato e, nel caso fosse l'ultimo, aggiunge il messaggio "Nessuno"
+ */
 function removeTag(){
     this.parentNode.remove()
     if (document.getElementsByClassName("tag").length==0){
@@ -1041,6 +1057,10 @@ function removeTag(){
     }
 }
 
+/**
+ * Funzione che, dato il valore presente nell'input e lo stato dei 4 switch, fa una ricerca 
+ * in base all'input per ogni categoria selezionata
+ */
 async function search(){
     input = document.getElementById("input").value
     if(input==""){return}
@@ -1060,76 +1080,96 @@ async function search(){
     document.getElementById("myPlaylists").parentNode.prepend(divSearch)
 
     if(radioTrack.checked){
-        tracks = await searchTrack(input)
-        tracks=tracks.tracks.items
-        console.log(tracks)
-
         div = document.createElement("div")
         title = document.createElement("h5")
         title.innerHTML = "Canzoni dalla ricerca"
         div.append(title)
         divResults = document.createElement("div")
         divResults.id="searchTrack"
-        divResults.classList.add("container")
+        divResults.classList.add("row")
+        div.classList.add("container")
         div.append(divResults)
         divSearch.append(div)
+
+        for(let i=0;i<5;i++){
+            printCardPlaceholder("searchTrack")
+        }
+
+        tracks = await searchTrack(input)
+        tracks=tracks.tracks.items
+        console.log(tracks)
 
         printPlaylist(tracks, "searchTrack", "top-template")
     }
     if(radioArtist.checked){
-        artists = await searchArtist(input)
-        artists=artists.artists.items
-        console.log(artists)
-        
         div = document.createElement("div")
         title = document.createElement("h5")
         title.innerHTML = "Artisti dalla ricerca"
         div.append(title)
         divResults = document.createElement("div")
         divResults.id="searchArtist"
-        divResults.classList.add("container")
+        divResults.classList.add("row")
+        div.classList.add("container")
         div.append(divResults)
         divSearch.append(div)
+
+        for(let i=0;i<5;i++){
+            printCardPlaceholder("searchArtist")
+        }
+
+        artists = await searchArtist(input)
+        artists=artists.artists.items
+        console.log(artists)
         
         printArtists(artists, "searchArtist", "artist-template")
     }
     if(radioAlbum.checked){
-        albums = await searchAlbum(input)
-        albums=albums.albums.items
-        console.log(albums)
-
         div = document.createElement("div")
         title = document.createElement("h5")
         title.innerHTML = "Album dalla ricerca"
         div.append(title)
         divResults = document.createElement("div")
         divResults.id="searchAlbum"
-        divResults.classList.add("container")
+        divResults.classList.add("row")
+        div.classList.add("container")
         div.append(divResults)
         divSearch.append(div)
+
+        for(let i=0;i<5;i++){
+            printCardPlaceholder("searchAlbum")
+        }
+        
+        albums = await searchAlbum(input)
+        albums=albums.albums.items
+        console.log(albums)
 
         printAlbum(albums, "searchAlbum" , "album-template")
     }
     if(radioPlaylist.checked){
+        div = document.createElement("div")
+        title = document.createElement("h5")
+        title.id="titleTemp"
+        title.innerHTML = "Playlist dalla ricerca"
+        div.append(title)
+
+        divResults = document.createElement("div")
+        divResults.id="searchPlaylist"
+        divResults.classList.add("row")
+        div.append(divResults)
+        div.classList.add("container")
+        divSearch.append(div)
+
+        for(let i=0;i<5;i++){
+            printCardPlaceholder("searchPlaylist")
+        }
+
         playlists = await searchPlaylist(input)
         console.log(playlists)
 
-        div = document.createElement("div")
-        title = document.createElement("h5")
-        title.innerHTML = "Playlist dalla ricerca"
         if(playlists.length==0){
-            title.innerHTML+=": nessun risultato"
-            div.append(title)
-            divSearch.append(div)
+            document.getElementById("searchPlaylist").innerHTML=""
+            document.getElementById("titleTemp").innerHTML = "Playlist dalla ricerca: nessun risultato"
         }else{
-            div.append(title)
-
-            divResults = document.createElement("div")
-            divResults.id="searchPlaylist"
-            divResults.classList.add("container")
-            div.append(divResults)
-            divSearch.append(div)
-    
             printPlaylistCard(playlists, "searchPlaylist", "playlist-template")
         }
     }
@@ -1141,7 +1181,7 @@ async function search(){
  */
 function printCardPlaceholder(id){
     div = document.createElement("div")
-    div.classList.add("card", "col-3")
+    div.classList.add("card", "col-2")
 
     node = document.createElement("div")
     node.classList.add("card-body")
