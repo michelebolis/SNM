@@ -47,8 +47,19 @@
             </div>
           </div>
 
-          <div class="container" id="my_playlist">
-            <script>printMyPlaylists()</script>
+          <div id="playlist-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
+            <img class="card-img" src="../img/music.jpg"/>
+            <div class="card-body">
+              <h5 class="card-title ">
+                <span class="nome_playlist col-6"></span>
+              </h5>
+            </div>
+          </div>
+          <div id="myPlaylists" class="container">
+              <script>printMyPlaylists("myPlaylists", "playlist-template")</script>
+          </div>
+          <div id="followedPlaylists">
+              <h4>Le playlist che segui</h4>
           </div>
 
           <div class="container" id="my_playlist_followed">
