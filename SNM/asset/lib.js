@@ -870,7 +870,8 @@ function addTag(){
         newtag = document.createElement("div")
         newtag.classList.add("col", "tag")
         a = document.createElement("a")
-        a.innerHTML = "\u2718"
+        a.innerHTML = "\u274C "
+        a.classList.add("link")
         a.addEventListener("click", removeTag)
         div = document.createElement("div")
         span = document.createElement("span")
