@@ -558,7 +558,11 @@ function printArtists(artists, idNode, idTemplate){
         clone.classList.add("link")
 
         clone.addEventListener("click", function move(){window.location.href = "/src/artist.html?" + artists[i].id})
-        clone.getElementsByClassName("card-img")[0].src = artists[i].images[0].url
+        if(artists[i].images.length!=0){
+            clone.getElementsByClassName("card-img")[0].src = artists[i].images[0].url
+        }else{
+            clone.getElementsByClassName("card-img")[0].src = "/img/music.jpg"
+        }
         clone.getElementsByClassName("nome_artista")[0].innerHTML = "#" + (i+1) + " " +artists[i].name
         clone.getElementsByClassName("follower")[0].innerHTML = artists[i].followers.total.toLocaleString('en-US')
         row.append(clone)

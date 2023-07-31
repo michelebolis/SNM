@@ -17,7 +17,10 @@ body{
 .card{
     margin: 10px;
     background: white;
-    transition: background-color 1s ease-out 150ms
+    transition: background-color 1s ease-out 150ms;
+    max-height:350px;
+    text-overflow: ellipsis;
+    overflow: auto;
 }
 .card:hover{
     background: lightskyblue;
