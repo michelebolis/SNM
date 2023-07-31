@@ -211,8 +211,45 @@ async function getPlaylistSpotify(url){
     .catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che effettua la chiamata all'API di Spotify che ricerca le canzoni in base al nome della track data
+ * @param {String} track nome della track da ricercare
+ * @returns array di json contenenti le track risultanti
+ */
 async function searchTrack(track){
     return fetch(`${BASE_URL}search?q=${track}&type=track`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che effettua la chiamata all'API di Spotify che ricerca gli album in base al nome dell'album dato
+ * @param {String} album nome dell'album da ricercare
+ * @returns array di json contenenti gli album risultanti
+ */
+async function searchAlbum(album){
+    return fetch(`${BASE_URL}search?q=${album}&type=album`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che effettua la chiamata all'API di Spotify che ricerca gli artist in base al nome dell'artist dato
+ * @param {String} artist nome dell'artist da ricercare
+ * @returns array di json contenenti gli artist risultanti
+ */
+async function searchArtist(artist){
+    return fetch(`${BASE_URL}search?q=${artist}&type=artist`, {
         headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer " + access_token,
@@ -258,23 +295,24 @@ function printPlaylist(playlist, idNode, idTemplate){
     button.innerHTML="Show more"
     button.classList.add("show", "btn","btn-secondary")
     
-    for (let i=0; i<playlist.length; i+=10){
+    for (let i=0; i<playlist.length; i+=5){
         // create the button to show more element
         newButton = button.cloneNode(true)
-        newButton.id = "showMore_" + i
+        newButton.id = "showMore_" + i/5
         newButton.addEventListener("click", showMore)
         //create the row
         row = document.createElement("div")
         row.classList.add("row", "justify-content-center")
-        newid = idNode+"Row" + (i/10)
+        newid = idNode+"Row" + (i/5)
         row.id= newid
         document.getElementById(idNode).append(row)
-        printTracksCard(playlist.slice(i,i+10), template, newid, i+1)
+        printTracksCard(playlist.slice(i,i+5), template, newid, i+1)
         // append the button and hide everything
         document.getElementById(newid).append(newButton)
         document.getElementById(newid).classList.add("visually-hidden")
     }
     document.getElementById(idNode+"Row0").classList.remove("visually-hidden")
+    document.getElementById("showMore_" + ((playlist.length/5)-1)).remove()
     //document.getElementById(idNode+'-template').remove()
 }
 
@@ -432,7 +470,6 @@ async function printTopTrackArtist(idArtist, idTemplate){
     }
     console.log(playlist)
     printPlaylist(playlist.tracks, "topTrackArtist", idTemplate)
-    document.getElementById("showMore_0").remove() // considero che le top track sono sempre 10
     nomeArtista = document.createElement("h4")
     nomeArtista.innerHTML = "Top track e feat di "+playlist.tracks[0].artists[0].name
     document.getElementById("topTrackArtist").prepend(nomeArtista)
@@ -522,17 +559,48 @@ async function printAlbumArtist(idArtist){
     h4 = document.createElement("h4")
     h4.innerHTML = "Discografia di " + onlyalbum[0].artists[0].name
     document.getElementById("album").prepend(h4)
-    template = document.getElementById("album-template")
-    for (let i=0; i<onlyalbum.length; i++){
+    printAlbum(onlyalbum, "album", "album-template")
+}
+
+function printAlbum(albums, idNode, idTemplate){
+    template = document.getElementById(idTemplate).cloneNode(true)
+    template.classList.remove("visually-hidden")
+    row = document.createElement("div")
+    row.id=idNode+"Row0"
+    row.classList.add("row", "justify-content-center")
+    for (let i=0; i<albums.length; i++){
         clone = template.cloneNode(true)
         clone.classList.add("link")
-        clone.classList.remove("visually-hidden")
-        clone.addEventListener("click", function move(){window.location.href = "/src/album.html?" + onlyalbum[i].id})
-        clone.id=id + (i + 1)
-        clone.getElementsByClassName("card-img-album")[0].src = onlyalbum[i].images[0].url
-        clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +onlyalbum[i].name
-        clone.getElementsByClassName("nome_artista")[0].innerHTML = onlyalbum[i].artists[0].name
-        document.getElementById("artistAlbum").append(clone)
+
+        clone.addEventListener("click", function move(){window.location.href = "/src/album.html?" + albums[i].id})
+        clone.getElementsByClassName("card-img-album")[0].src = albums[i].images[0].url
+        clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +albums[i].name
+        clone.getElementsByClassName("nome_artista")[0].innerHTML = albums[i].artists[0].name
+        row.append(clone)
+        if(((i+1)%5==0)&&(i!=0)){
+            if(i+1!=albums.length){
+                // create the button to show more element
+                newButton = document.createElement("button")
+                newButton.id = "showMore_" + i
+                newButton.classList.add("show", "btn","btn-secondary")
+                newButton.addEventListener("click", showMore)
+                newButton.innerHTML= "Show more"
+                row.append(newButton)
+            }
+            document.getElementById(idNode).append(row)
+            //create the row
+            row = document.createElement("div")
+            row.classList.add("row", "justify-content-center", "visually-hidden")
+            newid = idNode+"Row" + (i/5)
+            row.id= newid
+        }else if(i+1==albums.length){
+            document.getElementById(idNode).append(row)
+            //create the row
+            row = document.createElement("div")
+            row.classList.add("row", "justify-content-center", "visually-hidden")
+            newid = idNode+"Row" + (i/5)
+            row.id= newid
+        }
     }
 }
 
@@ -933,6 +1001,7 @@ async function search(){
         tracks = await searchTrack(input)
         tracks=tracks.tracks.items
         console.log(tracks)
+
         div = document.createElement("div")
         title = document.createElement("h5")
         title.innerHTML = "Canzoni dalla ricerca"
@@ -944,6 +1013,39 @@ async function search(){
         divSearch.append(div)
 
         printPlaylist(tracks, "searchTrack", "top-template")
+    }
+    if(radioArtist.checked){
+        artists = await searchArtist(input)
+        artists=artists.artists.items
+        console.log(artists)
+        /*
+        div = document.createElement("div")
+        title = document.createElement("h5")
+        title.innerHTML = "Artisti dalla ricerca"
+        div.append(title)
+        divResults = document.createElement("div")
+        divResults.id="searchArtist"
+        divResults.classList.add("container")
+        div.append(divResults)
+        divSearch.append(div)
+        */
+    }
+    if(radioAlbum.checked){
+        albums = await searchAlbum(input)
+        albums=albums.albums.items
+        console.log(albums)
+
+        div = document.createElement("div")
+        title = document.createElement("h5")
+        title.innerHTML = "Album dalla ricerca"
+        div.append(title)
+        divResults = document.createElement("div")
+        divResults.id="searchAlbum"
+        divResults.classList.add("container")
+        div.append(divResults)
+        divSearch.append(div)
+
+        printAlbum(albums, "searchAlbum" , "album-template")
     }
 }
 

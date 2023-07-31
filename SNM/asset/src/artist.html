@@ -20,7 +20,7 @@
                     <script>
                         id = window.location.href.split("?")[1]
                         printArtistInfo(id, "infoArtist")
-                        printTopTrackArtist(id)
+                        printTopTrackArtist(id, "topTrackArtist-template")
                         printAlbumArtist(id)
                     </script>
                 </div>
@@ -44,7 +44,6 @@
                     </div>
                 </div>
                 <div id="album" >
-                    <div class="row justify-content-center" id="artistAlbum">
                         <div id="album-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
                             <img class="card-img-album"/>
                             <div class="card-body">
@@ -53,8 +52,7 @@
                               </h5>
                               <div class="nome_artista"></div><br>
                             </div>
-                        </div>
-                    </div>
+                       </div>
                 </div>
             </div>
         </div>

@@ -55,14 +55,7 @@
                 <h4>Le playlist che segui</h4>
                 <script>printFollowedPlaylists()</script>
               </div>
-              <div id="playlist-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
-                <img class="card-img" src="../img/music.jpg"/>
-                <div class="card-body">
-                  <h5 class="card-title ">
-                    <span class="nome_playlist col-6"></span>
-                  </h5>
-                </div>
-              </div>
+              
             </div>
 
             <h4>TOP 50 Italia</h4>
@@ -75,24 +68,43 @@
                   }
                 </script>
               </div>
-              
-              <!--Template used for the tracks-->
-              <div id="top-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
-                <img class="card-img"/>
-                <div class="card-body">
-                  <h5 class="card-title ">
-                    <span class="nome_traccia col-6"></span>
-                  </h5>
-                  <span class="nome_artista"><span><br>
-                  <a class="btn btn-primary">+</a>
-                </div>
-              </div>
-  
             </div>
           </div>  
         </div>
           
-        
+        <div>
+          <div id="playlist-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
+            <img class="card-img" src="../img/music.jpg"/>
+            <div class="card-body">
+              <h5 class="card-title ">
+                <span class="nome_playlist col-6"></span>
+              </h5>
+            </div>
+          </div>
+          <!--Template used for the tracks-->
+          <div id="top-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
+            <img class="card-img"/>
+            <div class="card-body">
+              <h5 class="card-title ">
+                <span class="nome_traccia col-6"></span>
+              </h5>
+              <span class="nome_artista"><span><br>
+              <a class="btn btn-primary">+</a>
+            </div>
+          </div>
+
+          <div class="row justify-content-center" id="artistAlbum">
+            <div id="album-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
+                <img class="card-img-album"/>
+                <div class="card-body">
+                  <h5 class="card-title ">
+                    <span class="nome_album col-6"></span>
+                  </h5>
+                  <div class="nome_artista"></div><br>
+                </div>
+            </div>
+        </div>
+        </div>
         <script>printTopCharts()</script>
       </div>
   </div>
