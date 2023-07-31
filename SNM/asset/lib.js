@@ -1,3 +1,4 @@
+const MY_BASE_URL = "http://127.0.0.1:3100/"
 const BASE_URL = "https://api.spotify.com/v1/"
 const client_id = "8c847d5d66cd43f28e29a4e4f8d5f1cc"
 const client_secret = "62d9042a1da54e519cee47245ccfa8c5"
@@ -26,7 +27,7 @@ var access_token = localStorage.getItem("token") // salvo il token nel local sto
  *          ALTRIMENTI restituisce un errore nel formato json {text, status}
  */
 async function userLogin(user){
-    return fetch("http://127.0.0.1:3100/login?apikey=123456", {
+    return fetch(MY_BASE_URL+"login?apikey=123456", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -63,6 +64,26 @@ async function postUser(user){
 }
 
 /**
+ * Funzione che effettua la chiamata all'API che aggiunge una nuova playlist
+ * @param {*} playlist json contenente la playlist da aggiungere
+ */
+async function postPlaylist(playlist) {
+    fetch("http://127.0.0.1:3100/playlist?apikey=123456", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(playlist)
+    }).then(async response => {
+        if (response.ok) {
+            console.log("SIIII")
+        } else {
+            response.text().then( text => alert(text) )
+        }
+    })
+}
+
+/**
  * Funzione che effettua la chiamata all'API che restituisce le playlist di un utente
  * @param {*} id id dell'utente
  * @returns array di json delle sue playlist
@@ -79,7 +100,7 @@ async function getMyPlaylist(id){
 }
 
 /**
- * Funzione che effettua la chiamata all'API che restituisce le informazioni su una track
+ * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni su una track
  * @param {*} id id di Spotify della traccia
  * @returns json contenente le informazioni sulla track oppure un errore
  */
@@ -95,7 +116,7 @@ async function getTrack(id) {
 }
 
 /**
- * Funzione che effettua la chiamata all'API che restituisce le informazioni su un album
+ * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni su un album
  * @param {*} id id di Spotify dell'album
  * @returns json contenente le informazioni sull'album
  */
@@ -111,7 +132,7 @@ async function getAlbum(id) {
 }
 
 /**
- * Funzione che effettua la chiamata all'API che restituisce le informazioni sugli album dell'artista
+ * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni sugli album dell'artista
  * @param {*} id id di Spotify dell'artista
  * @returns array di json contenente le informazioni sugli album
  */
@@ -127,7 +148,7 @@ async function getAlbumByArtist(id) {
 }
 
 /**
- * Funzione che effettua la chiamata all'API che restituisce le informazioni dell'artista
+ * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni dell'artista
  * @param {*} id id di Spotify dell'artista 
  * @returns json contenente le informazioni dell'artista
  */
@@ -143,7 +164,7 @@ async function getArtist(id) {
 }
 
 /**
- * Funzione che restituisce le 50 track piu ascoltate in Italia
+ * Funzione che effettua la chiamata all'API di Spotify che restituisce le 50 track piu ascoltate in Italia
  */
 async function getTopCharts(){
     return fetch(`${BASE_URL}search?type=playlist&q=${'Top 50 - Italy'}&limit=1`, {
@@ -159,7 +180,7 @@ async function getTopCharts(){
 }
 
 /**
- * Funzione che effettua la chiamata all'API che restituisce le informazioni sulle top track di un artista (max 10)
+ * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni sulle top track di un artista (max 10)
  * @param {*} id id di Spotify dell'artista
  * @returns array di json contente le informazioni sulle track
  */
@@ -175,7 +196,7 @@ async function getTopTracks(id) {
 }
 
 /**
- * Funzione che effettua la chiamata all'API che restituisce le informazioni sulla playlist di Spotify
+ * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni sulla playlist di Spotify
  * @param {*} url url di una playlist di Spotify 
  * @returns informazioni sulla playlist
  */
@@ -462,9 +483,6 @@ async function printArtistInfo(idArtist, idNode){
     node.append(left)
     node.append(right)
     document.getElementById(idNode).append(node)
-
-    printTopTrackArtist(idArtist)
-    printAlbumArtist(idArtist)
 }
 
 /**
@@ -805,28 +823,19 @@ function logout(){
     localStorage.removeItem("user")
 }
 
-function addPlaylist(){
+/**
+ * Funzione che crea una nuova playlist 
+ */
+async function addPlaylist(){
     nome = document.getElementById("nome").value
     owner = window.localStorage.getItem("user")
     tracks = []
-    var data = {
+    var playlist = {
         name: nome,
         owner: owner,
         tracks: tracks
     }
-    fetch("http://127.0.0.1:3100/playlist?apikey=123456", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    }).then(async response => {
-        if (response.ok) {
-            console.log("SIIII")
-        } else {
-            response.text().then( text => alert(text) )
-        }
-    })
+    await postPlaylist(playlist)
 }
 
 /**
