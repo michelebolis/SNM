@@ -16,7 +16,6 @@
         </div>
 
         <div class="col" id="home">
-
           <div class="container">
             <div class="row justify-content-center">
               <div class="col-6 text-center" id="searchMenu" >
@@ -25,8 +24,8 @@
                   <input type="text" class="form-control" id="input"> 
                   <div class="row justify-content-center" id="searchParameters"> 
                     <div class="form-check form-switch col-10 col-md-5">
-                      <input class="form-check-input" type="checkbox" role="switch" id="song" checked>
-                      <label class="form-check-label" for="song">Canzone</label>
+                      <input class="form-check-input" type="checkbox" role="switch" id="track" checked>
+                      <label class="form-check-label" for="track">Canzone</label>
                     </div>
                     <div class="form-check form-switch col-10 col-md-5">
                       <input class="form-check-input" type="checkbox" role="switch" id="artist">
@@ -41,56 +40,58 @@
                       <label class="form-check-label" for="playlist">Playlist</label>
                     </div>
                   </div>
-                  <input class="btn btn-light" type="button" value="Ricerca" id="btnSearch">
+                  <button class="btn btn-light" value="Ricerca" onclick="search()">Ricerca</button>
                 </div>
               </div>
             </div>
           </div>
-
-          <div id="playlist-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
-            <img class="card-img" src="../img/music.jpg"/>
-            <div class="card-body">
-              <h5 class="card-title ">
-                <span class="nome_playlist col-6"></span>
-              </h5>
-            </div>
-          </div>
-          <div id="myPlaylists" class="container">
-              <script>printMyPlaylists("myPlaylists", "playlist-template")</script>
-          </div>
-          <div id="followedPlaylists">
-              <h4>Le playlist che segui</h4>
-          </div>
-
-          <div class="container" id="my_playlist_followed">
-            <script>printFollowedPlaylists()</script>
-          </div>
-
-          <div class="container" id="top50">
-            <h4>TOP 50 Italia</h4>
-            <div class="row justify-content-center" id="top">
-              <!--Placeholders cards while loading -->
-              <script>
-                for(let i=0;i<5;i++){
-                  printCardPlaceholder("top")
-                }
-              </script>
-            </div>
-            
-            <!--Template used for the tracks-->
-            <div id="top-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
-              <img class="card-img"/>
-              <div class="card-body">
-                <h5 class="card-title ">
-                  <span class="nome_traccia col-6"></span>
-                </h5>
-                <span class="nome_artista"><span><br>
-                <a class="btn btn-primary">+</a>
+          <div id="content">
+            <div>
+              <h4>Playlist</h4>
+              <div id="myPlaylists" class="container">
+                <script>printMyPlaylists("myPlaylists", "playlist-template")</script>
+              </div>
+              <div class="container" id="followedPlaylists">
+                <h4>Le playlist che segui</h4>
+                <script>printFollowedPlaylists()</script>
+              </div>
+              <div id="playlist-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
+                <img class="card-img" src="../img/music.jpg"/>
+                <div class="card-body">
+                  <h5 class="card-title ">
+                    <span class="nome_playlist col-6"></span>
+                  </h5>
+                </div>
               </div>
             </div>
 
-          </div>
-        </div>  
+            <h4>TOP 50 Italia</h4>
+            <div class="container" id="top50">  
+              <div class="row justify-content-center" id="top">
+                <!--Placeholders cards while loading -->
+                <script>
+                  for(let i=0;i<5;i++){
+                    printCardPlaceholder("top")
+                  }
+                </script>
+              </div>
+              
+              <!--Template used for the tracks-->
+              <div id="top-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
+                <img class="card-img"/>
+                <div class="card-body">
+                  <h5 class="card-title ">
+                    <span class="nome_traccia col-6"></span>
+                  </h5>
+                  <span class="nome_artista"><span><br>
+                  <a class="btn btn-primary">+</a>
+                </div>
+              </div>
+  
+            </div>
+          </div>  
+        </div>
+          
         
         <script>printTopCharts()</script>
       </div>

@@ -211,6 +211,17 @@ async function getPlaylistSpotify(url){
     .catch((e) => console.log(e))
 }
 
+async function searchTrack(track){
+    return fetch(`${BASE_URL}search?q=${track}&type=track`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
 /**
  * Funzione che verifica se un utente sia loggato o meno
  * @returns true SE l'utente è loggato nell'applicativo, false altrimenti
@@ -228,16 +239,17 @@ async function printTopCharts() {
     for(let i=0;i<playlist.length;i++){
         playlist[i]=playlist[i].track
     }
-    printPlaylist(playlist, "top")
+    printPlaylist(playlist, "top", "top-template")
 }
 
 /**
  * Funzione che stampa le tracks contenente nella playlist, visualizzate con il titolo, immagine della canzone e nome dell'artista
  * @param {Array} playlist Array contenente le track da stampare
  * @param {String} idNode id del node in cui stampare le track
+ * @param {String} idTemplate id del node che verrà utilizzato come template per le track
  */
-function printPlaylist(playlist, idNode){
-    template = document.getElementById(idNode +'-template').cloneNode(true)
+function printPlaylist(playlist, idNode, idTemplate){
+    template = document.getElementById(idTemplate).cloneNode(true)
     template.classList.remove("visually-hidden")
     document.getElementById(idNode).innerHTML=""
     console.log(playlist)
@@ -305,8 +317,9 @@ function showMore(){
  * e stampa le canzoni migliori dell'artista nel node con id 'topTrackArtist'
  * @param {String} idTrack id della track di cui richiedo le informazioni
  * @param {String} idNode id del nodo a cui accodare le informazioni da stampare
+ * @param {String} idTemplate id del nodo che verrà utilizzato come template per le track
  */
-async function printTrackInfo(idTrack, idNode){
+async function printTrackInfo(idTrack, idNode, idTemplate){
     info = await getTrack(idTrack)
     if(info.error){
         alert(info.error.message)
@@ -392,7 +405,7 @@ async function printTrackInfo(idTrack, idNode){
     node.append(right)
     document.getElementById(idNode).append(node)
 
-    printTopTrackArtist(info.artists[0].id)
+    printTopTrackArtist(info.artists[0].id, idTemplate)
 }
 
 /**
@@ -409,15 +422,16 @@ function msToMinutesAndSeconds(ms) {
 /**
  * Funzione che stampa le canzoni migliori di un'artista nel node con id 'topTrackArtist'
  * @param {String} idArtist id dell'artista di cui richiediamo informazioni
+ * @param {String} idTemplate id del nodo che verrà utilizzato come template per le track
  */
-async function printTopTrackArtist(idArtist){
+async function printTopTrackArtist(idArtist, idTemplate){
     playlist = await getTopTracks(idArtist)
     if(playlist.error){
         alert(playlist.error.message)
         return
     }
     console.log(playlist)
-    printPlaylist(playlist.tracks, "topTrackArtist")
+    printPlaylist(playlist.tracks, "topTrackArtist", idTemplate)
     document.getElementById("showMore_0").remove() // considero che le top track sono sempre 10
     nomeArtista = document.createElement("h4")
     nomeArtista.innerHTML = "Top track e feat di "+playlist.tracks[0].artists[0].name
@@ -668,7 +682,7 @@ async function printMyPlaylists(idNode, idTemplate){
     }else{
         template = document.getElementById(idTemplate).cloneNode(true)
         template.classList.remove("visually-hidden")
-        document.getElementById(idTemplate).remove()
+        //document.getElementById(idTemplate).remove()
         title = document.createElement("h4")
         title.innerHTML = "Le tue playlist"
         node.append(title)
@@ -894,6 +908,42 @@ function removeTag(){
         div.innerHTML="Nessuno"
         div.id="nessuno"
         list.append(div)
+    }
+}
+
+async function search(){
+    input = document.getElementById("input").value
+    if(input==""){return}
+    radioTrack = document.getElementById("track")
+    radioArtist = document.getElementById("artist")
+    radioAlbum = document.getElementById("album")
+    radioPlaylist = document.getElementById("playlist")
+    if(!(radioTrack.checked || radioArtist.checked || radioAlbum.checked || radioPlaylist.checked)){return}
+
+    prevSearch = document.getElementById("searchResult")
+    if(prevSearch){prevSearch.remove()}
+    divSearch = document.createElement("div")
+    divSearch.id="searchResult"
+    title = document.createElement("h4")
+    title.innerHTML = "Risultati ricerca"
+    divSearch.append(title)
+    document.getElementById("myPlaylists").parentNode.prepend(divSearch)
+
+    if(radioTrack.checked){
+        tracks = await searchTrack(input)
+        tracks=tracks.tracks.items
+        console.log(tracks)
+        div = document.createElement("div")
+        title = document.createElement("h5")
+        title.innerHTML = "Canzoni dalla ricerca"
+        div.append(title)
+        divResults = document.createElement("div")
+        divResults.id="searchTrack"
+        divResults.classList.add("container")
+        div.append(divResults)
+        divSearch.append(div)
+
+        printPlaylist(tracks, "searchTrack", "top-template")
     }
 }
 
