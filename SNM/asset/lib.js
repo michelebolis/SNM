@@ -99,6 +99,17 @@ async function getMyPlaylist(id){
     .catch((e) => console.log(e))
 }
 
+async function searchPlaylist(playlist){
+    return fetch(MY_BASE_URL+"playlists/search/"+playlist+"?apikey=123456", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
 /**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni su una track
  * @param {*} id id di Spotify della traccia
@@ -790,21 +801,26 @@ async function printMyPlaylists(idNode, idTemplate){
         title.append(a)
         node.append(title)
     }else{
-        template = document.getElementById(idTemplate).cloneNode(true)
-        template.classList.remove("visually-hidden")
-        //document.getElementById(idTemplate).remove()
         title = document.createElement("h4")
         title.innerHTML = "Le tue playlist"
         node.append(title)
-        row = document.createElement("div")
-        row.classList.add("row")
-        node.append(row)
-        node = row
-        for(let i=0;i<playlists.length;i++){
-            div = template.cloneNode(true)
-            div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
-            node.append(div)
-        }
+        printPlaylistCard(playlists, idNode, idTemplate)
+    }
+}
+
+function printPlaylistCard(playlists, idNode, idTemplate){
+    node = document.getElementById(idNode)
+    template = document.getElementById(idTemplate).cloneNode(true)
+    template.classList.remove("visually-hidden")
+    //document.getElementById(idTemplate).remove()
+    row = document.createElement("div")
+    row.classList.add("row")
+    node.append(row)
+    node = row
+    for(let i=0;i<playlists.length;i++){
+        div = template.cloneNode(true)
+        div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
+        node.append(div)
     }
 }
 
@@ -1089,6 +1105,29 @@ async function search(){
         divSearch.append(div)
 
         printAlbum(albums, "searchAlbum" , "album-template")
+    }
+    if(radioPlaylist.checked){
+        playlists = await searchPlaylist(input)
+        console.log(playlists)
+
+        div = document.createElement("div")
+        title = document.createElement("h5")
+        title.innerHTML = "Playlist dalla ricerca"
+        if(playlists.length==0){
+            title.innerHTML+=": nessun risultato"
+            div.append(title)
+            divSearch.append(div)
+        }else{
+            div.append(title)
+
+            divResults = document.createElement("div")
+            divResults.id="searchPlaylist"
+            divResults.classList.add("container")
+            div.append(divResults)
+            divSearch.append(div)
+    
+            printPlaylistCard(playlists, "searchPlaylist", "playlist-template")
+        }
     }
 }
 

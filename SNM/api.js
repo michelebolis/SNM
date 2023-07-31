@@ -210,3 +210,14 @@ app.get('/playlists/:user', auth, async function (req, res) {
         .toArray();
     res.json(playlists)
 })
+
+app.get('/playlists/search/:playlist', auth, async function (req, res) {
+    // Ricerca nel database
+    var playlist = req.params.playlist
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .find({ "name": playlist , "public":true})
+        .toArray();
+    res.json(playlists)
+})
