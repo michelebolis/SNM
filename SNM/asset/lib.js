@@ -20,6 +20,81 @@ fetch(URL_TOKEN, {
 var access_token = localStorage.getItem("token") // salvo il token nel local storage
 
 /**
+ * Funzione che effettua la chiamata all'API per effettuare il login
+ * @param {*} user json contenente email e password
+ * @returns SE le credenziali sono corrette, restituisce un json con i dati dell'utente
+ *          ALTRIMENTI restituisce un errore nel formato json {text, status}
+ */
+async function userLogin(user){
+    return fetch("http://127.0.0.1:3100/login?apikey=123456", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(user)
+    }).then(res => {
+        if(!res.ok){
+            return {text: res.statusText, status: res.status}
+        }else{
+            return res.json()
+        }
+    })
+}
+
+/**
+ * Funzione che effettua la chiamata all'API per aggiungere un nuovo utente
+ * @param {*} user json contenente email, nickname e password
+ * @returns json contenente l'id del nuovo utente oppure un errore nel formato json {text, status}
+ */
+async function postUser(user){
+    return fetch("http://127.0.0.1:3100/users?apikey=123456", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(user)
+    }).then(async res => {
+        if (res.ok) {
+            return res.json()
+        } else {
+            return {text: res.statusText, status: res.status}
+        }
+    })
+}
+
+/**
+ * Funzione che effettua la chiamata all'API che restituisce le playlist di un utente
+ * @param {*} user id dell'utente
+ * @returns array di json delle sue playlist
+ */
+async function getMyPlaylist(user){
+    return fetch("http://127.0.0.1:3100/playlists/"+user+"?apikey=123456", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che effettua la chiamata all'API che restituisce le informazioni su una track
+ * @param {*} idTrack 
+ * @returns json contenente le informazioni sulla track oppure un errore
+ */
+async function getTrack(idTrack) {
+    return fetch(`${BASE_URL}tracks/${idTrack}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
  * Funzione che verifica se un utente sia loggato o meno
  * @returns true SE l'utente è loggato nell'applicativo, false altrimenti
  */
@@ -140,97 +215,92 @@ function showMore(){
  * @param {String} idNode id del nodo a cui accodare le informazioni da stampare
  */
 async function printTrackInfo(idTrack, idNode){
-    fetch(`${BASE_URL}tracks/${idTrack}`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then(response => response.json())
-    .then(function(info){
-        console.log(info)
-        node = document.createElement("div")
-        node.classList.add("row", "justify-content-center")
-        title = document.createElement("h3")
-        title.innerHTML = "Titolo: " + info.name
-        node.append(title)
-        
-        left = document.createElement("div")
-        left.classList.add("col-4", "col-sm-12", "col-md-4",)
-        right = document.createElement("ul")
-        right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
-        img = document.createElement("img")
-        img.style="width:100%"
-        img.src = info.album.images[1].url
-        left.append(img)
+    info = await getTrack(idTrack)
+    if(info.error){
+        alert(info.error.message)
+        return
+    }
+    console.log(info)
+    node = document.createElement("div")
+    node.classList.add("row", "justify-content-center")
+    title = document.createElement("h3")
+    title.innerHTML = "Titolo: " + info.name
+    node.append(title)
+    
+    left = document.createElement("div")
+    left.classList.add("col-4", "col-sm-12", "col-md-4",)
+    right = document.createElement("ul")
+    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+    img = document.createElement("img")
+    img.style="width:100%"
+    img.src = info.album.images[1].url
+    left.append(img)
 
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
-        div.innerHTML="Artisti: "
-        for (let i=0; i<info.artists.length; i++){
-            a = document.createElement("a")
-            a.addEventListener("click", function show(){window.location.href="/src/artist.html?"+info.artists[i].id})
-            a.innerHTML = info.artists[i].name 
-            div.append(a)
-            i+1<info.artists.length ? div.append(document.createElement("div").innerHTML=" e ") : null
-        }
-        right.append(div)
-
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
-        div.innerHTML = "Album: "
+    div = document.createElement("li")
+    div.classList.add("list-group-item", "list-group-item-dark")
+    div.innerHTML="Artisti: "
+    for (let i=0; i<info.artists.length; i++){
         a = document.createElement("a")
-        a.innerHTML = info.album.name
-        a.addEventListener("click", function move(){window.location.href="/src/album.html?"+info.album.id})
-        a.classList.add("link")
+        a.addEventListener("click", function show(){window.location.href="/src/artist.html?"+info.artists[i].id})
+        a.innerHTML = info.artists[i].name 
         div.append(a)
-        right.append(div)
+        i+1<info.artists.length ? div.append(document.createElement("div").innerHTML=" e ") : null
+    }
+    right.append(div)
 
+    div = document.createElement("li")
+    div.classList.add("list-group-item", "list-group-item-dark")
+    div.innerHTML = "Album: "
+    a = document.createElement("a")
+    a.innerHTML = info.album.name
+    a.addEventListener("click", function move(){window.location.href="/src/album.html?"+info.album.id})
+    a.classList.add("link")
+    div.append(a)
+    right.append(div)
+
+    div = document.createElement("li")
+    div.classList.add("list-group-item", "list-group-item-dark")
+    div.innerHTML = "Durata: " + msToMinutesAndSeconds(info.duration_ms)
+    right.append(div)
+
+    if (info.preview_url!=null){
         div = document.createElement("li")
         div.classList.add("list-group-item", "list-group-item-dark")
-        div.innerHTML = "Durata: " + msToMinutesAndSeconds(info.duration_ms)
+        div.innerHTML = "Preview: </br>"
+        div.style="vertical-align: middle;"
+        audio = document.createElement("audio")
+        audio.controls="controls"
+        source = document.createElement("source")
+        source.src = info.preview_url
+        source.type = "audio/mpeg"
+        audio.append(source)
+        audio.style="width:100%;"
+        div.append(audio)
         right.append(div)
+    }
+    if (logged()){
+        div = document.createElement("li")
+        div.classList.add("list-group-item", "list-group-item-dark")
+        div.innerHTML = "Aggiungi alla playlist: "
+        button = document.createElement("button")
+        button.innerHTML="Aggiungi"
+        button.classList.add("btn", "btn-primary", "btn-light")
+        div.append(button)
+        select = document.createElement("select")
+        select.classList.add("form-select")
+        select.style = "width:50%"
+        option = document.createElement("option")
+        option.innerHTML = "Seleziona una tua playlist"
+        select.append(option)
+        div.append(select)
+        right.append(div)
+    }
 
-        if (info.preview_url!=null){
-            div = document.createElement("li")
-            div.classList.add("list-group-item", "list-group-item-dark")
-            div.innerHTML = "Preview: </br>"
-            div.style="vertical-align: middle;"
-            audio = document.createElement("audio")
-            audio.controls="controls"
-            source = document.createElement("source")
-            source.src = info.preview_url
-            source.type = "audio/mpeg"
-            audio.append(source)
-            audio.style="width:100%;"
-            div.append(audio)
-            right.append(div)
-        }
-        if (logged()){
-            div = document.createElement("li")
-            div.classList.add("list-group-item", "list-group-item-dark")
-            div.innerHTML = "Aggiungi alla playlist: "
-            button = document.createElement("button")
-            button.innerHTML="Aggiungi"
-            button.classList.add("btn", "btn-primary", "btn-light")
-            div.append(button)
-            select = document.createElement("select")
-            select.classList.add("form-select")
-            select.style = "width:50%"
-            option = document.createElement("option")
-            option.innerHTML = "Seleziona una tua playlist"
-            select.append(option)
-            div.append(select)
-            right.append(div)
-        }
+    node.append(left)
+    node.append(right)
+    document.getElementById(idNode).append(node)
 
-        node.append(left)
-        node.append(right)
-        document.getElementById(idNode).append(node)
-
-        printTopTrackArtist(info.artists[0].id)
-    })
-    .catch((e) => console.log(e))
+    printTopTrackArtist(info.artists[0].id)
 }
 
 /**
@@ -509,45 +579,37 @@ function printAlbumTrack(tracks){
  * 
  * @returns 
  */
-function printMyPlaylists(idNode, idTemplate){
+async function printMyPlaylists(idNode, idTemplate){
     if (!logged()){return}
     user = localStorage.getItem("user")
-    fetch("http://127.0.0.1:3100/playlists/"+user+"?apikey=123456", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
+    playlists = await getMyPlaylist(user)
+    console.log(playlists)
+    node = document.getElementById(idNode)
+    if (playlists.length==0){
+        title = document.createElement("h4")
+        title.innerHTML = "Non hai ancora nessuna playlist, creane una "
+        a = document.createElement("a")
+        a.href = "/src/newplaylist.html"
+        a.innerHTML = "qui"
+        title.append(a)
+        node.append(title)
+    }else{
+        template = document.getElementById(idTemplate).cloneNode(true)
+        template.classList.remove("visually-hidden")
+        document.getElementById(idTemplate).remove()
+        title = document.createElement("h4")
+        title.innerHTML = "Le tue playlist"
+        node.append(title)
+        row = document.createElement("div")
+        row.classList.add("row")
+        node.append(row)
+        node = row
+        for(let i=0;i<playlists.length;i++){
+            div = template.cloneNode(true)
+            div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
+            node.append(div)
         }
-    })
-    .then(response => response.json())
-    .then(function(playlists){
-        console.log(playlists)
-        node = document.getElementById(idNode)
-        if (playlists.length==0){
-            title = document.createElement("h4")
-            title.innerHTML = "Non hai ancora nessuna playlist, creane una "
-            a = document.createElement("a")
-            a.href = "/src/newplaylist.html"
-            a.innerHTML = "qui"
-            title.append(a)
-            node.append(title)
-        }else{
-            template = document.getElementById(idTemplate).cloneNode(true)
-            template.classList.remove("visually-hidden")
-            document.getElementById(idTemplate).remove()
-            title = document.createElement("h4")
-            title.innerHTML = "Le tue playlist"
-            node.append(title)
-            row = document.createElement("div")
-            row.classList.add("row")
-            node.append(row)
-            node = row
-            for(let i=0;i<playlists.length;i++){
-                div = template.cloneNode(true)
-                div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
-                node.append(div)
-            }
-        }
-    }).catch((e) => console.log(e))
+    }
 }
 
 /**
@@ -630,69 +692,56 @@ function printNavBar(id){
  * Funzione che, dati i valori contenuti in due input text con id email e password, crea un nuovo utente nel db
  * SE si verificano degli errori, li stampa in un alert 
  */
-function addUser(){
+async function addUser(){
     email = document.getElementById("email").value
     password = document.getElementById("password").value
     nickname = document.getElementById("user").value
-    var data = {
+    var user = {
         email: email,
         password: password,
         nickname: nickname
     }
-    console.log(data)
-    fetch("http://127.0.0.1:3100/users?apikey=123456", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    }).then(async response => {
-        if (response.ok) {
-            localStorage.setItem("user", email)
-            div = document.getElementById("userForm")
-            div.innerHTML = ""
+    console.log(user)
+    res = await postUser(user)
+    console.log(res)
+    if (!res.status){
+        localStorage.setItem("user", res.insertedId)
+        div = document.getElementById("userForm")
+        div.innerHTML = ""
 
-            mess = document.createElement("h4")
-            mess.classList.add("text-center")
-            mess.innerHTML = "Utente creato correttamente, benvenuto!</br>"
-            a = document.createElement("a")
-            a.innerHTML = "Torna alla home"
-            a.href="/"
-            mess.append(a)
-            div.append(mess)
-        } else {
-            response.text().then( text =>
-                alert(text)
-            )
-        }
-    })
+        mess = document.createElement("h4")
+        mess.classList.add("text-center")
+        mess.innerHTML = "Utente creato correttamente, benvenuto!</br>"
+        a = document.createElement("a")
+        a.innerHTML = "Torna alla home"
+        a.href="/"
+        mess.append(a)
+        div.append(mess)
+    }else{
+        alert(res.status + res.text)
+    }
 }
 
 /**
  * Funziome che preleva l'email e la password da due input e fa una richiesta al db 
  * per verificare se mail e password corrispondo ad un utente 
  */
-function login(){
+async function login(){
     email = document.getElementById("login_email").value
     password = document.getElementById("login_password").value
-    var data = {
+    var user = {
         email: email,
         password: password
     }
-    fetch("http://127.0.0.1:3100/login?apikey=123456", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    }).then(async response => {
-        if (response.ok) {
-            localStorage.setItem("user", email)
-            window.location.href = document.referrer
-        } else {
-            response.text().then( text => alert(text) )
-        }
-    })
+    response = await userLogin(user)
+    console.log(response)
+    if (!response.status) {
+        localStorage.setItem("user", response.loggedUser._id)
+        window.location.href = document.referrer
+    } else {
+        alert(response.text)
+    }
+    
 }
 
 /**
