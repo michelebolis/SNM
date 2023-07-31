@@ -64,11 +64,11 @@ async function postUser(user){
 
 /**
  * Funzione che effettua la chiamata all'API che restituisce le playlist di un utente
- * @param {*} user id dell'utente
+ * @param {*} id id dell'utente
  * @returns array di json delle sue playlist
  */
-async function getMyPlaylist(user){
-    return fetch("http://127.0.0.1:3100/playlists/"+user+"?apikey=123456", {
+async function getMyPlaylist(id){
+    return fetch("http://127.0.0.1:3100/playlists/"+id+"?apikey=123456", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -80,11 +80,107 @@ async function getMyPlaylist(user){
 
 /**
  * Funzione che effettua la chiamata all'API che restituisce le informazioni su una track
- * @param {*} idTrack 
+ * @param {*} id id di Spotify della traccia
  * @returns json contenente le informazioni sulla track oppure un errore
  */
-async function getTrack(idTrack) {
-    return fetch(`${BASE_URL}tracks/${idTrack}`, {
+async function getTrack(id) {
+    return fetch(`${BASE_URL}tracks/${id}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che effettua la chiamata all'API che restituisce le informazioni su un album
+ * @param {*} id id di Spotify dell'album
+ * @returns json contenente le informazioni sull'album
+ */
+async function getAlbum(id) {
+    return fetch(`${BASE_URL}albums/${id}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che effettua la chiamata all'API che restituisce le informazioni sugli album dell'artista
+ * @param {*} id id di Spotify dell'artista
+ * @returns array di json contenente le informazioni sugli album
+ */
+async function getAlbumByArtist(id) {
+    return fetch(`${BASE_URL}artists/${id}/albums`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che effettua la chiamata all'API che restituisce le informazioni dell'artista
+ * @param {*} id id di Spotify dell'artista 
+ * @returns json contenente le informazioni dell'artista
+ */
+async function getArtist(id) {
+    return fetch(`${BASE_URL}artists/${id}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che restituisce le 50 track piu ascoltate in Italia
+ */
+async function getTopCharts(){
+    return fetch(`${BASE_URL}search?type=playlist&q=${'Top 50 - Italy'}&limit=1`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then((response) => response.json())
+    .then(async searchResults => {
+        return await getPlaylistSpotify(searchResults.playlists.items[0].tracks.href)}
+    ).catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che effettua la chiamata all'API che restituisce le informazioni sulle top track di un artista (max 10)
+ * @param {*} id id di Spotify dell'artista
+ * @returns array di json contente le informazioni sulle track
+ */
+async function getTopTracks(id) {
+    return fetch(`${BASE_URL}artists/${id}/top-tracks?market=ES`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che effettua la chiamata all'API che restituisce le informazioni sulla playlist di Spotify
+ * @param {*} url url di una playlist di Spotify 
+ * @returns informazioni sulla playlist
+ */
+async function getPlaylistSpotify(url){
+    return fetch(url, {
         headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer " + access_token,
@@ -103,42 +199,17 @@ function logged(){
 }
 
 /**
- * Funzione che restituisce le 50 track piu ascoltate in Italia
+ * Funzione che stampa le track migliori in Italia
  */
-function getTopCharts(){
-    fetch(`${BASE_URL}search?type=playlist&q=${'Top 50 - Italy'}&limit=1`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then((response) => response.json())
-    .then((searchResults) => 
-        getInfoPlaylist(searchResults.playlists.items[0])
-    ).catch((e) => console.log(e))
+async function printTopCharts() {
+    playlist = await getTopCharts()
+    playlist=playlist.items
+    for(let i=0;i<playlist.length;i++){
+        playlist[i]=playlist[i].track
+    }
+    printPlaylist(playlist, "top")
 }
 
-/**
- * 
- * @param {*} playlist Data una playlist contenente 
- */
-function getInfoPlaylist(playlist){
-    fetch(playlist.tracks.href, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then((response) => response.json())
-    .then(function(searchResults){
-        searchResults=searchResults.items
-        for(let i=0;i<searchResults.length;i++){
-            searchResults[i]=searchResults[i].track
-        }
-        printPlaylist(searchResults, "top")
-    }
-    ).catch((e) => console.log(e))
-}
 /**
  * Funzione che stampa le tracks contenente nella playlist, visualizzate con il titolo, immagine della canzone e nome dell'artista
  * @param {Array} playlist Array contenente le track da stampare
@@ -318,22 +389,18 @@ function msToMinutesAndSeconds(ms) {
  * Funzione che stampa le canzoni migliori di un'artista nel node con id 'topTrackArtist'
  * @param {String} idArtist id dell'artista di cui richiediamo informazioni
  */
-function printTopTrackArtist(idArtist){
-    fetch(`${BASE_URL}artists/${idArtist}/top-tracks?market=ES`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then(response => response.json())
-    .then(function(playlist){
-        console.log(playlist)
-        printPlaylist(playlist.tracks, "topTrackArtist")
-        document.getElementById("showMore_0").remove() // considero che le top track sono sempre 10
-        nomeArtista = document.createElement("h4")
-        nomeArtista.innerHTML = "Top track e feat di "+playlist.tracks[0].artists[0].name
-        document.getElementById("topTrackArtist").prepend(nomeArtista)
-    }).catch((e) => console.log(e))
+async function printTopTrackArtist(idArtist){
+    playlist = await getTopTracks(idArtist)
+    if(playlist.error){
+        alert(playlist.error.message)
+        return
+    }
+    console.log(playlist)
+    printPlaylist(playlist.tracks, "topTrackArtist")
+    document.getElementById("showMore_0").remove() // considero che le top track sono sempre 10
+    nomeArtista = document.createElement("h4")
+    nomeArtista.innerHTML = "Top track e feat di "+playlist.tracks[0].artists[0].name
+    document.getElementById("topTrackArtist").prepend(nomeArtista)
 }
 
 /**
@@ -342,109 +409,99 @@ function printTopTrackArtist(idArtist){
  * @param {String} idArtist id dell'artista di cui richiediamo informazioni
  * @param {String} idNode id del nodo a cui si vogliono accodare le informazioni
  */
-function printArtistInfo(idArtist, idNode){
-    fetch(`${BASE_URL}artists/${idArtist}`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then(response => response.json())
-    .then(function(artist){
-        console.log(artist)
-        node = document.createElement("div")
-        node.classList.add("row", "justify-content-center")
-        // titolo
-        title = document.createElement("h3")
-        title.innerHTML = "Artista: " + artist.name
-        node.append(title)
-        // divisione in due sezioni della pagina, a sinistra la foto dell'artista e a destra le informazioni
-        left = document.createElement("div")
-        left.classList.add("col-4", "col-sm-12", "col-md-4",)
-        img = document.createElement("img")
-        img.style="width:100%"
-        img.src = artist.images[1].url
-        left.append(img)
-        right = document.createElement("ul")
-        right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+async function printArtistInfo(idArtist, idNode){
+    artist = await getArtist(idArtist)
+    if(artist.error){
+        alert(artist.error.message)
+        return
+    }
+    console.log(artist)
+    node = document.createElement("div")
+    node.classList.add("row", "justify-content-center")
+    // titolo
+    title = document.createElement("h3")
+    title.innerHTML = "Artista: " + artist.name
+    node.append(title)
+    // divisione in due sezioni della pagina, a sinistra la foto dell'artista e a destra le informazioni
+    left = document.createElement("div")
+    left.classList.add("col-4", "col-sm-12", "col-md-4",)
+    img = document.createElement("img")
+    img.style="width:100%"
+    img.src = artist.images[1].url
+    left.append(img)
+    right = document.createElement("ul")
+    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
 
-        li = document.createElement("li")
-        li.classList.add("list-group-item", "list-group-item-dark")
-        li_clone = li.cloneNode(true)
-        if(artist.genres.length==0){
-            li_clone.innerHTML="Generi: Nessuno"
-        }else{
-            li_clone.innerHTML="Generi: " + artist.genres[0]
-            for (let i=1; i<artist.genres.length; i++){
-                li_clone.innerHTML += ", " + artist.genres[i] 
-            }
+    li = document.createElement("li")
+    li.classList.add("list-group-item", "list-group-item-dark")
+    li_clone = li.cloneNode(true)
+    if(artist.genres.length==0){
+        li_clone.innerHTML="Generi: Nessuno"
+    }else{
+        li_clone.innerHTML="Generi: " + artist.genres[0]
+        for (let i=1; i<artist.genres.length; i++){
+            li_clone.innerHTML += ", " + artist.genres[i] 
         }
-        right.append(li_clone)
+    }
+    right.append(li_clone)
 
-        li_clone = li.cloneNode(true)
-        li_clone.innerHTML = "Follower: "
-        a = document.createElement("a")
-        a.innerHTML = artist.followers.total.toLocaleString('en-US')
-        li_clone.append(a)
-        right.append(li_clone)
+    li_clone = li.cloneNode(true)
+    li_clone.innerHTML = "Follower: "
+    a = document.createElement("a")
+    a.innerHTML = artist.followers.total.toLocaleString('en-US')
+    li_clone.append(a)
+    right.append(li_clone)
 
-        li_clone = li.cloneNode(true)
-        li_clone.innerHTML = "Aggiungi ai preferiti: "
-        button = document.createElement("button")
-        button.innerHTML="Aggiungi"
-        li_clone.append(button)
-        right.append(li_clone)
+    li_clone = li.cloneNode(true)
+    li_clone.innerHTML = "Aggiungi ai preferiti: "
+    button = document.createElement("button")
+    button.innerHTML="Aggiungi"
+    li_clone.append(button)
+    right.append(li_clone)
 
-        node.append(left)
-        node.append(right)
-        document.getElementById(idNode).append(node)
+    node.append(left)
+    node.append(right)
+    document.getElementById(idNode).append(node)
 
-        printTopTrackArtist(idArtist)
-        printAlbumArtist(idArtist)
-    }).catch((e) => console.log(e))
+    printTopTrackArtist(idArtist)
+    printAlbumArtist(idArtist)
 }
 
 /**
  * Funzione che stampa gli album dell'artista in un node con id 'artistAlbum'
  * @param {String} idArtist id dell'artista di cui si richiedono gli album
  */
-function printAlbumArtist(idArtist){
-    fetch(`${BASE_URL}artists/${idArtist}/albums`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then(response => response.json())
-    .then(function(album){
-        album = album.items
-        // considero solo gli album dell'artista e NON ep o partecipazioni ad altri album
-        onlyalbum = []
-        for (let i=0;i<album.length;i++){
-            if (album[i].album_group=="album"){
-                onlyalbum.push(album[i])
-            }
+async function printAlbumArtist(idArtist){
+    album = await getAlbumByArtist(idArtist)
+    if(album.error){
+        alert(album.error.message)
+        return
+    }
+    album = album.items
+    // considero solo gli album dell'artista e NON ep o partecipazioni ad altri album
+    onlyalbum = []
+    for (let i=0;i<album.length;i++){
+        if (album[i].album_group=="album"){
+            onlyalbum.push(album[i])
         }
-        console.log(onlyalbum)
-        if(onlyalbum.length==0){
-            return
-        }
-        h4 = document.createElement("h4")
-        h4.innerHTML = "Discografia di " + onlyalbum[0].artists[0].name
-        document.getElementById("album").prepend(h4)
-        template = document.getElementById("album-template")
-        for (let i=0; i<onlyalbum.length; i++){
-            clone = template.cloneNode(true)
-            clone.classList.add("link")
-            clone.classList.remove("visually-hidden")
-            clone.addEventListener("click", function move(){window.location.href = "/src/album.html?" + onlyalbum[i].id})
-            clone.id=id + (i + 1)
-            clone.getElementsByClassName("card-img-album")[0].src = onlyalbum[i].images[0].url
-            clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +onlyalbum[i].name
-            clone.getElementsByClassName("nome_artista")[0].innerHTML = onlyalbum[i].artists[0].name
-            document.getElementById("artistAlbum").append(clone)
-        }
-    }).catch((e) => console.log(e))
+    }
+    console.log(onlyalbum)
+    if(onlyalbum.length==0){return}
+    h4 = document.createElement("h4")
+    h4.innerHTML = "Discografia di " + onlyalbum[0].artists[0].name
+    document.getElementById("album").prepend(h4)
+    template = document.getElementById("album-template")
+    for (let i=0; i<onlyalbum.length; i++){
+        clone = template.cloneNode(true)
+        clone.classList.add("link")
+        clone.classList.remove("visually-hidden")
+        clone.addEventListener("click", function move(){window.location.href = "/src/album.html?" + onlyalbum[i].id})
+        clone.id=id + (i + 1)
+        clone.getElementsByClassName("card-img-album")[0].src = onlyalbum[i].images[0].url
+        clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +onlyalbum[i].name
+        clone.getElementsByClassName("nome_artista")[0].innerHTML = onlyalbum[i].artists[0].name
+        document.getElementById("artistAlbum").append(clone)
+    }
 }
 
 /**
@@ -453,69 +510,65 @@ function printAlbumArtist(idArtist){
  * @param {String} idAlbum id dell'album di cui si cercano le informazioni
  * @param {String} idNode id del nodo in cui accodare le informazioni
  */
-function printAlbumInfo(idAlbum, idNode){
-    fetch(`${BASE_URL}albums/${idAlbum}`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then(response => response.json())
-    .then(function(album){
-        console.log(album)
-        // titolo
-        node = document.createElement("div")
-        node.classList.add("row", "justify-content-center")
-        title = document.createElement("h3")
-        title.innerHTML = "Album: " + album.name
-        node.append(title)
-        // divisione in due sezioni della pagina, a sinistra la foto dell'album e a destra le informazioni
-        left = document.createElement("div")
-        left.classList.add("col-4", "col-sm-12", "col-md-4",)
-        img = document.createElement("img")
-        img.style="width:100%"
-        img.src = album.images[1].url
-        left.append(img)
-        right = document.createElement("ul")
-        right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+async function printAlbumInfo(idAlbum, idNode){
+    album = await getAlbum(idAlbum)
+    if(album.error){
+        alert(album.error.message)
+        return
+    }
+    console.log(album)
+    // titolo
+    node = document.createElement("div")
+    node.classList.add("row", "justify-content-center")
+    title = document.createElement("h3")
+    title.innerHTML = "Album: " + album.name
+    node.append(title)
+    // divisione in due sezioni della pagina, a sinistra la foto dell'album e a destra le informazioni
+    left = document.createElement("div")
+    left.classList.add("col-4", "col-sm-12", "col-md-4",)
+    img = document.createElement("img")
+    img.style="width:100%"
+    img.src = album.images[1].url
+    left.append(img)
+    right = document.createElement("ul")
+    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
 
-        li = document.createElement("li")
-        li.classList.add("list-group-item", "list-group-item-dark")
-        li_clone = li.cloneNode(true)
-        li_clone.innerHTML = "Autori: "  
-        a = document.createElement("a")
-        a.innerHTML = album.artists[0].name
-        a.addEventListener("click", function move(){window.location.href="/src/artist.html?"+album.artists[0].id})
-        a.classList.add("link")
-        li_clone.append(a)
-        right.append(li_clone)
+    li = document.createElement("li")
+    li.classList.add("list-group-item", "list-group-item-dark")
+    li_clone = li.cloneNode(true)
+    li_clone.innerHTML = "Autori: "  
+    a = document.createElement("a")
+    a.innerHTML = album.artists[0].name
+    a.addEventListener("click", function move(){window.location.href="/src/artist.html?"+album.artists[0].id})
+    a.classList.add("link")
+    li_clone.append(a)
+    right.append(li_clone)
 
-        li_clone = li.cloneNode(true)
-        if(album.genres.length==0){
-            li_clone.innerHTML="Generi: Nessuno"
-        }else{
-            li_clone.innerHTML="Generi: " + album.genres[0]
-            for (let i=1; i<album.genres.length; i++){
-                li_clone.innerHTML += ", " + album.genres[i] 
-            }
+    li_clone = li.cloneNode(true)
+    if(album.genres.length==0){
+        li_clone.innerHTML="Generi: Nessuno"
+    }else{
+        li_clone.innerHTML="Generi: " + album.genres[0]
+        for (let i=1; i<album.genres.length; i++){
+            li_clone.innerHTML += ", " + album.genres[i] 
         }
-        right.append(li_clone)
+    }
+    right.append(li_clone)
 
-        li_clone = li.cloneNode(true)
-        li_clone.innerHTML = "Numero di traccie: " + album.total_tracks
-        right.append(li_clone)
+    li_clone = li.cloneNode(true)
+    li_clone.innerHTML = "Numero di traccie: " + album.total_tracks
+    right.append(li_clone)
 
-        li_clone = li.cloneNode(true)
-        date = new Date(album.release_date)
-        li_clone.innerHTML = "Data di uscita: " + date.toLocaleDateString('it-IT')
-        right.append(li_clone)
+    li_clone = li.cloneNode(true)
+    date = new Date(album.release_date)
+    li_clone.innerHTML = "Data di uscita: " + date.toLocaleDateString('it-IT')
+    right.append(li_clone)
 
-        node.append(left)
-        node.append(right)
-        document.getElementById(idNode).append(node)
+    node.append(left)
+    node.append(right)
+    document.getElementById(idNode).append(node)
 
-        printAlbumTrack(album.tracks.items)
-    }).catch((e) => console.log(e))
+    printAlbumTrack(album.tracks.items)
 }
 
 /**
@@ -576,8 +629,9 @@ function printAlbumTrack(tracks){
 }
 
 /**
- * 
- * @returns 
+ * Funzione che stampa le playlist dell'utente
+ * @param {0} idNode id dove accodare le playlist 
+ * @param {*} idTemplate id dove reperire il template da utilizzare
  */
 async function printMyPlaylists(idNode, idTemplate){
     if (!logged()){return}
