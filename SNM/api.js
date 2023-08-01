@@ -37,7 +37,6 @@ app.get('/users/:id', auth, async function (req, res) {
     var user = await pwmClient.db("SNM")
         .collection('Users')
         .find({ "_id": new ObjectId(id) })
-        .project({ "password": 0 })
         .toArray();
     res.json(user)
 })
@@ -80,39 +79,29 @@ function deleteUser(res, id) {
     res.json(users)
 }
 async function updateUser(res, id, updatedUser) {
-    if (updatedUser.name == undefined) {
+    if (updatedUser.nickname == undefined) {
         res.status(400).send("Missing Name")
-        return
-    }
-    if (updatedUser.surname == undefined) {
-        res.status(400).send("Missing Surname")
         return
     }
     if (updatedUser.email == undefined) {
         res.status(400).send("Missing Email")
         return
     }
-    if (updatedUser.password == undefined) {
-        res.status(400).send("Missing Password")
-        return
+    if (updatedUser.password != undefined) {
+        updatedUser.password = hash(updatedUser.password)
     }
-    updatedUser.password = hash(updatedUser.password)
     try {
-
         var pwmClient = await new mongoClient(uri).connect()
-
         var filter = { "_id": new ObjectId(id) }
-
         var updatedUserToInsert = {
             $set: updatedUser
         }
 
         var item = await pwmClient.db("SNM")
-            .collection('users')
+            .collection('Users')
             .updateOne(filter, updatedUserToInsert)
 
-        res.send(item)
-
+        res.json(item)
     } catch (e) {
         console.log('catch in test');
         if (e.code == 11000) {

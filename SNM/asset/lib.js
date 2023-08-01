@@ -74,6 +74,22 @@ async function postUser(user){
     })
 }
 
+async function putUser(id, user){
+    return fetch(MY_BASE_URL+"users/"+id+"?apikey=123456", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(user)
+    }).then(async res => {
+        if (res.ok) {
+            return res.json()
+        } else {
+            return {text: res.statusText, status: res.status}
+        }
+    })
+}
+
 /**
  * Funzione che effettua la chiamata all'API che aggiunge una nuova playlist
  * @param {*} playlist json contenente la playlist da aggiungere
@@ -382,6 +398,33 @@ async function searchArtist(artist){
  */
 function logged(){
     return localStorage.getItem("user") != null
+}
+
+async function loadAccount(){
+    user = await getUser(window.localStorage.getItem("user"))
+    user = user[0]
+    document.getElementById("email").value = user.email
+    document.getElementById("nickname").value = user.nickname
+}
+
+async function cambiaCredenziali(){
+    check = document.getElementById("changePassword")
+    if(check.checked){
+        newpass = document.getElementById("password").value
+        if(newpass==""){return}
+        updatedUser = {
+            email : document.getElementById("email").value,
+            nickname : document.getElementById("nickname").value,
+            password : newpass
+        }
+    }else{
+        updatedUser = {
+            email : document.getElementById("email").value,
+            nickname : document.getElementById("nickname").value
+        }
+    }
+    result = await putUser(window.localStorage.getItem("user"), updatedUser)
+    console.log(result)
 }
 
 /**
