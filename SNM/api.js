@@ -211,6 +211,17 @@ app.get('/playlists/:user', auth, async function (req, res) {
     res.json(playlists)
 })
 
+app.get('/playlists/info/:id', auth, async function (req, res) {
+    // Ricerca nel database
+    var id = req.params.id
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .find({ "_id": new ObjectId(id) })
+        .toArray();
+    res.json(playlists)
+})
+
 app.get('/playlists/search/:playlist', auth, async function (req, res) {
     // Ricerca nel database
     var playlist = req.params.playlist
@@ -220,4 +231,27 @@ app.get('/playlists/search/:playlist', auth, async function (req, res) {
         .find({ "name": playlist , "public":true})
         .toArray();
     res.json(playlists)
+})
+
+app.put('/playlists/:playlist', auth, async function (req, res) {
+    // Ricerca nel database
+    var playlist = req.params.playlist
+    var pwmClient = await new mongoClient(uri).connect()
+    var track = req.body
+    var myplaylist = pwmClient.db("SNM")
+    .collection('Playlists').find({$and:[{"_id" : new ObjectId(playlist)}, {"tracks": track}]})
+    
+    if(await myplaylist.next()){
+        res.statusMessage = "Canzone gia presente nella playlist"
+        res.sendStatus(400)
+    }else{
+        var newplaylist = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .updateOne(
+            {"_id" : new ObjectId(playlist)},
+            {"$push" : {"tracks":track}}
+        )
+        console.log(newplaylist)
+        res.json(newplaylist)
+    }
 })

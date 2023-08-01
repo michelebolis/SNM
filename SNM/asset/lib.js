@@ -110,6 +110,29 @@ async function searchPlaylist(playlist){
     .catch((e) => console.log(e))
 }
 
+async function putPlaylist(){
+    id = this.id
+    info = await getTrack(id)
+    track = {"id" : id, "info":info}
+    playlist = this.parentNode.childNodes[0].value
+    console.log((track))
+    result = await fetch(`${MY_BASE_URL}playlists/${playlist}?apikey=123456`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(track)
+    })
+    .then(async response => {
+        if(response.status!=200){
+            alert(response.statusText)
+        }else{
+            alert("Canzone aggiunta alla playlist")
+            return response.json()
+        }
+    })
+    .catch((e) => {console.log(e)})
+}
 /**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni su una track
  * @param {*} id id di Spotify della traccia
@@ -323,7 +346,10 @@ function printPlaylist(playlist, idNode, idTemplate){
         document.getElementById(newid).classList.add("visually-hidden")
     }
     document.getElementById(idNode+"Row0").classList.remove("visually-hidden")
-    document.getElementById("showMore_" + ((playlist.length/5)-1)).remove()
+    if (playlist.length%5==0){
+        document.getElementById("showMore_" + ((playlist.length/5)-1)).remove()
+    }
+
     //document.getElementById(idNode+'-template').remove()
 }
 
@@ -433,21 +459,39 @@ async function printTrackInfo(idTrack, idNode, idTemplate){
         right.append(div)
     }
     if (logged()){
-        div = document.createElement("li")
-        div.classList.add("list-group-item", "list-group-item-dark")
+        li = document.createElement("li")
+        li.classList.add("list-group-item", "list-group-item-dark")
+        
+        div = document.createElement("div")
         div.innerHTML = "Aggiungi alla playlist: "
-        button = document.createElement("button")
-        button.innerHTML="Aggiungi"
-        button.classList.add("btn", "btn-primary", "btn-light")
-        div.append(button)
+        li.append(div)
+        div = document.createElement("div")
         select = document.createElement("select")
+        select.id = "myplaylist"
         select.classList.add("form-select")
         select.style = "width:50%"
         option = document.createElement("option")
         option.innerHTML = "Seleziona una tua playlist"
         select.append(option)
+        myplaylist = await getMyPlaylist(window.localStorage.getItem("user"))
+        console.log(myplaylist)
+        for (let i=0;i<myplaylist.length;i++){
+            option = document.createElement("option")
+            option.innerHTML = myplaylist[i].name
+            option.value = myplaylist[i]._id
+            option.classList.add("playlistToAdd")
+            select.append(option)
+        }
+        
         div.append(select)
-        right.append(div)
+        li.append(div)
+        button = document.createElement("button")
+        button.innerHTML="Aggiungi"
+        button.id = window.location.href.split("?")[1]
+        button.addEventListener("click", putPlaylist)
+        button.classList.add("btn", "btn-primary", "btn-light")
+        div.append(button)
+        right.append(li)
     }
 
     node.append(left)
@@ -735,7 +779,7 @@ async function printAlbumInfo(idAlbum, idNode){
  * Funzione che stampa le track di un album accodandole al nodo con id 'albumTrack'
  * @param {Array} tracks array contenente le track dell'album
  */
-function printAlbumTrack(tracks){
+async function printAlbumTrack(tracks){
     console.log(tracks)
     tracklist = document.createElement("ul")
     tracklist.classList.add("container", "list-group", "list-group-flush")
@@ -748,6 +792,8 @@ function printAlbumTrack(tracks){
     col.classList.add("col")
     row.append(col, col.cloneNode(true))
     template.append(row, row.cloneNode(true))
+
+    if(logged()){myplaylist = await getMyPlaylist(window.localStorage.getItem("user"))}
 
     for(let i=0;i<tracks.length;i++){
         clone = template.cloneNode(true)
@@ -773,10 +819,24 @@ function printAlbumTrack(tracks){
             clone.childNodes[1].childNodes[0].innerHTML = "Aggiungi in una tua playlist"
             select = document.createElement("select")
             select.classList.add("form-select")
-                option = document.createElement("option")
-                option.innerHTML = "Seleziona una tua playlist"
+            select.id="myplaylist"
+            option = document.createElement("option")
+            option.innerHTML = "Seleziona una tua playlist"
             select.append(option)
+                for (let i=0;i<myplaylist.length;i++){
+                    option = document.createElement("option")
+                    option.innerHTML = myplaylist[i].name
+                    option.value = myplaylist[i]._id
+                    option.classList.add("playlistToAdd")
+                    select.append(option)
+                }
             clone.childNodes[1].childNodes[1].append(select)
+            button = document.createElement("button")
+            button.id=tracks[i].id
+            button.innerHTML="Aggiungi"
+            button.addEventListener("click", putPlaylist)
+            button.classList.add("btn", "btn-primary", "btn-light")
+            clone.childNodes[1].childNodes[1].append(button)
         }
         tracklist.append(clone)
     }
