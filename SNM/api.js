@@ -35,7 +35,7 @@ app.get('/users/:id', auth, async function (req, res) {
     var id = req.params.id
     var pwmClient = await new mongoClient(uri).connect()
     var user = await pwmClient.db("SNM")
-        .collection('users')
+        .collection('Users')
         .find({ "_id": new ObjectId(id) })
         .project({ "password": 0 })
         .toArray();

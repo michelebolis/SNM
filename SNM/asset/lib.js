@@ -42,6 +42,17 @@ async function userLogin(user){
     })
 }
 
+async function getUser(id){
+    return fetch(MY_BASE_URL+"users/"+id+"?apikey=123456", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
 /**
  * Funzione che effettua la chiamata all'API per aggiungere un nuovo utente
  * @param {*} user json contenente email, nickname e password
@@ -90,6 +101,17 @@ async function postPlaylist(playlist) {
  */
 async function getMyPlaylist(id){
     return fetch(MY_BASE_URL+"playlists/"+id+"?apikey=123456", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+async function getPlaylist(id){
+    return fetch(MY_BASE_URL+"playlists/info/"+id+"?apikey=123456", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -904,6 +926,139 @@ function printPlaylistCard(playlists, idNode, idTemplate){
     }
 }
 
+async function printPlaylistInfo(id, idNode, template){
+    playlist = await getPlaylist(id)
+    playlist = playlist[0]
+    console.log(playlist)
+
+    // titolo
+    node = document.createElement("div")
+    node.classList.add("row", "justify-content-center")
+    title = document.createElement("h3")
+    title.innerHTML = "Playlist: " + playlist.name
+    node.append(title)
+    // divisione in due sezioni della pagina, a sinistra la foto della playlist e a destra le informazioni
+    left = document.createElement("div")
+    left.classList.add("col-4", "col-sm-12", "col-md-4",)
+    img = document.createElement("img")
+    img.style="width:100%"
+    if(playlist.tracks && playlist.tracks.length!=0){
+        img.src = playlist.tracks[0].info.album.images[1].url
+    }else{
+        img.src = "../img/music.jpg"
+    }
+
+    left.append(img)
+    right = document.createElement("ul")
+    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+
+    li = document.createElement("li")
+    li.classList.add("list-group-item", "list-group-item-dark")
+
+    li_clone = li.cloneNode(true)
+    if(playlist.owner = window.localStorage.getItem("user")){
+        autore="Tu"
+    }else{
+        autore = await getUser(playlist.owner)
+        autore = autore.nickname
+    }
+    li_clone.innerHTML = "Autore: "  + autore
+    right.append(li_clone)
+
+    li_clone = li.cloneNode(true)
+    li_clone.innerHTML = "Descrizione: " + (!playlist.description || playlist.description=="" ? "nessuna" : playlist.description)
+    right.append(li_clone)
+
+    li_clone = li.cloneNode(true)
+    li_clone.innerHTML = "Pubblica: " + (playlist.public ? "si" : "no")
+    right.append(li_clone)
+
+    
+    node.append(left)
+    node.append(right)
+    document.getElementById(idNode).append(node)
+
+    printPlaylistTracks(playlist.tracks, "trackPlaylist", template)
+}
+
+async function printPlaylistTracks(tracks, idNode, template){
+    node = document.getElementById(idNode)
+    node.innerHTML = ""
+    title = document.createElement("h4")
+    if(tracks.length==0){
+        title.innerHTML = "Nessuna canzone nella playlist"
+        node.append(title)
+    }else{
+        
+        tracklist = document.createElement("ul")
+    tracklist.classList.add("container", "list-group", "list-group-flush")
+    // creo il template degli elementi della lista
+    template = document.createElement("li")
+    template.classList.add("list-group-item", "list-group-item-dark")
+    row = document.createElement("div")
+    row.classList.add("row")
+    col = document.createElement("div")
+    col.classList.add("col")
+    row.append(col, col.cloneNode(true))
+    template.append(row, row.cloneNode(true))
+
+    if(logged()){myplaylist = await getMyPlaylist(window.localStorage.getItem("user"))}
+
+    for(let i=0;i<tracks.length;i++){
+        clone = template.cloneNode(true)
+        clone.childNodes[0].childNodes[0].innerHTML = "#" + (i+1) + " "
+            a = document.createElement("a")
+            a.innerHTML = tracks[i].info.name
+            a.addEventListener("click", function move(){window.location.href = "/src/track.html?" + tracks[i].info.id})
+            a.classList.add("link")
+            clone.childNodes[0].childNodes[0].append(a)
+        if(tracks[i].info.preview_url!=null){
+            // la preview per alcuna track non è disponibile
+            audio = document.createElement("audio")
+            audio.style = "width:100%"
+            audio.controls="controls"
+            source = document.createElement("source")
+            source.src = tracks[i].info.preview_url
+            source.type = "audio/mpeg"
+            audio.append(source)
+            clone.childNodes[0].childNodes[1].append(audio)
+        }
+        if(logged()){
+            // la possibilità di aggiungere la track ad una playlist è possibile solo SE si è loggati
+            clone.childNodes[1].childNodes[0].innerHTML = "Aggiungi in una tua playlist"
+            select = document.createElement("select")
+            select.classList.add("form-select")
+            select.id="myplaylist"
+            option = document.createElement("option")
+            option.innerHTML = "Seleziona una tua playlist"
+            select.append(option)
+                for (let i=0;i<myplaylist.length;i++){
+                    if(myplaylist[i]._id!=window.location.href.split("?")[1]){
+                        option = document.createElement("option")
+                        option.innerHTML = myplaylist[i].name
+                        option.value = myplaylist[i]._id
+                        option.classList.add("playlistToAdd")
+                        select.append(option)
+                    }
+                }
+            clone.childNodes[1].childNodes[1].append(select)
+            button = document.createElement("button")
+            button.id=tracks[i].info.id
+            button.innerHTML="Aggiungi"
+            button.addEventListener("click", putPlaylist)
+            button.classList.add("btn", "btn-primary", "btn-light")
+            clone.childNodes[1].childNodes[1].append(button)
+        }
+        tracklist.append(clone)
+    }
+
+    title = document.createElement("h4")
+    title.innerHTML = "Tracklist della playlist"
+    document.getElementById(idNode).append(tracklist)
+    document.getElementById(idNode).prepend(title)
+    }
+}
+
 /**
  * 
  * @returns 
@@ -917,65 +1072,68 @@ function printFollowedPlaylists(){
  * Funzione che stampa la navbar nel nodo il cui id è passato come argomento
  * @param {*} id id del nodo in cui stampare la navbar 
  */
-function printNavBar(id){
+async function printNavBar(id){
     navdiv = document.createElement("div")
-    title = document.createElement("h3")
-    title.innerHTML = "Menu"
-    navdiv.appendChild(title)
+    titlenav = document.createElement("h3")
+    titlenav.innerHTML = "Menu"
+    navdiv.appendChild(titlenav)
     if (!logged()){
-        a = document.createElement("a")
-        a.classList.add("nav","nav-link")
-        a.innerHTML="Home"
-        a.href="/"
-        navdiv.appendChild(a)
+        anav = document.createElement("a")
+        anav.classList.add("nav","nav-link")
+        anav.innerHTML="Home"
+        anav.href="/"
+        navdiv.appendChild(anav)
 
-        node = document.createElement("h5")
-        node.innerHTML = "Per accedere alle funzionalità complete, effettua il login o registrati"
-        navdiv.append(node)
+        sub = document.createElement("h5")
+        sub.innerHTML = "Per accedere alle funzionalità complete, effettua il login o registrati"
+        navdiv.append(sub)
 
-        node = document.createElement("a")
-        node.innerHTML = "Accedi o registrati"
-        node.href = "/src/login.html"
-        navdiv.append(node)
+        anav = document.createElement("a")
+        anav.innerHTML = "Accedi o registrati"
+        anav.href = "/src/login.html"
+        navdiv.append(anav)
     }else{
-        title = document.createElement("h4")
-        title.innerHTML = "Benvenuto " 
+        titlenav = document.createElement("h4")
+        nickname = (window.localStorage.getItem("nickname"))
+        if(nickname){
+            titlenav.innerHTML = "Benvenuto " + nickname
+        }
         
-        navdiv.append(title)
-        node = document.createElement("nav")
-        node.classList.add("nav", "flex-column")
-        a = document.createElement("a")
-        a.classList.add("nav-link")
-        a.innerHTML="Home"
-        a.href="/"
-        node.appendChild(a)
+        navdiv.append(titlenav)
+        nav = document.createElement("nav")
+        nav.classList.add("nav", "flex-column")
+        anav = document.createElement("a")
+        anav.classList.add("nav-link")
+        anav.innerHTML="Home"
+        anav.href="/"
+        nav.appendChild(anav)
 
-        a = document.createElement("a")
-        a.classList.add("nav-link")
-        a.innerHTML="Crea una playlist"
-        a.href="/src/newplaylist.html"
-        node.appendChild(a)
+        anav = document.createElement("a")
+        anav.classList.add("nav-link")
+        anav.innerHTML="Crea una playlist"
+        anav.href="/src/newplaylist.html"
+        nav.appendChild(anav)
 
-        a = document.createElement("a")
-        a.classList.add("nav-link")
-        a.innerHTML="Gestisci le tue playlist"
-        a.href="/src/playlist.html"
-        node.appendChild(a)
+        anav = document.createElement("a")
+        anav.classList.add("nav-link")
+        anav.innerHTML="Gestisci le tue playlist"
+        anav.href="/src/playlist.html"
+        nav.appendChild(anav)
 
-        a = document.createElement("a")
-        a.classList.add("nav-link")
-        a.innerHTML="Gestisci il tuo account"
-        a.href="/src/account.html"
-        node.appendChild(a)
+        anav = document.createElement("a")
+        anav.classList.add("nav-link")
+        anav.innerHTML="Gestisci il tuo account"
+        anav.href="/src/account.html"
+        nav.appendChild(anav)
 
-        a = document.createElement("a")
-        a.classList.add("nav-link")
-        a.innerHTML="Logout"
-        a.addEventListener("click", logout)
-        a.href=window.location.href
-        node.appendChild(a)
+        anav = document.createElement("a")
+        anav.classList.add("nav-link")
+        anav.innerHTML="Logout"
+        anav.addEventListener("click", logout)
+        anav.href=window.location.href
+        nav.appendChild(anav)
 
-        navdiv.append(node)
+        navdiv.append(nav)
     }
     document.getElementById(id).append(navdiv)
 }
@@ -1029,6 +1187,7 @@ async function login(){
     console.log(response)
     if (!response.status) {
         localStorage.setItem("user", response.loggedUser._id)
+        localStorage.setItem("nickname", response.loggedUser.nickname)
         window.location.href = document.referrer
     } else {
         alert(response.text)
@@ -1041,6 +1200,7 @@ async function login(){
  */
 function logout(){
     localStorage.removeItem("user")
+    localStorage.removeItem("nickname")
 }
 
 /**
