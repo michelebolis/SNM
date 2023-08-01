@@ -6,13 +6,22 @@
     <title>SNM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="style/style.css">
-    <script src="lib.js"></script>
 </head>
 <body>
     <div class="container external-container">
       <div class="row">
         <div class="col-12 col-lg-3 col-sm-12 col-xs-12 text-center" id="left_menu">
-          <script>printNavBar("left_menu")</script> 
+          <script type="module">
+            import {printNavBar, printMyPlaylists, printFollowedPlaylists, printTopCharts, search, printCardPlaceholder} from "./lib.js";
+            printNavBar("left_menu")
+            for(let i=0;i<5;i++){
+              printCardPlaceholder("top")
+            }
+            printMyPlaylists("myPlaylists", "playlist-template")
+            printFollowedPlaylists()
+            printTopCharts()
+            document.getElementById("searchbutton").addEventListener("click", search)
+          </script> 
         </div>
 
         <div class="col" id="home">
@@ -40,7 +49,7 @@
                       <label class="form-check-label" for="playlist">Playlist</label>
                     </div>
                   </div>
-                  <button class="btn btn-light" value="Ricerca" onclick="search()">Ricerca</button>
+                  <button class="btn btn-light" value="Ricerca" id="searchbutton">Ricerca</button>
                 </div>
               </div>
             </div>
@@ -49,25 +58,16 @@
             <div>
               <h4>Playlist</h4>
               <div id="myPlaylists" class="container">
-                <script>printMyPlaylists("myPlaylists", "playlist-template")</script>
+                <script></script>
               </div>
               <div class="container" id="followedPlaylists">
                 <h4>Le playlist che segui</h4>
-                <script>printFollowedPlaylists()</script>
               </div>
-              
             </div>
 
             <h4>TOP 50 Italia</h4>
             <div class="container" id="top50">  
               <div class="row justify-content-center" id="top">
-                <!--Placeholders cards while loading -->
-                <script>
-                  for(let i=0;i<5;i++){
-                    printCardPlaceholder("top")
-                  }
-                </script>
-                <script>printTopCharts()</script>
               </div>
             </div>
           </div>  

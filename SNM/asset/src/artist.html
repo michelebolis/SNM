@@ -12,26 +12,27 @@
     <div class="container external-container">
         <div class="row">
             <div class="col-12 col-lg-3 col-sm-12 col-xs-12 text-center" id="left_menu">
-              <script>printNavBar("left_menu")</script> 
+              <script type="module">
+                import {printArtistInfo, printTopTrackArtist, printAlbumArtist, printNavBar, printCardPlaceholder} from  "../lib.js";
+                printNavBar("left_menu")
+                for(let i=0;i<5;i++){
+                  printCardPlaceholder("top")
+                }
+                var id = window.location.href.split("?")[1]
+                printArtistInfo(id, "infoArtist")
+                printTopTrackArtist(id, "topTrackArtist-template")
+                printAlbumArtist(id)
+              </script> 
             </div>
 
             <div class="col" id="home">
                 <div class="" id="infoArtist">
                     <script>
-                        id = window.location.href.split("?")[1]
-                        printArtistInfo(id, "infoArtist")
-                        printTopTrackArtist(id, "topTrackArtist-template")
-                        printAlbumArtist(id)
+
                     </script>
                 </div>
                 <div id="topTrackArtist">
                     <div class="row justify-content-center" id="top">
-                        <!--Placeholders cards while loading -->
-                        <script>
-                          for(let i=0;i<5;i++){
-                            printCardPlaceholder("top")
-                          }
-                        </script>
                       </div>
                     <div id="topTrackArtist-template" class="visually-hidden card col-lg-3 col-xl-2 col-md-3 col-sm-6">
                         <img class="card-img"/>
