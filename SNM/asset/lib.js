@@ -79,7 +79,7 @@ async function postUser(user){
  * @param {*} playlist json contenente la playlist da aggiungere
  */
 async function postPlaylist(playlist) {
-    fetch(MY_BASE_URL+"playlist?apikey=123456", {
+    return fetch(MY_BASE_URL+"playlist?apikey=123456", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -87,7 +87,7 @@ async function postPlaylist(playlist) {
         body: JSON.stringify(playlist)
     }).then(async response => {
         if (response.ok) {
-            console.log("SIIII")
+            return response.json()
         } else {
             response.text().then( text => alert(text) )
         }
@@ -137,6 +137,7 @@ async function putPlaylist(){
     info = await getTrack(id)
     track = {"id" : id, "info":info}
     playlist = this.parentNode.childNodes[0].value
+    if(playlist=="Seleziona una tua playlist"){alert("Seleziona una tua playlist");return}
     console.log((track))
     result = await fetch(`${MY_BASE_URL}playlists/${playlist}?apikey=123456`, {
         method: "PUT",
@@ -150,6 +151,13 @@ async function putPlaylist(){
             alert(response.statusText)
         }else{
             alert("Canzone aggiunta alla playlist")
+            select = this.parentNode.childNodes[0]
+            for(let i=0;i<select.childNodes.length;i++){
+                if(select.childNodes[i].value==playlist){
+                    select.childNodes[i].remove()
+                    break
+                }
+            }
             return response.json()
         }
     })
@@ -853,10 +861,12 @@ async function printAlbumTrack(tracks){
                     select.append(option)
                 }
             clone.childNodes[1].childNodes[1].append(select)
+            clone.childNodes[1].childNodes[1].classList.add("text-center")
             button = document.createElement("button")
             button.id=tracks[i].id
             button.innerHTML="Aggiungi"
             button.addEventListener("click", putPlaylist)
+            button.style = "width:80%;margin: 5px 0;"
             button.classList.add("btn", "btn-primary", "btn-light")
             clone.childNodes[1].childNodes[1].append(button)
         }
@@ -970,6 +980,19 @@ async function printPlaylistInfo(id, idNode, template){
     right.append(li_clone)
 
     li_clone = li.cloneNode(true)
+    li_clone.innerHTML = "Tag:"
+    if(playlist.tags.length==0){
+        li_clone.innerHTML+=" Nessuno"
+    }else{
+        for(let i=0;i<playlist.tags.length;i++){
+            a = document.createElement("a")
+            a.innerHTML = " #" + playlist.tags[i]
+            li_clone.append(a)
+        }
+    }
+    right.append(li_clone)
+
+    li_clone = li.cloneNode(true)
     li_clone.innerHTML = "Pubblica: " + (playlist.public ? "si" : "no")
     right.append(li_clone)
 
@@ -1026,25 +1049,27 @@ async function printPlaylistTracks(tracks, idNode, template){
         if(logged()){
             // la possibilità di aggiungere la track ad una playlist è possibile solo SE si è loggati
             clone.childNodes[1].childNodes[0].innerHTML = "Aggiungi in una tua playlist"
+            clone.childNodes[1].childNodes[1].classList.add("text-center")
             select = document.createElement("select")
             select.classList.add("form-select")
             select.id="myplaylist"
             option = document.createElement("option")
             option.innerHTML = "Seleziona una tua playlist"
             select.append(option)
-                for (let i=0;i<myplaylist.length;i++){
-                    if(myplaylist[i]._id!=window.location.href.split("?")[1]){
-                        option = document.createElement("option")
-                        option.innerHTML = myplaylist[i].name
-                        option.value = myplaylist[i]._id
-                        option.classList.add("playlistToAdd")
-                        select.append(option)
-                    }
+            for (let i=0;i<myplaylist.length;i++){
+                if(myplaylist[i]._id!=window.location.href.split("?")[1]){
+                    option = document.createElement("option")
+                    option.innerHTML = myplaylist[i].name
+                    option.value = myplaylist[i]._id
+                    option.classList.add("playlistToAdd")
+                    select.append(option)
                 }
+            }
             clone.childNodes[1].childNodes[1].append(select)
             button = document.createElement("button")
             button.id=tracks[i].info.id
             button.innerHTML="Aggiungi"
+            button.style = "width:80%;margin:5px 0;"
             button.addEventListener("click", putPlaylist)
             button.classList.add("btn", "btn-primary", "btn-light")
             clone.childNodes[1].childNodes[1].append(button)
@@ -1066,6 +1091,10 @@ async function printPlaylistTracks(tracks, idNode, template){
 function printFollowedPlaylists(){
     if (!logged()){return}
     document.write("QUI CI SONO LE PLAYLIST CHE SEGUO")
+}
+
+function printPublicPlaylists(){
+    
 }
 
 /**
@@ -1213,6 +1242,7 @@ async function addPlaylist(){
     description = document.getElementById("descrizione").value
     tracks = []
     tags = []
+    followers = []
     tagsNode = document.getElementsByClassName("tagSpan")
     if(tags){
         find=false
@@ -1227,9 +1257,12 @@ async function addPlaylist(){
         tracks: tracks,
         public: public,
         description: description,
-        tags: tags
+        tags: tags,
+        followers: followers
     }
-    await postPlaylist(playlist)
+    res = await postPlaylist(playlist)
+    console.log(res)
+    window.location.href = "/src/infoplaylist.html?"+res.insertedId
 }
 
 /**

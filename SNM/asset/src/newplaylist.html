@@ -19,13 +19,13 @@
             <div class="col" id="home">
                 <div id="newPlaylist">
                     <h4>Crea una nuova playlist</h4>
-                    <div>
+                    <div style="margin:20px 0">
                         <div class="mb-3 form-check">
-                            <label for="nome" class="form-label">Nome della playlist</label>
+                            <li for="nome" class="form-label">Nome della playlist</li>
                             <input type="text" class="form-control" id="nome" autocomplete="off">
                         </div>
                         <div class="mb-3 form-check">
-                            <label for="descrizione" class="form-label">Descrizione</label>
+                            <li for="descrizione" class="form-label">Descrizione</li>
                             <textarea class="form-control" id="descrizione" rows="3"></textarea>
                         </div>
                         <div class="mb-3 form-check">
@@ -37,16 +37,15 @@
                                     <button class="btn btn-primary mb-3" style="width: 100%;" onclick=addTag()>Aggiungi tag</button>
                                 </div>
                             </div>
-                            <label for="tagList" class="form-label">Lista tag</label>
+                            <li for="tagList" class="form-label">Lista tag</li>
                             <div class="container">
                                 <div class="row" id="tagList" >
                                     <div class="col" id="nessuno">Nessuno</div>
                                 </div>
                             </div>
-                            
                         </div>
                         <div id="visibility" class="form-check">
-                            <label for="visibility" class="form-label">Rendi questa playlist</label>
+                            <li for="visibility" class="form-label">Rendi questa playlist</li>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="visibility" id="public" checked>
                                 <label class="form-check-label" for="public">
@@ -60,7 +59,7 @@
                                 </label>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary " onclick="addPlaylist()">Salva la playlist</button>
+                        <button type="submit" class="btn btn-primary" onclick="addPlaylist()" style="width: 100%;margin-top: 20px;">Salva la playlist</button>
                     </div>
                 </div>
             </div>
