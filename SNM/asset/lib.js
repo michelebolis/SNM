@@ -41,7 +41,11 @@ async function userLogin(user){
         }
     })
 }
-
+/**
+ * Funzione che effettua la chiamata all'API per ottenere le informazioni di un utente
+ * @param {String} id id dell'utente di cui si richiedono le informazioni
+ * @returns json contenente le informazioni
+ */
 async function getUser(id){
     return fetch(MY_BASE_URL+"users/"+id+"?apikey=123456", {
         method: "GET",
@@ -74,6 +78,12 @@ async function postUser(user){
     })
 }
 
+/**
+ * Funzione che effettua la chiamata all'API per modificare le informazioni di un utente
+ * @param {String} id id dell'utente da modificare
+ * @param {*} user informazioni da modificare
+ * @returns 
+ */
 async function putUser(id, user){
     return fetch(MY_BASE_URL+"users/"+id+"?apikey=123456", {
         method: "PUT",
@@ -110,6 +120,10 @@ async function postPlaylist(playlist) {
     })
 }
 
+/**
+ * Funzione che effettua la chiamata all'API per cancellare una playlist
+ * @param {*} id id della playlist da cancellare
+ */
 async function deletePlaylist(id) {
     return fetch(MY_BASE_URL+"playlist/"+id+"?apikey=123456", {
         method: "DELETE",
@@ -141,6 +155,10 @@ async function getMyPlaylist(id){
     .catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che effettua la chiamata all'API che restituisce le informazioni di una playlist
+ * @param {*} id id della playlist di cui si richiedono le informazioni
+ */
 async function getPlaylist(id){
     return fetch(MY_BASE_URL+"playlists/info/"+id+"?apikey=123456", {
         method: "GET",
@@ -152,6 +170,10 @@ async function getPlaylist(id){
     .catch((e) => console.log(e))
 }
 
+/**
+ * TO DO : NON VA
+ * @returns 
+ */
 async function getPublicPlaylist(){
     console.log("inizio")
     return fetch(MY_BASE_URL+"playlists/public?apikey=123456", {
@@ -164,8 +186,12 @@ async function getPublicPlaylist(){
     .catch((e) => console.log(e))
 }
 
-async function addFollow(id){
-    newfollower = {"id" : window.localStorage.getItem("user")}
+/**
+ * Funzione che effettua la chiamata all'API per aggiungere un nuovo follower alla playlist
+ * @param {String} id id della playlist a cui si vuole aggiungere un nuovo follower
+ * @param {*} newfollower json contenente id:iduser
+ */
+async function addFollow(id, newfollower){
     return fetch(MY_BASE_URL+"playlist/add/follow/"+id+"?apikey=123456", {
         method: "PUT",
         headers: {
@@ -177,19 +203,29 @@ async function addFollow(id){
     .catch((e) => console.log(e))
 }
 
-async function removeFollow(id){
-    newfollower = {"id" : window.localStorage.getItem("user")}
+/**
+ * Funzione che effettua la chiamata all'API per rimuovere un follower dalla playlist
+ * @param {String} id id della playlist a cui si vuole rimuovere il follower
+ * @param {*} oldfollower json contenente id:iduser
+ * @returns 
+ */
+async function removeFollow(id, oldfollower){
     return fetch(MY_BASE_URL+"playlist/remove/follow/"+id+"?apikey=123456", {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(newfollower)
+        body: JSON.stringify(oldfollower)
     })
     .then(async response => {return response.json()})
     .catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che effettua la chiamata all'API per ricercare una playlist pubblica dato il suo nome
+ * @param {*} playlist nome della playlist
+ * @returns Array di playlist SE ce ne sono con quel name
+ */
 async function searchPlaylist(playlist){
     return fetch(MY_BASE_URL+"playlists/search/"+playlist+"?apikey=123456", {
         method: "GET",
@@ -201,6 +237,11 @@ async function searchPlaylist(playlist){
     .catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che effettua la chiamata all'API per aggiungere una track, 
+ * congiuntamente alla sue informazioni, alla playlist
+ * @returns 
+ */
 async function putPlaylist(){
     id = this.id
     info = await getTrack(id)
@@ -208,6 +249,7 @@ async function putPlaylist(){
     playlist = this.parentNode.childNodes[0].value
     if(playlist=="Seleziona una tua playlist"){alert("Seleziona una tua playlist");return}
     console.log((track))
+
     result = await fetch(`${MY_BASE_URL}playlists/${playlist}?apikey=123456`, {
         method: "PUT",
         headers: {
@@ -234,7 +276,7 @@ async function putPlaylist(){
 }
 /**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni su una track
- * @param {*} id id di Spotify della traccia
+ * @param {String} id id di Spotify della traccia
  * @returns json contenente le informazioni sulla track oppure un errore
  */
 async function getTrack(id) {
@@ -250,7 +292,7 @@ async function getTrack(id) {
 
 /**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni su un album
- * @param {*} id id di Spotify dell'album
+ * @param {String} id id di Spotify dell'album
  * @returns json contenente le informazioni sull'album
  */
 async function getAlbum(id) {
@@ -266,7 +308,7 @@ async function getAlbum(id) {
 
 /**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni sugli album dell'artista
- * @param {*} id id di Spotify dell'artista
+ * @param {String} id id di Spotify dell'artista
  * @returns array di json contenente le informazioni sugli album
  */
 async function getAlbumByArtist(id) {
@@ -282,7 +324,7 @@ async function getAlbumByArtist(id) {
 
 /**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni dell'artista
- * @param {*} id id di Spotify dell'artista 
+ * @param {String} id id di Spotify dell'artista 
  * @returns json contenente le informazioni dell'artista
  */
 async function getArtist(id) {
@@ -314,7 +356,7 @@ async function getTopCharts(){
 
 /**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni sulle top track di un artista (max 10)
- * @param {*} id id di Spotify dell'artista
+ * @param {String} id id di Spotify dell'artista
  * @returns array di json contente le informazioni sulle track
  */
 async function getTopTracks(id) {
@@ -718,6 +760,12 @@ async function printArtistInfo(idArtist, idNode){
     document.getElementById(idNode).append(node)
 }
 
+/**
+ * Funzione che stampa le informazioni degli artisti nel nodo specificato utilizzando il template
+ * @param {*} artists array di artisti
+ * @param {*} idNode id del nodo a cui si vogliono accodare gli artisti
+ * @param {*} idTemplate id del nodo da cui si clona il template da utilizzare
+ */
 function printArtists(artists, idNode, idTemplate){
     document.getElementById(idNode).innerHTML=""
     template = document.getElementById(idTemplate).cloneNode(true)
@@ -792,6 +840,12 @@ async function printAlbumArtist(idArtist){
     document.getElementById("album").prepend(h4)
 }
 
+/**
+ * Funzione che stampa nel nodo specificato gli album
+ * @param {*} albums array di album
+ * @param {String} idNode id del nodo a cui si vogliono accodare gli album
+ * @param {String} idTemplate id del nodo da cui si clona il template da utilizzare
+ */
 function printAlbum(albums, idNode, idTemplate){
     template = document.getElementById(idTemplate).cloneNode(true)
     document.getElementById(idNode).innerHTML=""
@@ -979,8 +1033,8 @@ async function printAlbumTrack(tracks){
 
 /**
  * Funzione che stampa le playlist dell'utente
- * @param {0} idNode id dove accodare le playlist 
- * @param {*} idTemplate id dove reperire il template da utilizzare
+ * @param {String} idNode id dove accodare le playlist 
+ * @param {String} idTemplate id dove reperire il template da utilizzare
  */
 async function printMyPlaylists(idNode, idTemplate){
     if (!logged()){return}
@@ -1005,10 +1059,10 @@ async function printMyPlaylists(idNode, idTemplate){
 }
 
 /**
- * Funzione che stampa le playlist 
+ * Funzione che stampa le playlist 5 playlist per riga
  * @param {*} playlists array contenente le playlist
- * @param {*} idNode id dove accodare le playlist 
- * @param {*} idTemplate id dove reperire il template da utilizzare
+ * @param {String} idNode id dove accodare le playlist 
+ * @param {String} idTemplate id dove reperire il template da utilizzare
  */
 function printPlaylistCard(playlists, idNode, idTemplate){
     node = document.getElementById(idNode)
@@ -1043,7 +1097,7 @@ function printPlaylistCard(playlists, idNode, idTemplate){
                     del.classList.add("card-action", "link")
                     del.innerHTML = "\u274C"
                     del.addEventListener("click", async function (){
-                        await removeFollow(playlists[i]._id);
+                        await removeFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
                         this.innerHTML = "Follow rimosso"
                     })
                     div.getElementsByClassName("nome_playlist")[0].append(del)
@@ -1056,7 +1110,7 @@ function printPlaylistCard(playlists, idNode, idTemplate){
                 del.classList.add("card-action", "link")
                 del.innerHTML = "➕"
                 del.addEventListener("click", async function (){
-                    await addFollow(playlists[i]._id);
+                    await addFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
                     this.innerHTML = "Follow aggiunto"
                 })
                 div.getElementsByClassName("nome_playlist")[0].append(del)
@@ -1066,6 +1120,12 @@ function printPlaylistCard(playlists, idNode, idTemplate){
     }
 }
 
+/**
+ * Funzione che stampa le informazioni di una playlist e le sue track
+ * @param {String} id 
+ * @param {String} idNode 
+ * @param {*} template 
+ */
 async function printPlaylistInfo(id, idNode, template){
     playlist = await getPlaylist(id)
     if(playlist[0]==undefined){window.location.href = "/src/playlist.html";return;}
@@ -1132,10 +1192,15 @@ async function printPlaylistInfo(id, idNode, template){
     node.append(right)
     document.getElementById(idNode).append(node)
 
-    printPlaylistTracks(playlist.tracks, "trackPlaylist", template)
+    printPlaylistTracks(playlist.tracks, "trackPlaylist")
 }
 
-async function printPlaylistTracks(tracks, idNode, template){
+/**
+ * Funzione che stampa le tracks nel nodo specificato
+ * @param {*} tracks array di canzoni da stampare
+ * @param {String} idNode id del nodo a cui accodare le canzoni della playlist
+ */
+async function printPlaylistTracks(tracks, idNode){
     node = document.getElementById(idNode)
     node.innerHTML = ""
     title = document.createElement("h4")
@@ -1216,7 +1281,7 @@ async function printPlaylistTracks(tracks, idNode, template){
 }
 
 /**
- * 
+ * TO DO
  * @returns 
  */
 function printFollowedPlaylists(){
@@ -1224,6 +1289,9 @@ function printFollowedPlaylists(){
     document.write("QUI CI SONO LE PLAYLIST CHE SEGUO")
 }
 
+/**
+ * TO DO NON VA
+ */
 async function printPublicPlaylists(){
     playlists = await getPublicPlaylist()
     console.log(playlists)
@@ -1235,7 +1303,7 @@ async function printPublicPlaylists(){
 
 /**
  * Funzione che stampa la navbar nel nodo il cui id è passato come argomento
- * @param {*} id id del nodo in cui stampare la navbar 
+ * @param {String} id id del nodo in cui stampare la navbar 
  */
 async function printNavBar(id){
     navdiv = document.createElement("div")
