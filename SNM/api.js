@@ -211,6 +211,36 @@ app.get('/playlists/:user', auth, async function (req, res) {
     res.json(playlists)
 })
 
+app.get('/playlists/public', auth, async function (req, res) {
+    // Ricerca nel database
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .find({"public":true})
+        .toArray();
+    res.json(playlists)
+})
+
+app.put('/playlist/add/follow/:id', auth, async function (req, res) {
+    // Ricerca nel database
+    var id = req.params.id
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .updateOne({"_id" : new ObjectId(id)}, {"$push" : {"followers":req.body}})
+    res.json(playlists)
+})
+
+app.put('/playlist/remove/follow/:id', auth, async function (req, res) {
+    // Ricerca nel database
+    var id = req.params.id
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .updateOne({"_id" : new ObjectId(id)}, {"$pull" : {"followers":req.body}})
+    res.json(playlists)
+})
+
 app.get('/playlists/info/:id', auth, async function (req, res) {
     // Ricerca nel database
     var id = req.params.id
@@ -254,4 +284,13 @@ app.put('/playlists/:playlist', auth, async function (req, res) {
         console.log(newplaylist)
         res.json(newplaylist)
     }
+})
+
+app.delete('/playlist/:id', auth, async function (req, res) {
+    // Ricerca nel database
+    var id = req.params.id
+    var pwmClient = await new mongoClient(uri).connect()
+    var myplaylist = pwmClient.db("SNM")
+    .collection('Playlists').deleteOne({"_id" : new ObjectId(id)})
+    return myplaylist
 })

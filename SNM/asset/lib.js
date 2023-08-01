@@ -94,6 +94,21 @@ async function postPlaylist(playlist) {
     })
 }
 
+async function deletePlaylist(id) {
+    return fetch(MY_BASE_URL+"playlist/"+id+"?apikey=123456", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(async response => {
+        if (response.ok) {
+            return response.json()
+        } else {
+            response.text().then( text => alert(text) )
+        }
+    })
+}
+
 /**
  * Funzione che effettua la chiamata all'API che restituisce le playlist di un utente
  * @param {*} id id dell'utente
@@ -116,6 +131,44 @@ async function getPlaylist(id){
         headers: {
             "Content-Type": "application/json"
         }
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+async function getPublicPlaylist(){
+    console.log("inizio")
+    return fetch(MY_BASE_URL+"playlists/public?apikey=123456", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+async function addFollow(id){
+    newfollower = {"id" : window.localStorage.getItem("user")}
+    return fetch(MY_BASE_URL+"playlist/add/follow/"+id+"?apikey=123456", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newfollower)
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+async function removeFollow(id){
+    newfollower = {"id" : window.localStorage.getItem("user")}
+    return fetch(MY_BASE_URL+"playlist/remove/follow/"+id+"?apikey=123456", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newfollower)
     })
     .then(async response => {return response.json()})
     .catch((e) => console.log(e))
@@ -393,9 +446,10 @@ function printPlaylist(playlist, idNode, idTemplate){
 function printTracksCard(playlist, template, id, startCount){
     for (let i=0; i<playlist.length; i++){
         clone = template.cloneNode(true)
-        clone.classList.add("link")
-        clone.addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].id})
+        //clone.classList.add("link")
+        clone.getElementsByClassName("card-img")[0].addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].id})
         clone.id=id + (i + startCount)
+        clone.getElementsByClassName("card-img")[0].classList.add("link")
         clone.getElementsByClassName("card-img")[0].src = playlist[i].album.images[0].url
         clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].name
         clone.getElementsByClassName("nome_artista")[0].innerHTML = playlist[i].artists[0].name
@@ -443,7 +497,7 @@ async function printTrackInfo(idTrack, idNode, idTemplate){
     right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
     img = document.createElement("img")
     img.style="width:100%"
-    img.src = info.album.images[1].url
+    img.src = info.album.images[0].url
     left.append(img)
 
     div = document.createElement("li")
@@ -584,7 +638,7 @@ async function printArtistInfo(idArtist, idNode){
     left.classList.add("col-4", "col-sm-12", "col-md-4",)
     img = document.createElement("img")
     img.style="width:100%"
-    img.src = artist.images[1].url
+    img.src = artist.images[0].url
     left.append(img)
     right = document.createElement("ul")
     right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
@@ -630,9 +684,9 @@ function printArtists(artists, idNode, idTemplate){
     row.classList.add("row", "justify-content-center")
     for (let i=0; i<artists.length; i++){
         clone = template.cloneNode(true)
-        clone.classList.add("link")
 
-        clone.addEventListener("click", function move(){window.location.href = "/src/artist.html?" + artists[i].id})
+        clone.getElementsByClassName("card-img")[0].addEventListener("click", function move(){window.location.href = "/src/artist.html?" + artists[i].id})
+        clone.getElementsByClassName("card-img")[0].classList.add("link")
         if(artists[i].images.length!=0){
             clone.getElementsByClassName("card-img")[0].src = artists[i].images[0].url
         }else{
@@ -704,10 +758,10 @@ function printAlbum(albums, idNode, idTemplate){
     row.classList.add("row", "justify-content-center")
     for (let i=0; i<albums.length; i++){
         clone = template.cloneNode(true)
-        clone.classList.add("link")
 
-        clone.addEventListener("click", function move(){window.location.href = "/src/album.html?" + albums[i].id})
+        clone.getElementsByClassName("card-img")[0].addEventListener("click", function move(){window.location.href = "/src/album.html?" + albums[i].id})
         clone.getElementsByClassName("card-img")[0].src = albums[i].images[0].url
+        clone.getElementsByClassName("card-img")[0].classList.add("link")
         clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +albums[i].name
         clone.getElementsByClassName("nome_artista")[0].innerHTML = albums[i].artists[0].name
         row.append(clone)
@@ -762,7 +816,7 @@ async function printAlbumInfo(idAlbum, idNode){
     left.classList.add("col-4", "col-sm-12", "col-md-4",)
     img = document.createElement("img")
     img.style="width:100%"
-    img.src = album.images[1].url
+    img.src = album.images[0].url
     left.append(img)
     right = document.createElement("ul")
     right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
@@ -930,14 +984,48 @@ function printPlaylistCard(playlists, idNode, idTemplate){
                 div.getElementsByClassName("card-img")[0].src = playlists[i].tracks[0].info.album.images[0].url
             }
         }
-        div.addEventListener("click", function move(){window.location.href = "/src/infoplaylist.html?"+playlists[i]._id})
+        div.getElementsByClassName("card-img")[0].addEventListener("click", function move(){window.location.href = "/src/infoplaylist.html?"+playlists[i]._id})
         div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
+        if(logged() && playlists[i].owner==window.localStorage.getItem("user")){
+            del = document.createElement("div")
+            del.classList.add("card-action", "link")
+            del.innerHTML = "\u274C"
+            del.addEventListener("click", async function (){await deletePlaylist(playlists[i]._id);})
+            div.getElementsByClassName("nome_playlist")[0].append(del)
+        }else{
+            found=false
+            for(let k=0;k<playlists[i].followers.length;k++){
+                if(window.localStorage.getItem("user") == playlists[i].followers[k].id){
+                    del = document.createElement("div")
+                    del.classList.add("card-action", "link")
+                    del.innerHTML = "\u274C"
+                    del.addEventListener("click", async function (){
+                        await removeFollow(playlists[i]._id);
+                        this.innerHTML = "Follow rimosso"
+                    })
+                    div.getElementsByClassName("nome_playlist")[0].append(del)
+                    found = true
+                    break
+                }
+            }
+            if(!found){
+                del = document.createElement("div")
+                del.classList.add("card-action", "link")
+                del.innerHTML = "➕"
+                del.addEventListener("click", async function (){
+                    await addFollow(playlists[i]._id);
+                    this.innerHTML = "Follow aggiunto"
+                })
+                div.getElementsByClassName("nome_playlist")[0].append(del)
+            }
+        }
         node.append(div)
     }
 }
 
 async function printPlaylistInfo(id, idNode, template){
     playlist = await getPlaylist(id)
+    if(playlist[0]==undefined){window.location.href = "/src/playlist.html";return;}
     playlist = playlist[0]
     console.log(playlist)
 
@@ -953,7 +1041,7 @@ async function printPlaylistInfo(id, idNode, template){
     img = document.createElement("img")
     img.style="width:100%"
     if(playlist.tracks && playlist.tracks.length!=0){
-        img.src = playlist.tracks[0].info.album.images[1].url
+        img.src = playlist.tracks[0].info.album.images[0].url
     }else{
         img.src = "../img/music.jpg"
     }
@@ -1093,8 +1181,13 @@ function printFollowedPlaylists(){
     document.write("QUI CI SONO LE PLAYLIST CHE SEGUO")
 }
 
-function printPublicPlaylists(){
-    
+async function printPublicPlaylists(){
+    playlists = await getPublicPlaylist()
+    console.log(playlists)
+    printPlaylistCard(playlists, "publicPlaylists", "playlist-template")
+    title = document.createElement("h4")
+    title.innerHTML = "Esplora le playlist pubbliche"
+    document.getElementById("publicPlaylists").prepend(title)
 }
 
 /**

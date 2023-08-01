@@ -63,3 +63,8 @@ body{
 #signin h4, #login h4{
     text-align: center;
 }
+.card-action{
+    width: 100%;
+    text-align:center;
+    margin-top:5px;
+}
