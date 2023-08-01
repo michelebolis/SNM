@@ -893,6 +893,12 @@ function printPlaylistCard(playlists, idNode, idTemplate){
     node = row
     for(let i=0;i<playlists.length;i++){
         div = template.cloneNode(true)
+        if(playlists[i].tracks && playlists[i].tracks.length!=0){
+            if (playlists[i].tracks[0].info.album.images[0].url){
+                div.getElementsByClassName("card-img")[0].src = playlists[i].tracks[0].info.album.images[0].url
+            }
+        }
+        div.addEventListener("click", function move(){window.location.href = "/src/infoplaylist.html?"+playlists[i]._id})
         div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
         node.append(div)
     }
