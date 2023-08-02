@@ -1,4 +1,4 @@
-import {putPlaylist, getPublicPlaylist, userLogin, getUser, postUser, putUser, postPlaylist, deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist} from "./script/backend.js"
+import {putPlaylist, getFollowedPlaylists, getPublicPlaylist, userLogin, getUser, postUser, putUser, postPlaylist, deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist} from "./script/backend.js"
 import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, searchArtist, searchTrack} from "./script/spotify_backend.js"
 
 /**
@@ -10,10 +10,14 @@ export function logged(){
 }
 
 export async function loadAccount(){
+    document.getElementById("email").value = "Loading..."
+    document.getElementById("nickname").value = "Loading..."
+    document.getElementById("buttonModify").disabled = true
     var user = await getUser(window.localStorage.getItem("user"))
     user = user[0]
     document.getElementById("email").value = user.email
     document.getElementById("nickname").value = user.nickname
+    document.getElementById("buttonModify").disabled = false
 }
 
 export async function cambiaCredenziali(){
@@ -229,7 +233,7 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
         button.innerHTML="Aggiungi"
         button.id = window.location.href.split("?")[1]
         button.addEventListener("click", putPlaylist)
-        button.classList.add("btn", "btn-primary", "btn-light")
+        button.classList.add("btn","show", "button-small", "btn-primary")
         div.append(button)
         right.append(li)
     }
@@ -592,8 +596,7 @@ export async function printAlbumTrack(tracks){
             button.id=tracks[i].id
             button.innerHTML="Aggiungi"
             button.addEventListener("click", putPlaylist)
-            button.style = "width:80%;margin: 5px 0;"
-            button.classList.add("btn", "btn-primary", "btn-light")
+            button.classList.add("btn", "btn-primary", "show")
             clone.childNodes[1].childNodes[1].append(button)
         }
         tracklist.append(clone)
@@ -614,9 +617,15 @@ export async function printAlbumTrack(tracks){
 export async function printMyPlaylists(idNode, idTemplate){
     if (!logged()){return}
     var user = localStorage.getItem("user")
+    var node = document.getElementById(idNode)
+    var title = document.createElement("h4")
+    title.innerHTML = "Le tue playlist"
+    node.parentNode.prepend(title)
+    for(let i=0;i<5;i++){
+        printCardPlaceholder(idNode)
+    }
     var playlists = await getMyPlaylist(user)
     console.log(playlists)
-    var node = document.getElementById(idNode)
     if (playlists.length==0){
         var title = document.createElement("h4")
         title.innerHTML = "Non hai ancora nessuna playlist, creane una "
@@ -624,11 +633,9 @@ export async function printMyPlaylists(idNode, idTemplate){
         a.href = "/src/newplaylist.html"
         a.innerHTML = "qui"
         title.append(a)
-        node.append(title)
+        node.parentNode.append(title)
     }else{
         printPlaylistCard(playlists, idNode, idTemplate)
-        var title = document.createElement("h4")
-        title.innerHTML = "Le tue playlist"
         node.parentNode.prepend(title)
     }
 }
@@ -862,9 +869,27 @@ export async function printPlaylistTracks(tracks, idNode){
  * TO DO
  * @returns 
  */
-export function printFollowedPlaylists(){
-    if (!logged()){return}
-    document.write("QUI CI SONO LE PLAYLIST CHE SEGUO")
+export async function printFollowedPlaylists(){
+    if (!logged()){
+        document.getElementById("followedPlaylists").innerHTML = ""
+        return
+    }
+    var user = window.localStorage.getItem("user")
+    var title = document.createElement("h4")
+    title.innerHTML = "Le playlist che segui"
+    document.getElementById("followedPlaylists").parentNode.prepend(title)
+    for(let i=0;i<5;i++){
+        printCardPlaceholder("followedPlaylists")
+    }
+    var followedPlaylists = await getFollowedPlaylists(user)
+    console.log(followedPlaylists)
+    if(followedPlaylists.length==0){
+        document.getElementById("followedPlaylists").innerHTML = ""
+        title.innerHTML = "Non segui ancora nessuna playlist"
+    }else{
+        printPlaylistCard(followedPlaylists, "followedPlaylists", "playlist-template")
+    }
+    document.getElementById("followedPlaylists").parentNode.prepend(title)
 }
 
 /**

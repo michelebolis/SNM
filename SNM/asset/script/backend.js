@@ -135,6 +135,17 @@ export async function getMyPlaylist(id){
     .catch((e) => console.log(e))
 }
 
+export async function getFollowedPlaylists(id){
+    return fetch(MY_BASE_URL+"playlists/followedby/"+id+"?apikey=123456", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
 /**
  * Funzione che effettua la chiamata all'API che restituisce le informazioni di una playlist
  * @param {*} id id della playlist di cui si richiedono le informazioni

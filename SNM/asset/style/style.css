@@ -53,6 +53,11 @@ body{
 .show:hover{
     opacity: 80%;
 }
+.button-small{
+    width:20%;
+    margin: 10px 0;
+}
+
 .card-title{
     font-size: 16px;
 }
