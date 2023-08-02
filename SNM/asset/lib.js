@@ -540,7 +540,7 @@ export async function printAlbumTrack(tracks){
     col.classList.add("col")
     row.append(col, col.cloneNode(true))
     template.append(row, row.cloneNode(true))
-
+    var myplaylist
     if(logged()){myplaylist = await getMyPlaylist(window.localStorage.getItem("user"))}
 
     for(let i=0;i<tracks.length;i++){
@@ -1068,8 +1068,8 @@ export function addTag(){
         span.innerHTML=tag
         newtag.append(span)
         newtag.prepend(a)
-        list = document.getElementById("tagList")
-        nessuno = document.getElementById("nessuno")
+        var list = document.getElementById("tagList")
+        var nessuno = document.getElementById("nessuno")
         if (nessuno){nessuno.remove()}
         list.append(newtag)
     }
