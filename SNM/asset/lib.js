@@ -99,13 +99,14 @@ export function printTracksCard(playlist, template, id, startCount){
     for (let i=0; i<playlist.length; i++){
         var clone = template.cloneNode(true)
         //clone.classList.add("link")
-        clone.getElementsByClassName("card-img")[0].addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].id})
+        clone.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToTrack(playlist[i].id)})
         clone.id=id + (i + startCount)
         clone.getElementsByClassName("card-img")[0].classList.add("link")
         clone.getElementsByClassName("card-img")[0].src = playlist[i].album.images[0].url
         clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].name
+        clone.getElementsByClassName("nome_traccia")[0].addEventListener("click", function(){goToTrack(playlist[i].id)})
         clone.getElementsByClassName("nome_artista")[0].innerHTML = playlist[i].artists[0].name
-        //clone.getElementsByClassName("nome_artista")[0].addEventListener("click", function move(){window.location.href = "/src/track.html?" + playlist[i].artists[0].id})
+        clone.getElementsByClassName("nome_artista")[0].addEventListener("click", function(){goToArtist(playlist[i].artists[0].id)})
         document.getElementById(id).appendChild(clone)
     }
 }
@@ -157,7 +158,7 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
     div.innerHTML="Artisti: "
     for (let i=0; i<info.artists.length; i++){
         var a = document.createElement("a")
-        a.addEventListener("click", function show(){window.location.href="/src/artist.html?"+info.artists[i].id})
+        a.addEventListener("click", function(){goToArtist(info.artists[i].id)})
         a.innerHTML = info.artists[i].name 
         div.append(a)
         i+1<info.artists.length ? div.append(document.createElement("div").innerHTML=" e ") : null
@@ -169,7 +170,7 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
     div.innerHTML = "Album: "
     var a = document.createElement("a")
     a.innerHTML = info.album.name
-    a.addEventListener("click", function move(){window.location.href="/src/album.html?"+info.album.id})
+    a.addEventListener("click", function(){goToAlbum(info.album.id)})
     a.classList.add("link")
     div.append(a)
     right.append(div)
@@ -343,7 +344,7 @@ export function printArtists(artists, idNode, idTemplate){
     for (let i=0; i<artists.length; i++){
         var clone = template.cloneNode(true)
 
-        clone.getElementsByClassName("card-img")[0].addEventListener("click", function move(){window.location.href = "/src/artist.html?" + artists[i].id})
+        clone.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToArtist(artists[i].id)})
         clone.getElementsByClassName("card-img")[0].classList.add("link")
         if(artists[i].images.length!=0){
             clone.getElementsByClassName("card-img")[0].src = artists[i].images[0].url
@@ -423,7 +424,7 @@ export function printAlbum(albums, idNode, idTemplate){
     for (let i=0; i<albums.length; i++){
         var clone = template.cloneNode(true)
 
-        clone.getElementsByClassName("card-img")[0].addEventListener("click", function move(){window.location.href = "/src/album.html?" + albums[i].id})
+        clone.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToAlbum(albums[i].id)})
         clone.getElementsByClassName("card-img")[0].src = albums[i].images[0].url
         clone.getElementsByClassName("card-img")[0].classList.add("link")
         clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +albums[i].name
@@ -491,7 +492,7 @@ export async function printAlbumInfo(idAlbum, idNode){
     li_clone.innerHTML = "Autori: "  
     var a = document.createElement("a")
     a.innerHTML = album.artists[0].name
-    a.addEventListener("click", function move(){window.location.href="/src/artist.html?"+album.artists[0].id})
+    a.addEventListener("click", function(){goToArtist(album.artists[0].id)})
     a.classList.add("link")
     li_clone.append(a)
     right.append(li_clone)
@@ -548,7 +549,7 @@ export async function printAlbumTrack(tracks){
         clone.childNodes[0].childNodes[0].innerHTML = "#" + (i+1) + " "
             var a = document.createElement("a")
             a.innerHTML = tracks[i].name
-            a.addEventListener("click", function move(){window.location.href = "/src/track.html?" + tracks[i].id})
+            a.addEventListener("click", function(){goToTrack(tracks[i].id)})
             a.classList.add("link")
             clone.childNodes[0].childNodes[0].append(a)
         if(tracks[i].preview_url!=null){
@@ -648,7 +649,7 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
                 div.getElementsByClassName("card-img")[0].src = playlists[i].tracks[0].info.album.images[0].url
             }
         }
-        div.getElementsByClassName("card-img")[0].addEventListener("click", function move(){window.location.href = "/src/infoplaylist.html?"+playlists[i]._id})
+        div.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToPlaylist(playlists[i]._id)})
         div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
         if(logged() && playlists[i].owner==window.localStorage.getItem("user")){
             var del = document.createElement("div")
@@ -798,7 +799,7 @@ export async function printPlaylistTracks(tracks, idNode){
             clone.childNodes[0].childNodes[0].innerHTML = "#" + (i+1) + " "
                 var a = document.createElement("a")
                 a.innerHTML = tracks[i].info.name
-                a.addEventListener("click", function move(){window.location.href = "/src/track.html?" + tracks[i].info.id})
+                a.addEventListener("click", function(){goToTrack(tracks[i].info.id)})
                 a.classList.add("link")
                 clone.childNodes[0].childNodes[0].append(a)
             if(tracks[i].info.preview_url!=null){
@@ -942,6 +943,43 @@ export async function printNavBar(id){
 }
 
 /**
+ * Funzione che stampa in coda al nodo una card placeholder
+ * @param {String} id id del node dove fare l'append delle card
+ */
+export function printCardPlaceholder(id){
+    var div = document.createElement("div")
+    div.classList.add("card", "col-2")
+
+    var node = document.createElement("div")
+    node.classList.add("card-body")
+    var title = document.createElement("h5")
+    title.classList.add("card-title", "placeholder-glow")
+    var p = document.createElement("p")
+    p.classList.add("card-text", "placeholder-glow")
+
+    var span = document.createElement("span")
+    span.classList.add("placeholder", "col-7")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-4")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-4")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-6")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-9")
+    p.append(span)
+
+    node.append(title, p)
+    div.append(node)
+
+    document.getElementById(id).append(div)
+}
+
+/**
  * Funzione che, dati i valori contenuti in due input text con id email e password, crea un nuovo utente nel db
  * SE si verificano degli errori, li stampa in un alert 
  */
@@ -1036,7 +1074,7 @@ export async function addPlaylist(){
     }
     var res = await postPlaylist(playlist)
     console.log(res)
-    window.location.href = "/src/infoplaylist.html?"+res.insertedId
+    goToPlaylist(res.insertedId)
 }
 
 /**
@@ -1208,38 +1246,33 @@ export async function search(){
 }
 
 /**
- * Funzione che stampa in coda al nodo una card placeholder
- * @param {String} id id del node dove fare l'append delle card
+ * Funzione che porta alla pagina web che visualizza le informazioni di una track
+ * @param {*} id 
  */
-export function printCardPlaceholder(id){
-    var div = document.createElement("div")
-    div.classList.add("card", "col-2")
+export function goToTrack(id){
+    window.location.href = "/src/track.html?" + id
+}
 
-    var node = document.createElement("div")
-    node.classList.add("card-body")
-    var title = document.createElement("h5")
-    title.classList.add("card-title", "placeholder-glow")
-    var p = document.createElement("p")
-    p.classList.add("card-text", "placeholder-glow")
+/**
+ * Funzione che porta alla pagina web che visualizza le informazioni di un artista
+ * @param {*} id id dell'artista 
+ */
+export function goToArtist(id){
+    window.location.href = "/src/artist.html?" + id
+}
 
-    var span = document.createElement("span")
-    span.classList.add("placeholder", "col-7")
-    p.append(span)
-    span = document.createElement("span")
-    span.classList.add("placeholder", "col-4")
-    p.append(span)
-    span = document.createElement("span")
-    span.classList.add("placeholder", "col-4")
-    p.append(span)
-    span = document.createElement("span")
-    span.classList.add("placeholder", "col-6")
-    p.append(span)
-    span = document.createElement("span")
-    span.classList.add("placeholder", "col-9")
-    p.append(span)
+/**
+ * Funzione che porta alla pagina web che visualizza le informazioni di una album
+ * @param {*} id id dell'album
+ */
+export function goToAlbum(id){
+    window.location.href = "/src/album.html?" + id
+}
 
-    node.append(title, p)
-    div.append(node)
-
-    document.getElementById(id).append(div)
+/**
+ * Funzione che porta alla pagina web che visualizza le informazioni di una playlist
+ * @param {*} id id della playlist
+ */
+export function goToPlaylist(id){
+    window.location.href = "/src/infoplaylist.html?" + id
 }
