@@ -62,7 +62,7 @@ export function printPlaylist(playlist, idNode, idTemplate){
     // button template to clone
     var button = document.createElement("button")
     button.innerHTML="Show more"
-    button.classList.add("show", "btn","btn-secondary")
+    button.classList.add("show", "btn","btn-primary")
     
     for (let i=0; i<playlist.length; i+=5){
         // create the button to show more element
@@ -105,8 +105,10 @@ export function printTracksCard(playlist, template, id, startCount){
         clone.getElementsByClassName("card-img")[0].src = playlist[i].album.images[0].url
         clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].name
         clone.getElementsByClassName("nome_traccia")[0].addEventListener("click", function(){goToTrack(playlist[i].id)})
+        clone.getElementsByClassName("nome_traccia")[0].classList.add("link", "cursor")
         clone.getElementsByClassName("nome_artista")[0].innerHTML = playlist[i].artists[0].name
         clone.getElementsByClassName("nome_artista")[0].addEventListener("click", function(){goToArtist(playlist[i].artists[0].id)})
+        clone.getElementsByClassName("nome_artista")[0].classList.add("cursor")
         document.getElementById(id).appendChild(clone)
     }
 }
@@ -159,6 +161,7 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
     for (let i=0; i<info.artists.length; i++){
         var a = document.createElement("a")
         a.addEventListener("click", function(){goToArtist(info.artists[i].id)})
+        a.classList.add("link", "cursor")
         a.innerHTML = info.artists[i].name 
         div.append(a)
         i+1<info.artists.length ? div.append(document.createElement("div").innerHTML=" e ") : null
@@ -171,7 +174,7 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
     var a = document.createElement("a")
     a.innerHTML = info.album.name
     a.addEventListener("click", function(){goToAlbum(info.album.id)})
-    a.classList.add("link")
+    a.classList.add("link", "cursor")
     div.append(a)
     right.append(div)
 
@@ -345,7 +348,7 @@ export function printArtists(artists, idNode, idTemplate){
         var clone = template.cloneNode(true)
 
         clone.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToArtist(artists[i].id)})
-        clone.getElementsByClassName("card-img")[0].classList.add("link")
+        clone.getElementsByClassName("card-img")[0].classList.add("link", "cursor")
         if(artists[i].images.length!=0){
             clone.getElementsByClassName("card-img")[0].src = artists[i].images[0].url
         }else{
@@ -359,7 +362,7 @@ export function printArtists(artists, idNode, idTemplate){
                 // create the button to show more element
                 var newButton = document.createElement("button")
                 newButton.id = "showMore_" + i
-                newButton.classList.add("show", "btn","btn-secondary")
+                newButton.classList.add("show", "btn","btn-primary")
                 newButton.addEventListener("click", showMore)
                 newButton.innerHTML= "Show more"
                 row.append(newButton)
@@ -428,14 +431,18 @@ export function printAlbum(albums, idNode, idTemplate){
         clone.getElementsByClassName("card-img")[0].src = albums[i].images[0].url
         clone.getElementsByClassName("card-img")[0].classList.add("link")
         clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +albums[i].name
+        clone.getElementsByClassName("nome_album")[0].addEventListener("click", function(){goToAlbum(albums[i].id)})
+        clone.getElementsByClassName("nome_album")[0].classList.add("link", "cursor")
         clone.getElementsByClassName("nome_artista")[0].innerHTML = albums[i].artists[0].name
+        clone.getElementsByClassName("nome_artista")[0].addEventListener("click", function(){goToArtist(albums[i].artists[0].id)})
+        clone.getElementsByClassName("nome_artista")[0].classList.add("cursor")
         row.append(clone)
         if(((i+1)%5==0)&&(i!=0)){
             if(i+1!=albums.length){
                 // create the button to show more element
                 var newButton = document.createElement("button")
                 newButton.id = "showMore_" + i
-                newButton.classList.add("show", "btn","btn-secondary")
+                newButton.classList.add("show", "btn","btn-primary")
                 newButton.addEventListener("click", showMore)
                 newButton.innerHTML= "Show more"
                 row.append(newButton)
@@ -493,7 +500,7 @@ export async function printAlbumInfo(idAlbum, idNode){
     var a = document.createElement("a")
     a.innerHTML = album.artists[0].name
     a.addEventListener("click", function(){goToArtist(album.artists[0].id)})
-    a.classList.add("link")
+    a.classList.add("link", "cursor")
     li_clone.append(a)
     right.append(li_clone)
 
@@ -550,7 +557,7 @@ export async function printAlbumTrack(tracks){
             var a = document.createElement("a")
             a.innerHTML = tracks[i].name
             a.addEventListener("click", function(){goToTrack(tracks[i].id)})
-            a.classList.add("link")
+            a.classList.add("link", "cursor")
             clone.childNodes[0].childNodes[0].append(a)
         if(tracks[i].preview_url!=null){
             // la preview per alcuna track non è disponibile
@@ -800,7 +807,7 @@ export async function printPlaylistTracks(tracks, idNode){
                 var a = document.createElement("a")
                 a.innerHTML = tracks[i].info.name
                 a.addEventListener("click", function(){goToTrack(tracks[i].info.id)})
-                a.classList.add("link")
+                a.classList.add("link", "cursor")
                 clone.childNodes[0].childNodes[0].append(a)
             if(tracks[i].info.preview_url!=null){
                 // la preview per alcuna track non è disponibile
