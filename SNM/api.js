@@ -247,7 +247,18 @@ app.get('/playlists/search/:playlist', auth, async function (req, res) {
     var pwmClient = await new mongoClient(uri).connect()
     var playlists = await pwmClient.db("SNM")
         .collection('Playlists')
-        .find({ "name": playlist , "public":true})
+        .find({$and:[{ "name": playlist} , {"public":true}]})
+        .toArray();
+    res.json(playlists)
+})
+
+app.get('/playlists/followedby/:user', auth, async function (req, res) {
+    // Ricerca nel database
+    var user = req.params.user
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .find({$and:[{"public":true}, {"followers" : {"id":user}}]})
         .toArray();
     res.json(playlists)
 })
