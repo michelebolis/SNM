@@ -68,15 +68,16 @@ async function addUser(res, user) {
 
     };
 }
-function deleteUser(res, id) {
-    let index = users.findIndex(user => user.id == id)
-    if (index == -1) {
+async function deleteUser(res, id) {
+    var pwmClient = await new mongoClient(uri).connect()
+    var user = await pwmClient.db("SNM").collection('Users').find({"_id":new ObjectId(id)})
+    if (await user.hasNext()) {
+        pwmClient.db("SNM").collection('Users').deleteOne({"_id":new ObjectId(id)})
+        pwmClient.db("SNM").collection('Playlists').updateMany({"followers":{"id":id}}, {$pull : {"followers":{"id":id}}})
+    }else{
         res.status(404).send("User not found")
         return
     }
-    users = users.filter(user => user.id != id)
-
-    res.json(users)
 }
 async function updateUser(res, id, updatedUser) {
     if (updatedUser.nickname == undefined) {

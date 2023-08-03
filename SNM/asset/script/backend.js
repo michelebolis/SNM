@@ -81,6 +81,20 @@ export async function putUser(id, user){
 }
 
 /**
+ * Funcione che effettua la chiamata all'API per cancellare un utente
+ * @param {String} id id dell'utente da cancellare 
+ * @returns 
+ */
+export async function deleteUser(id){
+    return fetch(MY_BASE_URL+"users/"+id+"?apikey=123456", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+}
+
+/**
  * Funzione che effettua la chiamata all'API che aggiunge una nuova playlist
  * @param {*} playlist json contenente la playlist da aggiungere
  */

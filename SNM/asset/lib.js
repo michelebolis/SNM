@@ -1,6 +1,7 @@
 import {putPlaylist, getFollowedPlaylists, getPublicPlaylist, userLogin, getUser, postUser, putUser, postPlaylist, 
-    deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag} from "./script/backend.js"
-import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, searchArtist, searchTrack} from "./script/spotify_backend.js"
+    deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag, deleteUser} from "./script/backend.js"
+import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, 
+    searchArtist, searchTrack} from "./script/spotify_backend.js"
 
 /**
  * Funzione che verifica se un utente sia loggato o meno
@@ -1048,6 +1049,18 @@ export async function addUser(){
         div.append(mess)
     }else{
         alert(res.status + res.text)
+    }
+}
+
+/**
+ * Funzione che cancella l'account dell'utente loggato
+ */
+export async function deleteAccount(){
+    var id = window.localStorage.getItem("user")
+    var res = await deleteUser(id)
+    if(res.ok){
+        logout()
+        window.location.href = "../"
     }
 }
 
