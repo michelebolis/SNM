@@ -231,6 +231,24 @@ export async function removeFollow(id, oldfollower){
 }
 
 /**
+ * Funzione che effettua la chiamata all'API per cambiare la visibilità della playlist
+ * @param {String} id id della playlist
+ * @param {bool} publicVisibility SE la playlist è pubblica
+ * @returns 
+ */
+export async function changePlaylistVisibility(id, publicVisibility){
+    return fetch(MY_BASE_URL+"playlist/visibility/"+id+"?apikey=123456", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({"public":publicVisibility})
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
  * Funzione che effettua la chiamata all'API per ricercare una playlist pubblica dato il suo nome
  * @param {String} playlist nome della playlist
  * @returns Array di playlist SE ce ne sono con quel name

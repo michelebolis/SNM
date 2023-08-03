@@ -1,5 +1,5 @@
 import {putPlaylist, getFollowedPlaylists, getPublicPlaylist, userLogin, getUser, postUser, putUser, postPlaylist, 
-    deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag, deleteUser} from "./script/backend.js"
+    deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag, deleteUser, changePlaylistVisibility} from "./script/backend.js"
 import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, 
     searchArtist, searchTrack} from "./script/spotify_backend.js"
 
@@ -744,7 +744,7 @@ export async function printPlaylistInfo(id, idNode){
     //elenco informazioni
     var li = document.createElement("li")
     li.classList.add("list-group-item", "list-group-item-dark")
-
+    //autore
     var li_clone = li.cloneNode(true)
     var autore = ""
     var loggedUser = window.localStorage.getItem("user")
@@ -756,11 +756,15 @@ export async function printPlaylistInfo(id, idNode){
     }
     li_clone.innerHTML = "Autore: "  + autore
     right.append(li_clone)
-
+    //descrizione
     li_clone = li.cloneNode(true)
     li_clone.innerHTML = "Descrizione: " + (!playlist.description || playlist.description=="" ? "nessuna" : playlist.description)
     right.append(li_clone)
-
+    //numero dei followers
+    li_clone = li.cloneNode(true)
+    li_clone.innerHTML = "Numero follower: " + playlist.followers.length
+    right.append(li_clone)
+    //tag
     li_clone = li.cloneNode(true)
     li_clone.innerHTML = "Tag:"
     if(playlist.tags.length==0){
@@ -773,9 +777,12 @@ export async function printPlaylistInfo(id, idNode){
         }
     }
     right.append(li_clone)
-
+    //azioni possibili sulla playlist
     li_clone = li.cloneNode(true)
-    li_clone.innerHTML = "Pubblica: " + (playlist.public ? "si" : "no")
+    var div = document.createElement("div")
+    div.id = "public"
+    div.innerHTML = (playlist.public ? "Playlist pubblica" : "Playlist privata")
+    li_clone.append(div)
     if(loggedUser){
         var button = document.createElement("button")
         button.classList.add("show", "btn-primary", "btn")
@@ -786,6 +793,7 @@ export async function printPlaylistInfo(id, idNode){
             }else{
                 button.innerHTML = "Rendi pubblica"
             }
+            
         }else{
             button.innerHTML = "Follow"
             playlist.followers.forEach(follower => {
@@ -793,8 +801,8 @@ export async function printPlaylistInfo(id, idNode){
                     button.innerHTML = "Unfollow"
                 }
             });
+            button.addEventListener("click", handlePlaylist)
         }
-        button.addEventListener("click", handlePlaylist)
         li_clone.append(button)
     }
     right.append(li_clone)
@@ -807,6 +815,10 @@ export async function printPlaylistInfo(id, idNode){
     printPlaylistTracks(playlist.tracks, "trackPlaylist")
 }
 
+/**
+ * Funzione che in base all'inner html del nodo, o aggiunge/toglie il follow dell'utente loggato alla playlist,
+ * oppure cambia la visibilita della playlist da pubblica a privata e viceversa
+ */
 async function handlePlaylist(){
     var user = window.localStorage.getItem("user")
     switch(this.innerHTML){
@@ -827,10 +839,24 @@ async function handlePlaylist(){
             }
             break;
         case "Rendi pubblica":
+            try {
+                var res = await changePlaylistVisibility(this.value, true)
+                this.innerHTML = "Rendi privata"
+                var visibility = document.getElementById("public")
+                visibility.innerHTML = "Playlist pubblica"
+            } catch (error) {
 
+            }
             break;
         case "Rendi privata":
+            try {
+                var res = await changePlaylistVisibility(this.value, false)
+                this.innerHTML = "Rendi pubblica"
+                var visibility = document.getElementById("public")
+                visibility.innerHTML = "Playlist privata"
+            } catch (error) {
 
+            }
             break;
     }
 }
