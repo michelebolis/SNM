@@ -189,6 +189,15 @@ async function addPlaylist(res, playlist) {
     };
 }
 
+app.get('/playlists', auth, async function (req, res) {
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .find({"public":true})
+        .toArray();
+    res.json(playlists)
+})
+
 app.get('/playlists/:user', auth, async function (req, res) {
     // Ricerca nel database
     var user = req.params.user
@@ -196,16 +205,6 @@ app.get('/playlists/:user', auth, async function (req, res) {
     var playlists = await pwmClient.db("SNM")
         .collection('Playlists')
         .find({ "owner": user })
-        .toArray();
-    res.json(playlists)
-})
-
-app.get('/playlists/public', auth, async function (req, res) {
-    // Ricerca nel database
-    var pwmClient = await new mongoClient(uri).connect()
-    var playlists = await pwmClient.db("SNM")
-        .collection('Playlists')
-        .find({"public":true})
         .toArray();
     res.json(playlists)
 })
@@ -248,6 +247,17 @@ app.get('/playlists/search/:playlist', auth, async function (req, res) {
     var playlists = await pwmClient.db("SNM")
         .collection('Playlists')
         .find({$and:[{ "name": playlist} , {"public":true}]})
+        .toArray();
+    res.json(playlists)
+})
+
+app.get('/playlists/tag/:tag', auth, async function (req, res) {
+    // Ricerca nel database
+    var tag = req.params.tag
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .find({$and:[{ "tags": {"name" : tag}} , {"public":true}]})
         .toArray();
     res.json(playlists)
 })

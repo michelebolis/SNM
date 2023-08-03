@@ -5,18 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SNM</title>
     <link rel="icon" type="image/x-icon" href="/img/favicon.ico" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" 
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="style/style.css">
     <script type="module">
-      import {printNavBar, printMyPlaylists, printFollowedPlaylists, printTopCharts, search, printCardPlaceholder} from "./lib.js";
+      import {printNavBar, printMyPlaylists, printFollowedPlaylists, printTopCharts, 
+        verifySearch, printCardPlaceholder, printPublicPlaylists, checkAll, uncheckAllSwitch} from "./lib.js";
       printNavBar("left_menu")
       for(let i=0;i<5;i++){
         printCardPlaceholder("top")
       }
       printMyPlaylists("myPlaylists", "playlist-template")
       printFollowedPlaylists()
+      printPublicPlaylists()
       printTopCharts()
-      document.getElementById("searchbutton").addEventListener("click", search)
+      document.getElementById("searchbutton").addEventListener("click", verifySearch)
+      document.getElementById("track").addEventListener("click", uncheckAllSwitch)
+      document.getElementById("artist").addEventListener("click", uncheckAllSwitch)
+      document.getElementById("album").addEventListener("click", uncheckAllSwitch)
+      document.getElementById("playlist").addEventListener("click", uncheckAllSwitch)
+      document.getElementById("tag").addEventListener("click", uncheckAllSwitch)
+      document.getElementById("all").addEventListener("click", checkAll)
     </script> 
 </head>
 <body>
@@ -49,6 +58,14 @@
                         <input class="form-check-input" type="checkbox" role="switch" id="playlist">
                         <label class="form-check-label" for="playlist">Playlist</label>
                       </div>
+                      <div class="form-check form-switch col-10 col-md-5">
+                        <input class="form-check-input" type="checkbox" role="switch" id="tag">
+                        <label class="form-check-label" for="tag">Tag Playlist</label>
+                      </div>
+                      <div class="form-check form-switch col-10 col-md-5">
+                        <input class="form-check-input" type="checkbox" role="switch" id="all">
+                        <label class="form-check-label" for="all">All</label>
+                      </div>
                     </div>
                     <button class="btn btn-primary show" value="Ricerca" id="searchbutton">Ricerca</button>
                 </div>
@@ -64,6 +81,10 @@
                 </div>
                 <div class="container">
                   <div id="followedPlaylists" class="row justify-content-center">
+                  </div>
+                </div>
+                <div class="container">
+                  <div id="publicPlaylists" class="row justify-content-center">
                   </div>
                 </div>
               </div>
@@ -121,6 +142,7 @@
         </div>
       </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 </body>
 </html>

@@ -102,7 +102,7 @@ export async function postPlaylist(playlist) {
 
 /**
  * Funzione che effettua la chiamata all'API per cancellare una playlist
- * @param {*} id id della playlist da cancellare
+ * @param {String} id id della playlist da cancellare
  */
 export async function deletePlaylist(id) {
     return fetch(MY_BASE_URL+"playlist/"+id+"?apikey=123456", {
@@ -121,7 +121,7 @@ export async function deletePlaylist(id) {
 
 /**
  * Funzione che effettua la chiamata all'API che restituisce le playlist di un utente
- * @param {*} id id dell'utente
+ * @param {String} id id dell'utente
  * @returns array di json delle sue playlist
  */
 export async function getMyPlaylist(id){
@@ -135,6 +135,11 @@ export async function getMyPlaylist(id){
     .catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che effettua la chiamata all'API che restituisce le playlist seguite da un utente
+ * @param {String} id id dell'utente 
+ * @returns array di json delle playlist seguite dall'utente
+ */
 export async function getFollowedPlaylists(id){
     return fetch(MY_BASE_URL+"playlists/followedby/"+id+"?apikey=123456", {
         method: "GET",
@@ -148,7 +153,7 @@ export async function getFollowedPlaylists(id){
 
 /**
  * Funzione che effettua la chiamata all'API che restituisce le informazioni di una playlist
- * @param {*} id id della playlist di cui si richiedono le informazioni
+ * @param {String} id id della playlist di cui si richiedono le informazioni
  */
 export async function getPlaylist(id){
     return fetch(MY_BASE_URL+"playlists/info/"+id+"?apikey=123456", {
@@ -162,12 +167,11 @@ export async function getPlaylist(id){
 }
 
 /**
- * TO DO : NON VA
- * @returns 
+ * 
+ * @returns array di json delle playlist pubbliche
  */
 export async function getPublicPlaylist(){
-    console.log("inizio")
-    return fetch(MY_BASE_URL+"playlists/public?apikey=123456", {
+    return fetch(MY_BASE_URL+"playlists?apikey=123456", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -214,11 +218,27 @@ export async function removeFollow(id, oldfollower){
 
 /**
  * Funzione che effettua la chiamata all'API per ricercare una playlist pubblica dato il suo nome
- * @param {*} playlist nome della playlist
+ * @param {String} playlist nome della playlist
  * @returns Array di playlist SE ce ne sono con quel name
  */
 export async function searchPlaylist(playlist){
     return fetch(MY_BASE_URL+"playlists/search/"+playlist+"?apikey=123456", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che effettua la chiamata all'API per ricercare una playlist pubblica dato un suo tag
+ * @param {String} tag tag della playlist
+ * @returns Array di playlist SE ce ne sono con quel tag
+ */
+export async function searchPlaylistsByTag(tag){
+    return fetch(MY_BASE_URL+"playlists/tag/"+tag+"?apikey=123456", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
