@@ -29,6 +29,13 @@ export async function loadAccount(){
  */
 export async function cambiaCredenziali(){
     var check = document.getElementById("changePassword")
+    if(!document.getElementById("errorAlert").classList.contains("visually-hidden")){
+        document.getElementById("errorAlert").classList.add("visually-hidden")
+        document.getElementById("errorText").innerHTML = ""
+    }
+    if(!document.getElementById("successAlert").classList.contains("visually-hidden")){
+        document.getElementById("successAlert").classList.add("visually-hidden")
+    }
     if(check.checked){
         var newpass = document.getElementById("password").value
         if(newpass==""){return}
@@ -43,8 +50,14 @@ export async function cambiaCredenziali(){
             nickname : document.getElementById("nickname").value
         }
     }
-    var result = await putUser(window.localStorage.getItem("user"), updatedUser)
-    console.log(result)
+    var res = await putUser(window.localStorage.getItem("user"), updatedUser)
+    if(res.text){
+        document.getElementById("errorAlert").classList.remove("visually-hidden")
+        document.getElementById("errorText").innerHTML = res.status + ": " + res.text
+    }else{
+        document.getElementById("successAlert").classList.remove("visually-hidden")
+    }
+    console.log(res)
 }
 
 /**
@@ -793,7 +806,15 @@ export async function printPlaylistInfo(id, idNode){
             }else{
                 button.innerHTML = "Rendi pubblica"
             }
-            
+            button.addEventListener("click", handlePlaylist)
+            li_clone.append(button)
+            button = document.createElement("button")
+            button.classList.add("show", "btn-danger", "btn")
+            button.value = playlist._id
+            button.innerHTML = "Cancella la playlist"
+            button.addEventListener("click", async function(){
+                var res = await deletePlaylist(playlist._id);
+            })
         }else{
             button.innerHTML = "Follow"
             playlist.followers.forEach(follower => {
@@ -981,9 +1002,13 @@ export async function printFollowedPlaylists(){
 export async function printPublicPlaylists(){
     var playlists = await getPublicPlaylist()
     console.log(playlists)
-    printPlaylistCard(playlists, "publicPlaylists", "playlist-template")
     var title = document.createElement("h4")
-    title.innerHTML = "Esplora le playlist pubbliche"
+    if(playlists.length == 0){
+        title.innerHTML = "Oh no, non ci sono ancora playlist pubbliche"
+    }else{
+        printPlaylistCard(playlists, "publicPlaylists", "playlist-template")
+        title.innerHTML = "Esplora le playlist pubbliche"
+    }
     document.getElementById("publicPlaylists").parentNode.prepend(title)
 }
 

@@ -80,11 +80,27 @@ async function deleteUser(res, id) {
 }
 async function updateUser(res, id, updatedUser) {
     if (updatedUser.nickname == undefined) {
-        res.status(400).send("Missing Name")
+        res.statusMessage = "Missing Nickname"
+        res.status(400)
+        res.send()
+        return
+    }
+    if (updatedUser.nickname == ""){
+        res.statusMessage = "Empty Nickname"
+        res.status(400)
+        res.send()
         return
     }
     if (updatedUser.email == undefined) {
-        res.status(400).send("Missing Email")
+        res.statusMessage = "Missing Email"
+        res.status(400)
+        res.send()
+        return
+    }
+    if (updatedUser.email == ""){
+        res.statusMessage = "Empty Email"
+        res.status(400)
+        res.send()
         return
     }
     if (updatedUser.password != undefined) {
@@ -103,9 +119,10 @@ async function updateUser(res, id, updatedUser) {
 
         res.json(item)
     } catch (e) {
-        console.log('catch in test');
         if (e.code == 11000) {
-            res.status(400).send("Utente già presente")
+            res.statusMessage = "Utente già presente, prova un'altra email"
+            res.status(400)
+            res.send()
             return
         }
         res.status(500).send(`Errore generico: ${e}`)
