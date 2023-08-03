@@ -20,6 +20,10 @@ app.listen(3100, "0.0.0.0", () => { // apre il web server sulla porta 3100
 })
 app.use(express.static(__dirname + '/asset')); // carica i file statici dell'applicativo
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger-output.json');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 /**
  * Funzione che applica un metodo di hashing ad un input testuale
  * @param {String} input  
@@ -30,6 +34,7 @@ function hash(input) {
         .update(input)
         .digest('hex')
 }
+//Users
 app.get('/users/:id', auth, async function (req, res) {
     // Ricerca nel database
     var id = req.params.id
@@ -40,7 +45,14 @@ app.get('/users/:id', auth, async function (req, res) {
     res.json(user)
 })
 
-async function addUser(res, user) {
+app.get('/users', auth, async function (req, res) {
+    var pwmClient = await new mongoClient(uri).connect()
+    var users = await pwmClient.db("SNM").collection('Users').find().project({ "password": 0 }).toArray();
+    res.json(users)
+})
+
+app.post("/users", auth, async function (req, res) {
+    var user = req.body
     if (user.email == undefined) {
         res.status(400).send("Missing Email")
         return
@@ -66,19 +78,43 @@ async function addUser(res, user) {
         res.status(500).send(`Errore generico: ${e}`)
 
     };
-}
-async function deleteUser(res, id) {
-    var pwmClient = await new mongoClient(uri).connect()
-    var user = await pwmClient.db("SNM").collection('Users').find({"_id":new ObjectId(id)})
-    if (await user.hasNext()) {
-        pwmClient.db("SNM").collection('Users').deleteOne({"_id":new ObjectId(id)})
-        pwmClient.db("SNM").collection('Playlists').updateMany({"followers":{"id":id}}, {$pull : {"followers":{"id":id}}})
-    }else{
-        res.status(404).send("User not found")
+})
+
+app.post("/login", async (req, res) => {
+    login = req.body
+    if (login.email == undefined) {
+        res.status(400).send("Missing Email")
         return
     }
+    if (login.password == undefined) {
+        res.status(400).send("Missing Password")
+        return
+    }
+    login.password = hash(login.password)
+
+    var pwmClient = await new mongoClient(uri).connect()
+    var filter = {
+        $and : [
+            {"email": login.email},
+            {"password": login.password}
+        ]
+    }
+    var loggedUser = await pwmClient.db("SNM")
+    .collection('Users')
+    .findOne(filter);
+    console.log(loggedUser)
+
+    if (loggedUser == null) {
+        res.status(401).send("Unauthorized")
+    } else {
+        res.send({ loggedUser })
+    }
 }
-async function updateUser(res, id, updatedUser) {
+)
+
+app.put("/users/:id", auth, async function (req, res) {
+    var id = req.params.id
+    var updatedUser = req.body
     if (updatedUser.nickname == undefined) {
         res.statusMessage = "Missing Nickname"
         res.status(400)
@@ -128,65 +164,33 @@ async function updateUser(res, id, updatedUser) {
         res.status(500).send(`Errore generico: ${e}`)
 
     };
-}
+})
 
-app.get('/users', auth, async function (req, res) {
+app.delete("/users/:id", auth, async function (req, res) {
+    var id = req.params.id
     var pwmClient = await new mongoClient(uri).connect()
-    var users = await pwmClient.db("SNM").collection('users').find().project({ "password": 0 }).toArray();
-    res.json(users)
-})
-
-app.post("/users", auth, function (req, res) {
-    addUser(res, req.body)
-})
-
-app.post("/login", async (req, res) => {
-    login = req.body
-
-    if (login.email == undefined) {
-        res.status(400).send("Missing Email")
+    var user = await pwmClient.db("SNM").collection('Users').find({"_id":new ObjectId(id)})
+    if (await user.hasNext()) {
+        pwmClient.db("SNM").collection('Users').deleteOne({"_id":new ObjectId(id)})
+        pwmClient.db("SNM").collection('Playlists').updateMany({"followers":{"id":id}}, {$pull : {"followers":{"id":id}}})
+    }else{
+        res.status(404).send("User not found")
         return
     }
-    if (login.password == undefined) {
-        res.status(400).send("Missing Password")
-        return
-    }
+})
 
-    login.password = hash(login.password)
-
+//Playlist
+app.get('/playlists', auth, async function (req, res) {
     var pwmClient = await new mongoClient(uri).connect()
-    var filter = {
-        $and : [
-            {"email": login.email},
-            {"password": login.password}
-        ]
-    }
-    var loggedUser = await pwmClient.db("SNM")
-    .collection('Users')
-    .findOne(filter);
-    console.log(loggedUser)
-
-    if (loggedUser == null) {
-        res.status(401).send("Unauthorized")
-    } else {
-        res.send({ loggedUser })
-    }
-}
-)
-
-app.put("/users/:id", auth, function (req, res) {
-    updateUser(res, req.params.id, req.body)
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .find({"public":true})
+        .toArray();
+    res.json(playlists)
 })
 
-app.delete("/users/:id", auth, function (req, res) {
-    deleteUser(res, req.params.id)
-})
-
-app.post("/playlist", auth, function (req, res) {
-    addPlaylist(res, req.body)
-})
-
-async function addPlaylist(res, playlist) {
+app.post("/playlist", auth, async function (req, res) {
+    var playlist = req.body
     if (playlist.name == undefined) {
         res.statusMessage = "Missing name"
         res.status(400)
@@ -207,15 +211,38 @@ async function addPlaylist(res, playlist) {
     catch (e) {
         res.status(500).send(`Errore generico: ${e}`)
     };
-}
+})
 
-app.get('/playlists', auth, async function (req, res) {
+app.put('/playlists/:playlist', auth, async function (req, res) {
+    // Ricerca nel database
+    var playlist = req.params.playlist
     var pwmClient = await new mongoClient(uri).connect()
-    var playlists = await pwmClient.db("SNM")
+    var track = req.body
+    var myplaylist = pwmClient.db("SNM")
+    .collection('Playlists').find({$and:[{"_id" : new ObjectId(playlist)}, {"tracks": track}]})
+    
+    if(await myplaylist.next()){
+        res.statusMessage = "Canzone gia presente nella playlist"
+        res.sendStatus(400)
+    }else{
+        var newplaylist = await pwmClient.db("SNM")
         .collection('Playlists')
-        .find({"public":true})
-        .toArray();
-    res.json(playlists)
+        .updateOne(
+            {"_id" : new ObjectId(playlist)},
+            {"$push" : {"tracks":track}}
+        )
+        console.log(newplaylist)
+        res.json(newplaylist)
+    }
+})
+
+app.delete('/playlist/:id', auth, async function (req, res) {
+    // Ricerca nel database
+    var id = req.params.id
+    var pwmClient = await new mongoClient(uri).connect()
+    var myplaylist = pwmClient.db("SNM")
+    .collection('Playlists').deleteOne({"_id" : new ObjectId(id)})
+    return myplaylist
 })
 
 app.get('/playlists/:user', auth, async function (req, res) {
@@ -301,36 +328,4 @@ app.get('/playlists/followedby/:user', auth, async function (req, res) {
         .find({$and:[{"public":true}, {"followers" : {"id":user}}]})
         .toArray();
     res.json(playlists)
-})
-
-app.put('/playlists/:playlist', auth, async function (req, res) {
-    // Ricerca nel database
-    var playlist = req.params.playlist
-    var pwmClient = await new mongoClient(uri).connect()
-    var track = req.body
-    var myplaylist = pwmClient.db("SNM")
-    .collection('Playlists').find({$and:[{"_id" : new ObjectId(playlist)}, {"tracks": track}]})
-    
-    if(await myplaylist.next()){
-        res.statusMessage = "Canzone gia presente nella playlist"
-        res.sendStatus(400)
-    }else{
-        var newplaylist = await pwmClient.db("SNM")
-        .collection('Playlists')
-        .updateOne(
-            {"_id" : new ObjectId(playlist)},
-            {"$push" : {"tracks":track}}
-        )
-        console.log(newplaylist)
-        res.json(newplaylist)
-    }
-})
-
-app.delete('/playlist/:id', auth, async function (req, res) {
-    // Ricerca nel database
-    var id = req.params.id
-    var pwmClient = await new mongoClient(uri).connect()
-    var myplaylist = pwmClient.db("SNM")
-    .collection('Playlists').deleteOne({"_id" : new ObjectId(id)})
-    return myplaylist
 })
