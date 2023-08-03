@@ -105,11 +105,11 @@ export async function postPlaylist(playlist) {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(playlist)
-    }).then(async response => {
-        if (response.ok) {
-            return response.json()
+    }).then(async res => {
+        if (res.ok) {
+            return res.json()
         } else {
-            response.text().then( text => alert(text) )
+            return {text: res.statusText, status: res.status}
         }
     })
 }

@@ -1208,6 +1208,10 @@ export async function addPlaylist(){
     var tags = []
     var followers = []
     var tagsNode = document.getElementsByClassName("tagSpan")
+    if(!document.getElementById("errorAlert").classList.contains("visually-hidden")){
+        document.getElementById("errorAlert").classList.add("visually-hidden")
+        document.getElementById("errorText").innerHTML = ""
+    }
     if(tags){
         var find=false
         Array.prototype.forEach.call(tagsNode, function(tag) {
@@ -1226,7 +1230,12 @@ export async function addPlaylist(){
     }
     var res = await postPlaylist(playlist)
     console.log(res)
-    goToPlaylist(res.insertedId)
+    if(res.text){
+        document.getElementById("errorAlert").classList.remove("visually-hidden")
+        document.getElementById("errorText").innerHTML = res.status + ": " + res.text
+    }else{
+        goToPlaylist(res.insertedId)
+    }
 }
 
 /**

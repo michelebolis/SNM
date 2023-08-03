@@ -188,11 +188,15 @@ app.post("/playlist", auth, function (req, res) {
 
 async function addPlaylist(res, playlist) {
     if (playlist.name == undefined) {
-        res.status(400).send("Missing name")
+        res.statusMessage = "Missing name"
+        res.status(400)
+        res.send()
         return
     }
     if (playlist.name == "") {
-        res.status(400).send("Missing name")
+        res.statusMessage = "Empty name"
+        res.status(400)
+        res.send()
         return
     }
     var pwmClient = await new mongoClient(uri).connect()
@@ -201,7 +205,6 @@ async function addPlaylist(res, playlist) {
         res.json(items)
     }
     catch (e) {
-        console.log('catch in test');
         res.status(500).send(`Errore generico: ${e}`)
     };
 }
