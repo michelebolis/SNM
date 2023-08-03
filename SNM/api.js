@@ -36,8 +36,7 @@ app.get('/users/:id', auth, async function (req, res) {
     var pwmClient = await new mongoClient(uri).connect()
     var user = await pwmClient.db("SNM")
         .collection('Users')
-        .find({ "_id": new ObjectId(id) })
-        .toArray();
+        .findOne({ "_id": new ObjectId(id) })
     res.json(user)
 })
 
@@ -236,8 +235,7 @@ app.get('/playlists/info/:id', auth, async function (req, res) {
     var pwmClient = await new mongoClient(uri).connect()
     var playlists = await pwmClient.db("SNM")
         .collection('Playlists')
-        .find({ "_id": new ObjectId(id) })
-        .toArray();
+        .findOne({ "_id": new ObjectId(id) })
     res.json(playlists)
 })
 

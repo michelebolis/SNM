@@ -19,7 +19,6 @@ export async function loadAccount(){
     document.getElementById("nickname").value = "Loading..."
     document.getElementById("buttonModify").disabled = true
     var user = await getUser(window.localStorage.getItem("user"))
-    user = user[0]
     document.getElementById("email").value = user.email
     document.getElementById("nickname").value = user.nickname
     document.getElementById("buttonModify").disabled = false
@@ -673,7 +672,9 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
         }
         div.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToPlaylist(playlists[i]._id)})
         div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
-        if(logged() && playlists[i].owner==window.localStorage.getItem("user")){
+        if(!logged()){
+
+        }else if(playlists[i].owner==window.localStorage.getItem("user")){
             var del = document.createElement("div")
             del.classList.add("card-action", "link")
             del.innerHTML = "\u274C"
@@ -717,8 +718,7 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
  */
 export async function printPlaylistInfo(id, idNode){
     var playlist = await getPlaylist(id)
-    if(playlist[0]==undefined){window.location.href = "/src/playlist.html";return;}
-    playlist = playlist[0]
+    if(playlist==undefined){window.location.href = "/src/playlist.html";return;}
     console.log(playlist)
 
     // titolo
@@ -741,13 +741,14 @@ export async function printPlaylistInfo(id, idNode){
     left.append(img)
     var right = document.createElement("ul")
     right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
-
+    //elenco informazioni
     var li = document.createElement("li")
     li.classList.add("list-group-item", "list-group-item-dark")
 
     var li_clone = li.cloneNode(true)
     var autore = ""
-    if(playlist.owner = window.localStorage.getItem("user")){
+    var loggedUser = window.localStorage.getItem("user")
+    if(loggedUser && playlist.owner == loggedUser){
         autore="Tu"
     }else{
         autore = await getUser(playlist.owner)
@@ -775,6 +776,27 @@ export async function printPlaylistInfo(id, idNode){
 
     li_clone = li.cloneNode(true)
     li_clone.innerHTML = "Pubblica: " + (playlist.public ? "si" : "no")
+    if(loggedUser){
+        var button = document.createElement("button")
+        button.classList.add("show", "btn-primary", "btn")
+        button.value = playlist._id
+        if(playlist.owner == loggedUser){
+            if(playlist.public){
+                button.innerHTML = "Rendi privata"
+            }else{
+                button.innerHTML = "Rendi pubblica"
+            }
+        }else{
+            button.innerHTML = "Follow"
+            playlist.followers.forEach(follower => {
+                if(follower.id == loggedUser){
+                    button.innerHTML = "Unfollow"
+                }
+            });
+        }
+        button.addEventListener("click", handlePlaylist)
+        li_clone.append(button)
+    }
     right.append(li_clone)
 
     
@@ -783,6 +805,34 @@ export async function printPlaylistInfo(id, idNode){
     document.getElementById(idNode).append(node)
 
     printPlaylistTracks(playlist.tracks, "trackPlaylist")
+}
+
+async function handlePlaylist(){
+    var user = window.localStorage.getItem("user")
+    switch(this.innerHTML){
+        case "Follow": 
+            try {
+                var res = await addFollow(this.value, {"id":user})
+                this.innerHTML = "Unfollow"
+            } catch (error) {
+
+            }
+            break;
+        case "Unfollow":
+            try {
+                var res = await removeFollow(this.value, {"id":user})
+                this.innerHTML = "Follow"
+            } catch (error) {
+
+            }
+            break;
+        case "Rendi pubblica":
+
+            break;
+        case "Rendi privata":
+
+            break;
+    }
 }
 
 /**
