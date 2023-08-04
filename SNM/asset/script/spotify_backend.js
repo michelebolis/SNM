@@ -6,7 +6,7 @@ var URL_TOKEN = "https://accounts.spotify.com/api/token"
  * Collegamento alle API di spotify attraverso l'id e codice segreto del client, 
  * ottenendo un token per effettuare le chiamate API
  */
-fetch(URL_TOKEN, {
+await fetch(URL_TOKEN, {
     method: "POST",
     headers: {
         Authorization: "Basic " + btoa(`${client_id}:${client_secret}`),
@@ -127,6 +127,17 @@ export async function getTopTracks(id) {
  */
 export async function getPlaylistSpotify(url){
     return fetch(url, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+export async function getGenresSpotify(){
+    return fetch('https://api.spotify.com/v1/recommendations/available-genre-seeds', {
         headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer " + access_token,

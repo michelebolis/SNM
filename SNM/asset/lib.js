@@ -2,7 +2,7 @@ import {putPlaylist, getFollowedPlaylists, getPublicPlaylist, userLogin, getUser
     deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag, deleteUser, 
     changePlaylistVisibility, putTags} from "./script/backend.js"
 import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, 
-    searchArtist, searchTrack} from "./script/spotify_backend.js"
+    searchArtist, searchTrack, getGenresSpotify} from "./script/spotify_backend.js"
 
 /**
  * Funzione che verifica se un utente sia loggato o meno
@@ -23,6 +23,27 @@ export async function loadAccount(){
     document.getElementById("email").value = user.email
     document.getElementById("nickname").value = user.nickname
     document.getElementById("buttonModify").disabled = false
+    var taglist = document.getElementById("tagList")
+    if(!user.favorite_genres || user.favorite_genres.length==0){
+        var nessuno = document.createElement("div")
+        nessuno.id="nessuno"
+        nessuno.innerHTML = "Nessuno"
+        taglist.append(nessuno)
+    }
+}
+
+/**
+ * Funzione che riempie la select dei generi con quelli ottenuti da Spotify
+ */
+export async function loadGenres(){
+    var genres = await getGenresSpotify()
+    var select = document.getElementById("genres")
+    console.log(genres)
+    genres.genres.forEach(genre => {
+        var option = document.createElement("option")
+        option.innerHTML = genre
+        select.append(option)
+    });
 }
 
 /**
