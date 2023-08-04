@@ -726,8 +726,32 @@ export async function printMyPlaylists(idNode, idTemplate){
     }else{
         var title = document.createElement("h4")
         title.innerHTML = "Le tue playlist"
-        node.parentNode.prepend(title)
-        printPlaylistCard(playlists, idNode, idTemplate)
+        node.innerHTML = ""
+        var template = document.getElementById(idTemplate).cloneNode(true)
+        template.classList.remove("visually-hidden")
+        var pagination = document.createElement("ul")
+        pagination.classList.add("pagination", "justify-content-center")
+        for (let i=0;i<playlists.length;i+=5){
+            var row = document.createElement("div")
+            row.classList.add("row", "justify-content-center")
+            i/5 == 0 ? null : row.classList.add("visually-hidden")
+            var newid = "MyPlaylistRow"+(i/5)
+            row.id = newid
+            node.append(row)
+
+            printPlaylistCard(playlists.slice(i,i+5), newid, idTemplate)
+
+            var page = document.createElement("li")
+            page.classList.add("page-item", "page-link", "link")
+            page.style = "cursor: pointer"
+            page.innerHTML = (i/5) +1
+            page.addEventListener("click", showMore)
+            pagination.append(page)
+        }
+        if(playlists.length>5){
+            pagination.childNodes[0].classList.add("active")
+            document.getElementById(idNode).append(pagination)
+        }
         node.parentNode.prepend(title)
     }
 }
@@ -736,20 +760,16 @@ export async function printMyPlaylists(idNode, idTemplate){
  * Funzione che stampa le playlist 5 playlist per riga
  * @param {Array} playlists array contenente le playlist
  * @param {String} idNode id dove accodare le playlist 
- * @param {String} idTemplate id dove reperire il template da utilizzare
+ * @param {String} idTemplate template da utilizzare
  */
 export function printPlaylistCard(playlists, idNode, idTemplate){
     var node = document.getElementById(idNode)
-    node.innerHTML=""
-    var template = document.getElementById(idTemplate).cloneNode(true)
+    var template = document.getElementById(idTemplate)
     template.classList.remove("visually-hidden")
-    //document.getElementById(idTemplate).remove()
-    var row = document.createElement("div")
-    row.classList.add("row", "justify-content-center")
-    node.append(row)
-    node = row
     for(let i=0;i<playlists.length;i++){
         var div = template.cloneNode(true)
+        div.id=""
+        div.getElementsByClassName("card-img")[0].src = "../img/music.jpg"
         if(playlists[i].tracks && playlists[i].tracks.length!=0){
             if (playlists[i].tracks[0].info.album.images[0].url){
                 div.getElementsByClassName("card-img")[0].src = playlists[i].tracks[0].info.album.images[0].url
@@ -758,7 +778,7 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
         div.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToPlaylist(playlists[i]._id)})
         div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
         if(!logged()){
-
+            //niente
         }else if(playlists[i].owner==window.localStorage.getItem("user")){
             var del = document.createElement("div")
             del.classList.add("card-action", "link")
@@ -794,6 +814,7 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
         }
         node.append(div)
     }
+    template.classList.add("visually-hidden")
 }
 
 /**
@@ -1133,7 +1154,27 @@ export async function printFollowedPlaylists(){
         document.getElementById("followedPlaylists").innerHTML = ""
         title.innerHTML = "Non segui ancora nessuna playlist"
     }else{
-        printPlaylistCard(followedPlaylists, "followedPlaylists", "playlist-template")
+        var template = document.getElementById("playlist-template").cloneNode(true)
+        template.classList.remove("visually-hidden")
+        var pagination = document.createElement("ul")
+        pagination.classList.add("pagination", "justify-content-center")
+        for(let i=0;i<followedPlaylists.length;i+=5){
+            var row = document.createElement("div")
+            row.classList.add("row", "justify-content-center")
+            i/5 == 0 ? null : row.classList.add("visually-hidden")
+            var newid = "FollowedPlaylistsRow"+(i/5)
+            row.id = newid
+            node.append(row)
+
+            printPlaylistCard(followedPlaylists.slice(i, i+5), newid, idTemplate)
+
+            var page = document.createElement("li")
+            page.classList.add("page-item", "page-link", "link")
+            page.style = "cursor: pointer"
+            page.innerHTML = (i/5) +1
+            page.addEventListener("click", showMore)
+            pagination.append(page)
+        }
     }
     document.getElementById("followedPlaylists").parentNode.prepend(title)
 }
@@ -1142,16 +1183,38 @@ export async function printFollowedPlaylists(){
  * Funcione che stampa le playlist pubbliche
  */
 export async function printPublicPlaylists(){
+    var node = document.getElementById("publicPlaylists")
     var playlists = await getPublicPlaylist()
     console.log(playlists)
     var title = document.createElement("h4")
     if(playlists.length == 0){
         title.innerHTML = "Oh no, non ci sono ancora playlist pubbliche"
     }else{
-        printPlaylistCard(playlists, "publicPlaylists", "playlist-template")
+        var template = document.getElementById("playlist-template").cloneNode(true)
+        template.classList.remove("visually-hidden")
+        var pagination = document.createElement("ul")
+        pagination.classList.add("pagination", "justify-content-center")
+        for(let i=0;i<playlists.length; i+=5){
+            var row = document.createElement("div")
+            row.classList.add("row", "justify-content-center")
+            i/5 == 0 ? null : row.classList.add("visually-hidden")
+            var newid = "FollowedPlaylistsRow"+(i/5)
+            row.id = newid
+            node.append(row)
+
+            printPlaylistCard(playlists.slice(i, i+5), newid, "playlist-template")
+
+            var page = document.createElement("li")
+            page.classList.add("page-item", "page-link", "link")
+            page.style = "cursor: pointer"
+            page.innerHTML = (i/5) +1
+            page.addEventListener("click", showMore)
+            pagination.append(page)
+        }
+
         title.innerHTML = "Esplora le playlist pubbliche"
     }
-    document.getElementById("publicPlaylists").parentNode.prepend(title)
+    node.parentNode.prepend(title)
 }
 
 /**
@@ -1637,7 +1700,28 @@ export async function printSearchPlaylist(input, divSearch){
         document.getElementById("searchPlaylist").innerHTML=""
         document.getElementById("titleTemp").innerHTML = "Playlist dalla ricerca: nessun risultato"
     }else{
-        printPlaylistCard(playlists, "searchPlaylist", "playlist-template")
+        var node = document.getElementById("searchPlaylist")
+        var template = document.getElementById("playlist-template").cloneNode(true)
+        template.classList.remove("visually-hidden")
+        var pagination = document.createElement("ul")
+        pagination.classList.add("pagination", "justify-content-center")
+        for(let i=0;i<playlists.length; i+=5){
+            var row = document.createElement("div")
+            row.classList.add("row", "justify-content-center")
+            i/5 == 0 ? null : row.classList.add("visually-hidden")
+            var newid = "searchByPlaylistRow"+(i/5)
+            row.id = newid
+            node.append(row)
+
+            printPlaylistCard(playlists.slice(i, i+5), newid, "playlist-template")
+
+            var page = document.createElement("li")
+            page.classList.add("page-item", "page-link", "link")
+            page.style = "cursor: pointer"
+            page.innerHTML = (i/5) +1
+            page.addEventListener("click", showMore)
+            pagination.append(page)
+        }
     }
 }
 
@@ -1671,7 +1755,28 @@ export async function printSearchTag(input, divSearch){
         document.getElementById("searchPlaylist").innerHTML=""
         document.getElementById("titleTemp").innerHTML = "Playlist dalla ricerca: nessun risultato"
     }else{
-        printPlaylistCard(playlists, "searchPlaylist", "playlist-template")
+        var node = document.getElementById("searchPlaylist")
+        var template = document.getElementById("playlist-template").cloneNode(true)
+        template.classList.remove("visually-hidden")
+        var pagination = document.createElement("ul")
+        pagination.classList.add("pagination", "justify-content-center")
+        for(let i=0;i<playlists.length; i+=5){
+            var row = document.createElement("div")
+            row.classList.add("row", "justify-content-center")
+            i/5 == 0 ? null : row.classList.add("visually-hidden")
+            var newid = "searchByTagRow"+(i/5)
+            row.id = newid
+            node.append(row)
+
+            printPlaylistCard(playlists.slice(i, i+5), newid, "playlist-template")
+
+            var page = document.createElement("li")
+            page.classList.add("page-item", "page-link", "link")
+            page.style = "cursor: pointer"
+            page.innerHTML = (i/5) +1
+            page.addEventListener("click", showMore)
+            pagination.append(page)
+        }
     }
 }
 
