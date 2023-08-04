@@ -95,6 +95,12 @@ app.post("/users", auth, async function (req, res) {
         res.send()
         return
     }
+    if (user.favorite_genres == undefined || user.favorite_genres == ""){
+        res.statusMessage = "Missing Favorite Genres"
+        res.status(400)
+        res.send()
+        return
+    }
     user.password = hash(user.password)
 
     var pwmClient = await new mongoClient(uri).connect()
@@ -189,6 +195,12 @@ app.put("/users/:id", auth, async function (req, res) {
     }
     if (updatedUser.email == ""){
         res.statusMessage = "Empty Email"
+        res.status(400)
+        res.send()
+        return
+    }
+    if (updatedUser.favorite_genres == undefined || updatedUser.favorite_genres == ""){
+        res.statusMessage = "Missing Favorite genres"
         res.status(400)
         res.send()
         return

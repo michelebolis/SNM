@@ -29,6 +29,23 @@ export async function loadAccount(){
         nessuno.id="nessuno"
         nessuno.innerHTML = "Nessuno"
         taglist.append(nessuno)
+    }else{
+        user.favorite_genres.forEach(tag => {
+            var newtag = document.createElement("div")
+            newtag.classList.add("col-auto", "tag")
+            var a = document.createElement("a")
+            a.innerHTML = "❌ "
+            a.style = "cursor: pointer;text-decoration: none;"
+            a.classList.add("link")
+            a.addEventListener("click", removeTag)
+            var span = document.createElement("span")
+            span.classList.add("tagSpan")
+            span.innerHTML=tag.name
+            newtag.append(span)
+            newtag.prepend(a)
+            var list = document.getElementById("tagList")
+            list.append(newtag)
+        });
     }
 }
 
@@ -37,7 +54,7 @@ export async function loadAccount(){
  */
 export async function loadGenres(){
     var genres = await getGenresSpotify()
-    var select = document.getElementById("genres")
+    var select = document.getElementById("tagInput")
     console.log(genres)
     genres.genres.forEach(genre => {
         var option = document.createElement("option")
@@ -58,18 +75,25 @@ export async function cambiaCredenziali(){
     if(!document.getElementById("successAlert").classList.contains("visually-hidden")){
         document.getElementById("successAlert").classList.add("visually-hidden")
     }
+    var genresNode = document.getElementsByClassName("tagSpan")
+    var genres = []
+    Array.prototype.forEach.call(genresNode, function(genre) {
+        genres.push({"name" : genre.innerHTML})
+    });
     if(check.checked){
         var newpass = document.getElementById("password").value
         if(newpass==""){return}
         var updatedUser = {
             email : document.getElementById("email").value,
             nickname : document.getElementById("nickname").value,
-            password : newpass
+            password : newpass,
+            genres: genres==[] ? "" : genres
         }
     }else{
         var updatedUser = {
             email : document.getElementById("email").value,
-            nickname : document.getElementById("nickname").value
+            nickname : document.getElementById("nickname").value,
+            favorite_genres: genres==[] ? "" : genres
         }
     }
     var res = await putUser(window.localStorage.getItem("user"), updatedUser)
@@ -660,15 +684,13 @@ export async function printMyPlaylists(idNode, idTemplate){
     if (!logged()){return}
     var user = localStorage.getItem("user")
     var node = document.getElementById(idNode)
-    var title = document.createElement("h4")
-    title.innerHTML = "Le tue playlist"
-    node.parentNode.prepend(title)
     for(let i=0;i<5;i++){
         printCardPlaceholder(idNode)
     }
     var playlists = await getMyPlaylist(user)
     console.log(playlists)
     if (playlists.length==0){
+        node.innerHTML = ""
         var title = document.createElement("h4")
         title.innerHTML = "Non hai ancora nessuna playlist, creane una "
         var a = document.createElement("a")
@@ -677,6 +699,9 @@ export async function printMyPlaylists(idNode, idTemplate){
         title.append(a)
         node.parentNode.append(title)
     }else{
+        var title = document.createElement("h4")
+        title.innerHTML = "Le tue playlist"
+        node.parentNode.prepend(title)
         printPlaylistCard(playlists, idNode, idTemplate)
         node.parentNode.prepend(title)
     }
@@ -1223,27 +1248,29 @@ export async function addUser(){
     var email = document.getElementById("email").value
     var password = document.getElementById("password").value
     var nickname = document.getElementById("user").value
+    var genresNode = document.getElementsByClassName("tagSpan")
+    var genres = []
+    Array.prototype.forEach.call(genresNode, function(genre) {
+        genres.push({"name" : genre.innerHTML})
+    });
     var user = {
         email: email,
         password: password,
-        nickname: nickname
+        nickname: nickname,
+        favorite_genres: genres==[] ? "" : genres
     }
     console.log(user)
     var res = await postUser(user)
     console.log(res)
     if (!res.status){
         localStorage.setItem("user", res.insertedId)
-        var div = document.getElementById("userForm")
-        div.innerHTML = ""
-
-        var mess = document.createElement("h4")
-        mess.classList.add("text-center")
-        mess.innerHTML = "Utente creato correttamente, benvenuto!</br>"
-        var a = document.createElement("a")
-        a.innerHTML = "Torna alla home"
-        a.href="/"
-        mess.append(a)
-        div.append(mess)
+        localStorage.setItem("nickname", nickname)
+        if(document.getElementById("errorAlert").classList.contains("visually-hidden")){
+            document.getElementById("errorAlert").classList.add("visually-hidden")
+            document.getElementById("errorAlert").innerHTML = ""
+        }
+        document.getElementById("successAlert").classList.remove("visually-hidden")
+        document.getElementById("userForm").innerHTML = ""
     }else{
         document.getElementById("errorAlert").classList.remove("visually-hidden")
         document.getElementById("errorAlert").innerHTML = res.status + ": " + res.text
@@ -1315,11 +1342,9 @@ export async function addPlaylist(){
         document.getElementById("errorText").innerHTML = ""
     }
     if(tags){
-        var find=false
         Array.prototype.forEach.call(tagsNode, function(tag) {
             tags.push({"name" : tag.innerHTML})
         });
-        if(find){return}
     }
     var playlist = {
         name: nome,

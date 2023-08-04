@@ -9,9 +9,11 @@
       integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="../style/style.css">
     <script type="module">
-      import { addUser, login } from "../lib.js";
+      import { addUser, login, loadGenres, addTag} from "../lib.js";
+      loadGenres()
       document.getElementById("buttonAddUser").addEventListener("click", addUser)
       document.getElementById("buttonLogin").addEventListener("click", login)
+      document.getElementById("addGenre").addEventListener("click", addTag)
     </script>
     <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
       <symbol id="check-circle-fill" viewBox="0 0 16 16">
@@ -26,7 +28,7 @@
   </svg>
 </head>
 <body>
-    <div class="container external-container" >
+    <div class="container external-container" style="border:white solid 2px;">
       <div class="row" id="userForm">
         <div class="col-12 col-sm-12 col-md-5" id="signin">
           <h4>Registrati</h4>
@@ -41,6 +43,30 @@
           <div class="mb-3">
             <label for="password" class="form-label">Password</label>
             <input type="password" class="form-control" id="password" autocomplete="off">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">
+                Generi preferiti : scegline almeno 3 per aiutarci a suggerirti canzoni
+            </label>
+            <div class="container">
+                <div class="row" id="tagList" style="margin: 10px 0;">
+                  <div id="nessuno">Nessuno</div>
+                </div>
+            </div>
+            <div class="mb-3 ">
+                <div>Generi disponibili</div>
+                <div class="row" style="margin-top: 10px;">
+                    <div class="col-6">
+                        <select id="tagInput" class="form-select ">
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-primary" style="width: 100%;" id="addGenre">
+                            Aggiungi genere tra i preferiti
+                        </button>
+                    </div>
+                </div>
+            </div>
           </div>
           <div class="text-center">
             <button class="btn btn-primary show" id="buttonAddUser">Registrati</button>
@@ -62,17 +88,22 @@
             <button class="btn btn-primary show" id="buttonLogin">Accedi</button>
           </div>
         </div>
-        
-        <a href="/" class="text-center"><h3>Torna alla home</h3></a>
+      </div>
+      <a href="/" class="text-center"><h3>Torna alla home</h3></a>
 
         <div id="alerts">
+          <div class="alert alert-success d-flex align-items-center visually-hidden" style="height: 70px;" role="alert" id="successAlert">
+            <svg class="bi flex-shrink-0 me-2" role="img" style="width: 30px;"><use xlink:href="#check-circle-fill"/></svg>
+            <div>
+              Account creato correttamente, torna pure alla home
+            </div>
+          </div>
           <div class="alert alert-danger d-flex align-items-center visually-hidden" style="height: 70px;margin-top:20px;" role="alert" id="errorAlert">
               <svg class="bi flex-shrink-0 me-2" role="img" style="width: 30px;"><use xlink:href="#exclamation-triangle-fill"/></svg>
               <div id="errorText">
               </div>
           </div>
         </div>
-      </div>
     </div>    
 </body>
 </html>
