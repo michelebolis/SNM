@@ -317,3 +317,17 @@ export async function putPlaylist(){
     })
     .catch((e) => {console.log(e)})
 }
+
+export async function putTags(id, tags){
+    return fetch(`${MY_BASE_URL}playlist/tag/${id}?apikey=123456`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({tags: tags})
+    })
+    .then(async res => {
+        return res.json()
+    })
+    .catch((e) => {console.log(e)})
+}

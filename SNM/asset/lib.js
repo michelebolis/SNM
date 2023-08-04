@@ -1,5 +1,6 @@
 import {putPlaylist, getFollowedPlaylists, getPublicPlaylist, userLogin, getUser, postUser, putUser, postPlaylist, 
-    deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag, deleteUser, changePlaylistVisibility} from "./script/backend.js"
+    deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag, deleteUser, 
+    changePlaylistVisibility, putTags} from "./script/backend.js"
 import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, 
     searchArtist, searchTrack} from "./script/spotify_backend.js"
 
@@ -761,7 +762,8 @@ export async function printPlaylistInfo(id, idNode){
     var li_clone = li.cloneNode(true)
     var autore = ""
     var loggedUser = window.localStorage.getItem("user")
-    if(loggedUser && playlist.owner == loggedUser){
+    var isowner = loggedUser && playlist.owner == loggedUser
+    if(isowner){
         autore="Tu"
     }else{
         autore = await getUser(playlist.owner)
@@ -779,15 +781,76 @@ export async function printPlaylistInfo(id, idNode){
     right.append(li_clone)
     //tag
     li_clone = li.cloneNode(true)
-    li_clone.innerHTML = "Tag:"
+    li_clone.classList.add("container")
+    var row = document.createElement("div")
+    row.classList.add("row")
+    var div = document.createElement("div")
+    div.innerHTML = "Tag:"
+    div.classList.add("col-1")
+    row.append(div)
     if(playlist.tags.length==0){
-        li_clone.innerHTML+=" Nessuno"
+        div = document.createElement("div")
+        div.id= "nessuno"
+        div.innerHTML = "Nessuno"
+        row.append(div)
     }else{
+        var taglist = document.createElement("div")
+        taglist.id = "tagList"
+        taglist.classList.add("row", "col-11")
         for(let i=0;i<playlist.tags.length;i++){
-            var a = document.createElement("a")
-            a.innerHTML = " #" + playlist.tags[i]
-            li_clone.append(a)
+            var divtag = document.createElement("div")
+            divtag.classList.add("col-auto", "tag")
+            if(isowner){
+                var a = document.createElement("a")
+                a.innerHTML = "❌ "
+                a.style = "cursor: pointer; text-decoration: none;"
+                a.classList.add("link")
+                a.addEventListener("click", removeTag)
+                divtag.append(a)
+            }
+            var span = document.createElement("span")
+            span.innerHTML = playlist.tags[i].name
+            span.classList.add("tagSpan")
+            divtag.append(span)
+            taglist.append(divtag)
         }
+        row.append(taglist)
+    }
+    li_clone.append(row)
+
+    if(isowner){
+        row = document.createElement("div")
+        row.classList.add("row")
+        row.style = "margin-top:10px"
+
+        div = document.createElement("div")
+        div.classList.add("col")
+        var input = document.createElement("input")
+        input.type = "text"
+        input.classList.add("form-control")
+        input.id = "tagInput"
+        input.placeholder="Tag della playlist"
+        input.autocomplete="off"
+        div.append(input)
+        row.append(div)
+
+        div = document.createElement("div")
+        div.classList.add("col-auto")
+        button = document.createElement("button")
+        button.classList.add("btn", "btn-primary")
+        button.innerHTML="Aggiungi tag"
+        button.addEventListener("click", addTag)
+        div.append(button)
+        row.append(div)
+
+        li_clone.append(row)
+        button = document.createElement("button")
+        button.classList.add("btn", "btn-primary")
+        button.innerHTML="Aggiorna i tag della playlist"
+        button.style = "width:100%;margin-top:10px"
+        button.value = playlist._id
+        button.addEventListener("click", updateTag)
+        li_clone.append(button)
     }
     right.append(li_clone)
     //azioni possibili sulla playlist
@@ -797,17 +860,19 @@ export async function printPlaylistInfo(id, idNode){
     div.innerHTML = (playlist.public ? "Playlist pubblica" : "Playlist privata")
     li_clone.append(div)
     if(loggedUser){
+        div = document.createElement("div")
+        div.classList.add("text-center")
         var button = document.createElement("button")
         button.classList.add("show", "btn-primary", "btn")
         button.value = playlist._id
-        if(playlist.owner == loggedUser){
+        if(isowner){
             if(playlist.public){
                 button.innerHTML = "Rendi privata"
             }else{
                 button.innerHTML = "Rendi pubblica"
             }
             button.addEventListener("click", handlePlaylist)
-            li_clone.append(button)
+            div.append(button)
             button = document.createElement("button")
             button.classList.add("show", "btn-danger", "btn")
             button.value = playlist._id
@@ -824,7 +889,8 @@ export async function printPlaylistInfo(id, idNode){
             });
             button.addEventListener("click", handlePlaylist)
         }
-        li_clone.append(button)
+        div.append(button)
+        li_clone.append(div)
     }
     right.append(li_clone)
 
@@ -930,13 +996,25 @@ export async function printPlaylistTracks(tracks, idNode){
                 source.type = "audio/mpeg"
                 audio.append(source)
                 clone.childNodes[0].childNodes[1].append(audio)
+            }else{
+                clone.childNodes[1].style = "margin-top:10px"
             }
             if(logged()){
                 // la possibilità di aggiungere la track ad una playlist è possibile solo SE si è loggati
-                clone.childNodes[1].childNodes[0].innerHTML = "Aggiungi in una tua playlist"
+
+                clone.childNodes[1].childNodes[0].classList.add("text-center")
                 clone.childNodes[1].childNodes[1].classList.add("text-center")
+                var button = document.createElement("button")
+                button.id=tracks[i].info.id
+                button.innerHTML="Aggiungi in una tua playlist"
+                button.addEventListener("click", putPlaylist)
+                button.classList.add("btn", "btn-primary", "show")
+                button.style = "margin:0;"
+                clone.childNodes[1].childNodes[0].append(button)
+
                 var select = document.createElement("select")
                 select.classList.add("form-select")
+                select.style = "margin-top:10px;"
                 select.id="myplaylist"
                 var option = document.createElement("option")
                 option.innerHTML = "Seleziona una tua playlist"
@@ -951,13 +1029,6 @@ export async function printPlaylistTracks(tracks, idNode){
                     }
                 }
                 clone.childNodes[1].childNodes[1].append(select)
-                var button = document.createElement("button")
-                button.id=tracks[i].info.id
-                button.innerHTML="Aggiungi"
-                //button.style = "width:80%;margin:5px 0;"
-                button.addEventListener("click", putPlaylist)
-                button.classList.add("btn", "btn-primary", "show")
-                clone.childNodes[1].childNodes[1].append(button)
             }
             tracklist.append(clone)
         }
@@ -1267,9 +1338,10 @@ export function addTag(){
             if(find){return}
         }
         var newtag = document.createElement("div")
-        newtag.classList.add("col", "tag")
+        newtag.classList.add("col-auto", "tag")
         var a = document.createElement("a")
         a.innerHTML = "❌ "
+        a.style = "cursor: pointer;text-decoration: none;"
         a.classList.add("link")
         a.addEventListener("click", removeTag)
         var span = document.createElement("span")
@@ -1294,8 +1366,18 @@ export function removeTag(){
         div.classList.add("col-3")
         div.innerHTML="Nessuno"
         div.id="nessuno"
-        list.append(div)
+        document.getElementById("tagList").append(div)
     }
+}
+
+export async function updateTag(){
+    var tags = []
+    var id = this.value
+    var tagslist = document.getElementsByClassName("tagSpan")
+    Array.prototype.forEach.call(tagslist, function(tag) {
+        tags.push({"name":tag.innerHTML})
+    });
+    await putTags(id,tags)
 }
 
 /**

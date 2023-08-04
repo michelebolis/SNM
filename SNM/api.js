@@ -341,6 +341,17 @@ app.put('/playlist/visibility/:id', auth, async function (req, res) {
     res.json(playlists)
 })
 
+app.put('/playlist/tag/:id', auth, async function (req, res) {
+    // Ricerca nel database
+    var id = req.params.id
+    var tags = req.body
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .updateOne({"_id" : new ObjectId(id)}, {$set : tags})
+    res.json(playlists)
+})
+
 app.get('/playlists/info/:id', auth, async function (req, res) {
     // Ricerca nel database
     var id = req.params.id

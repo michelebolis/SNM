@@ -92,3 +92,10 @@ body{
     text-align:center;
     margin-top:5px;
 }
+
+.tag{
+    border:1px solid white;
+    border-radius: 20%;
+    padding:10px; 
+    margin: 0 5px;
+}
