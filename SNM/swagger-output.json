@@ -113,6 +113,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "nickname": {
+                  "example": "any"
+                },
                 "email": {
                   "example": "any"
                 },
@@ -169,6 +172,16 @@
         }
       }
     },
+    "/playlists": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/playlist": {
       "post": {
         "description": "",
@@ -199,12 +212,41 @@
         }
       }
     },
-    "/playlists": {
-      "get": {
+    "/playlists/{playlist}": {
+      "put": {
         "description": "",
+        "parameters": [
+          {
+            "name": "playlist",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/playlist/{id}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
           }
         }
       }
@@ -264,6 +306,24 @@
       }
     },
     "/playlist/visibility/{id}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/playlist/tag/{id}": {
       "put": {
         "description": "",
         "parameters": [
@@ -349,45 +409,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          }
-        }
-      }
-    },
-    "/playlists/{playlist}": {
-      "put": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "playlist",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      }
-    },
-    "/playlist/{id}": {
-      "delete": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
           }
         }
       }
