@@ -129,16 +129,11 @@ export function printPlaylist(playlist, idNode, idTemplate){
     template.classList.remove("visually-hidden")
     document.getElementById(idNode).innerHTML=""
     console.log(playlist)
-    // button template to clone
-    var button = document.createElement("button")
-    button.innerHTML="Show more"
-    button.classList.add("show", "btn","btn-primary")
     
+    var pagination = document.createElement("ul")
+    pagination.classList.add("pagination", "justify-content-center")
+
     for (let i=0; i<playlist.length; i+=5){
-        // create the button to show more element
-        var newButton = button.cloneNode(true)
-        newButton.id = "showMore_" + i/5
-        newButton.addEventListener("click", showMore)
         //create the row
         var row = document.createElement("div")
         row.classList.add("row", "justify-content-center")
@@ -146,16 +141,21 @@ export function printPlaylist(playlist, idNode, idTemplate){
         row.id= newid
         document.getElementById(idNode).append(row)
         printTracksCard(playlist.slice(i,i+5), template, newid, i+1)
-        // append the button and hide everything
-        document.getElementById(newid).append(newButton)
+        // Hide everything
         document.getElementById(newid).classList.add("visually-hidden")
+
+        var page = document.createElement("li")
+        page.classList.add("page-item", "page-link", "link")
+        page.style = "cursor: pointer"
+        page.innerHTML = (i/5) +1
+        page.addEventListener("click", showMore)
+        pagination.append(page)
     }
     document.getElementById(idNode+"Row0").classList.remove("visually-hidden")
-    if (playlist.length%5==0){
-        document.getElementById("showMore_" + ((playlist.length/5)-1)).remove()
+    if(playlist.length>5){
+        pagination.childNodes[0].classList.add("active")
+        document.getElementById(idNode).append(pagination)
     }
-
-    //document.getElementById(idNode+'-template').remove()
 }
 
 /**
@@ -187,13 +187,21 @@ export function printTracksCard(playlist, template, id, startCount){
  * Visualizza il nodo successivo rispetto a quello del padre
  */
 export function showMore(){
-    var next = (this.parentNode.nextSibling)
-    if (next == null){
-        this.innerHTML = "Non ci sono piu elementi da mostrare"
-    }else{
-        next.classList.remove("visually-hidden")
-        this.classList.add("visually-hidden")
+    var n_page = this.innerHTML 
+    var rows = this.parentNode.parentNode.getElementsByClassName("row")
+    for(let i=0;i<rows.length;i++){
+        if(!rows[i].classList.contains("visually-hidden")){
+            document.getElementById(rows[i].id).classList.add("visually-hidden")
+        }
     }
+    rows[n_page-1].classList.remove("visually-hidden")
+    var pages = this.parentNode.getElementsByClassName("page-item")
+    for(let i=0;i<pages.length;i++){
+        if(pages[i].classList.contains("active")){
+            pages[i].classList.remove("active")
+        }
+    }
+    this.classList.add("active")
 }
 
 /**
@@ -408,15 +416,46 @@ export async function printArtistInfo(idArtist, idNode){
  * @param {String} idTemplate id del nodo da cui si clona il template da utilizzare
  */
 export function printArtists(artists, idNode, idTemplate){
-    document.getElementById(idNode).innerHTML=""
+    var node = document.getElementById(idNode)
+    node.innerHTML=""
     var template = document.getElementById(idTemplate).cloneNode(true)
     template.classList.remove("visually-hidden")
-    var row = document.createElement("div")
-    row.id=idNode+"Row0"
-    row.classList.add("row", "justify-content-center")
-    for (let i=0; i<artists.length; i++){
-        var clone = template.cloneNode(true)
+    var pagination = document.createElement("ul")
+    pagination.classList.add("pagination", "justify-content-center")
+    for (let i=0; i<artists.length; i+=5){
+        var page = document.createElement("li")
+        page.classList.add("page-item", "page-link", "link")
+        page.style = "cursor: pointer"
+        page.innerHTML = (i/5) +1
+        page.addEventListener("click", showMore)
+        pagination.append(page)
 
+        //create the row
+        var row = document.createElement("div")
+        row.classList.add("row", "justify-content-center")
+        i/5 == 0 ? null : row.classList.add("visually-hidden")
+        var newid = idNode+"Row" + (i/5)
+        row.id= newid
+        node.append(row)
+
+        printArtistsCard(artists.slice(i,i+5), template, newid, i+1)
+    }
+    if(artists.length>5){
+        pagination.childNodes[0].classList.add("active")
+        node.append(pagination)
+    }
+}
+
+/**
+ * Funzione che stampa gli informazioni degli artisti con le card
+ * @param {Array} artists array contentente le informazioni sugli artisti
+ * @param {Node} template nodo da usare come template 
+ * @param {String} idNode id del nodo a cui accodare le card 
+ * @param {int} startCount count da cui far partire il conteggio delle card
+ */
+export function printArtistsCard(artists, template, idNode, startCount){
+    for(let i=0;i<artists.length;i++){
+        var clone = template.cloneNode(true)
         clone.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToArtist(artists[i].id)})
         clone.getElementsByClassName("card-img")[0].classList.add("link", "cursor")
         if(artists[i].images.length!=0){
@@ -424,33 +463,9 @@ export function printArtists(artists, idNode, idTemplate){
         }else{
             clone.getElementsByClassName("card-img")[0].src = "/img/music.jpg"
         }
-        clone.getElementsByClassName("nome_artista")[0].innerHTML = "#" + (i+1) + " " +artists[i].name
+        clone.getElementsByClassName("nome_artista")[0].innerHTML = "#" + (startCount+i) + " " +artists[i].name
         clone.getElementsByClassName("follower")[0].innerHTML = artists[i].followers.total.toLocaleString('en-US')
-        row.append(clone)
-        if(((i+1)%5==0)&&(i!=0)){
-            if(i+1!=artists.length){
-                // create the button to show more element
-                var newButton = document.createElement("button")
-                newButton.id = "showMore_" + i
-                newButton.classList.add("show", "btn","btn-primary")
-                newButton.addEventListener("click", showMore)
-                newButton.innerHTML= "Show more"
-                row.append(newButton)
-            }
-            document.getElementById(idNode).append(row)
-            //create the row
-            var row = document.createElement("div")
-            row.classList.add("row", "justify-content-center", "visually-hidden")
-            var newid = idNode+"Row" + (i/5)
-            row.id= newid
-        }else if(i+1==artists.length){
-            document.getElementById(idNode).append(row)
-            //create the row
-            var row = document.createElement("div")
-            row.classList.add("row", "justify-content-center", "visually-hidden")
-            newid = idNode+"Row" + (i/5)
-            row.id= newid
-        }
+        document.getElementById(idNode).append(clone)
     }
 }
 
@@ -488,49 +503,59 @@ export async function printAlbumArtist(idArtist){
  * @param {String} idTemplate id del nodo da cui si clona il template da utilizzare
  */
 export function printAlbum(albums, idNode, idTemplate){
+    var node = document.getElementById(idNode)
     var template = document.getElementById(idTemplate).cloneNode(true)
-    document.getElementById(idNode).innerHTML=""
+    node.innerHTML=""
     template.classList.remove("visually-hidden")
     var row = document.createElement("div")
     row.id=idNode+"Row0"
     row.classList.add("row", "justify-content-center")
-    for (let i=0; i<albums.length; i++){
-        var clone = template.cloneNode(true)
+    var pagination = document.createElement("ul")
+    pagination.classList.add("pagination", "justify-content-center")
+    for (let i=0; i<albums.length; i+=5){
+        var page = document.createElement("li")
+        page.classList.add("page-item", "page-link", "link")
+        page.style = "cursor: pointer"
+        page.innerHTML = (i/5)+1
+        page.addEventListener("click", showMore)
+        pagination.append(page)
 
+        //create the row
+        var row = document.createElement("div")
+        row.classList.add("row", "justify-content-center")
+        i/5 == 0 ? null : row.classList.add("visually-hidden")
+        var newid = idNode+"Row" + (i/5)
+        row.id= newid
+        node.append(row)
+
+        printAlbumsCard(albums.slice(i,i+5), template, newid, i)
+    }
+    if(albums.length>5){
+        pagination.childNodes[0].classList.add("active")
+        document.getElementById(idNode).append(pagination)
+    }
+}
+
+/**
+ * Funzione che stampa gli informazioni degli album con le card
+ * @param {Array} albums array contentente le informazioni sugli album
+ * @param {Node} template nodo da usare come template 
+ * @param {String} idNode id del nodo a cui accodare le card 
+ * @param {int} startCount count da cui far partire il conteggio delle card
+ */
+export function printAlbumsCard(albums, template, idNode, startCount){
+    for (let i=0;i<albums.length;i++){
+        var clone = template.cloneNode(true)
         clone.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToAlbum(albums[i].id)})
         clone.getElementsByClassName("card-img")[0].src = albums[i].images[0].url
         clone.getElementsByClassName("card-img")[0].classList.add("link")
-        clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+1) + " " +albums[i].name
+        clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+startCount) + " " +albums[i].name
         clone.getElementsByClassName("nome_album")[0].addEventListener("click", function(){goToAlbum(albums[i].id)})
         clone.getElementsByClassName("nome_album")[0].classList.add("link", "cursor")
         clone.getElementsByClassName("nome_artista")[0].innerHTML = albums[i].artists[0].name
         clone.getElementsByClassName("nome_artista")[0].addEventListener("click", function(){goToArtist(albums[i].artists[0].id)})
         clone.getElementsByClassName("nome_artista")[0].classList.add("cursor")
-        row.append(clone)
-        if(((i+1)%5==0)&&(i!=0)){
-            if(i+1!=albums.length){
-                // create the button to show more element
-                var newButton = document.createElement("button")
-                newButton.id = "showMore_" + i
-                newButton.classList.add("show", "btn","btn-primary")
-                newButton.addEventListener("click", showMore)
-                newButton.innerHTML= "Show more"
-                row.append(newButton)
-            }
-            document.getElementById(idNode).append(row)
-            //create the row
-            var row = document.createElement("div")
-            row.classList.add("row", "justify-content-center", "visually-hidden")
-            var newid = idNode+"Row" + (i/5)
-            row.id= newid
-        }else if(i+1==albums.length){
-            document.getElementById(idNode).append(row)
-            //create the row
-            var row = document.createElement("div")
-            row.classList.add("row", "justify-content-center", "visually-hidden")
-            var newid = idNode+"Row" + (i/5)
-            row.id= newid
-        }
+        document.getElementById(idNode).append(clone)
     }
 }
 
