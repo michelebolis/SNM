@@ -53,15 +53,48 @@ app.get('/users', auth, async function (req, res) {
 
 app.post("/users", auth, async function (req, res) {
     var user = req.body
+    if (user.nickname == undefined) {
+        res.statusMessage = "Missing Nickname"
+        res.status(400)
+        res.send()
+        return
+    }
+    if (user.nickname == "") {
+        res.statusMessage = "Empty Nickname"
+        res.status(400)
+        res.send()
+        return
+    }
     if (user.email == undefined) {
-        res.status(400).send("Missing Email")
+        res.statusMessage = "Missing Email"
+        res.status(400)
+        res.send()
         return
     }
-    if (user.password == undefined || user.password.length < 3) {
-        res.status(400).send("Password is missing or too short")
+    if (user.email == "") {
+        res.statusMessage = "Empty Email"
+        res.status(400)
+        res.send()
         return
     }
-
+    if (!user.email.includes("@")) {
+        res.statusMessage = "Email doesn't contain @"
+        res.status(400)
+        res.send()
+        return
+    }
+    if (user.password == undefined) {
+        res.statusMessage = "Missing Password"
+        res.status(400)
+        res.send()
+        return
+    }
+    if (user.password == "") {
+        res.statusMessage = "Empty Password"
+        res.status(400)
+        res.send()
+        return
+    }
     user.password = hash(user.password)
 
     var pwmClient = await new mongoClient(uri).connect()
@@ -76,18 +109,39 @@ app.post("/users", auth, async function (req, res) {
             return
         }
         res.status(500).send(`Errore generico: ${e}`)
-
     };
 })
 
-app.post("/login", async (req, res) => {
+app.post("/login", auth, async (req, res) => {
     login = req.body
     if (login.email == undefined) {
-        res.status(400).send("Missing Email")
+        res.statusMessage = "Missing Email"
+        res.status(400)
+        res.send()
+        return
+    }
+    if (login.email == "") {
+        res.statusMessage = "Empty Email"
+        res.status(400)
+        res.send()
+        return
+    }
+    if (!login.email.includes("@")){
+        res.statusMessage = "Email doesn't contain @"
+        res.status(400)
+        res.send()
         return
     }
     if (login.password == undefined) {
-        res.status(400).send("Missing Password")
+        res.statusMessage = "Missing Password"
+        res.status(400)
+        res.send()
+        return
+    }
+    if (login.password == "") {
+        res.statusMessage = "Empty Password"
+        res.status(400)
+        res.send()
         return
     }
     login.password = hash(login.password)
@@ -105,7 +159,7 @@ app.post("/login", async (req, res) => {
     console.log(loggedUser)
 
     if (loggedUser == null) {
-        res.status(401).send("Unauthorized")
+        res.status(401).send("Email or password wrong")
     } else {
         res.send({ loggedUser })
     }

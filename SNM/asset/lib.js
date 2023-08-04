@@ -690,7 +690,7 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
         }else if(playlists[i].owner==window.localStorage.getItem("user")){
             var del = document.createElement("div")
             del.classList.add("card-action", "link")
-            del.innerHTML = "\u274C"
+            del.innerHTML = "❌"
             del.addEventListener("click", async function (){await deletePlaylist(playlists[i]._id); this.innerHTML("Playlist rimossa")})
             div.getElementsByClassName("nome_playlist")[0].append(del)
         }else{
@@ -699,7 +699,7 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
                 if(window.localStorage.getItem("user") == playlists[i].followers[k].id){
                     var del = document.createElement("div")
                     del.classList.add("card-action", "link")
-                    del.innerHTML = "\u274C"
+                    del.innerHTML = "❌"
                     del.addEventListener("click", async function (){
                         await removeFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
                         this.innerHTML = "Follow rimosso"
@@ -1124,6 +1124,10 @@ export function printCardPlaceholder(id){
  * SE si verificano degli errori, li stampa in un alert 
  */
 export async function addUser(){
+    if(document.getElementById("errorAlert").classList.contains("visually-hidden")){
+        document.getElementById("errorAlert").classList.add("visually-hidden")
+        document.getElementById("errorAlert").innerHTML = ""
+    }
     var email = document.getElementById("email").value
     var password = document.getElementById("password").value
     var nickname = document.getElementById("user").value
@@ -1149,7 +1153,8 @@ export async function addUser(){
         mess.append(a)
         div.append(mess)
     }else{
-        alert(res.status + res.text)
+        document.getElementById("errorAlert").classList.remove("visually-hidden")
+        document.getElementById("errorAlert").innerHTML = res.status + ": " + res.text
     }
 }
 
@@ -1170,20 +1175,25 @@ export async function deleteAccount(){
  * per verificare se mail e password corrispondo ad un utente 
  */
 export async function login(){
+    if(document.getElementById("errorAlert").classList.contains("visually-hidden")){
+        document.getElementById("errorAlert").classList.add("visually-hidden")
+        document.getElementById("errorAlert").innerHTML = ""
+    }
     var email = document.getElementById("login_email").value
     var password = document.getElementById("login_password").value
     var user = {
         email: email,
         password: password
     }
-    var response = await userLogin(user)
-    console.log(response)
-    if (!response.status) {
-        localStorage.setItem("user", response.loggedUser._id)
-        localStorage.setItem("nickname", response.loggedUser.nickname)
+    var res = await userLogin(user)
+    console.log(res)
+    if (!res.status) {
+        localStorage.setItem("user", res.loggedUser._id)
+        localStorage.setItem("nickname", res.loggedUser.nickname)
         window.location.href = document.referrer
     } else {
-        alert(response.text)
+        document.getElementById("errorAlert").classList.remove("visually-hidden")
+        document.getElementById("errorAlert").innerHTML = res.status + ": " + res.text
     }
     
 }
@@ -1259,7 +1269,7 @@ export function addTag(){
         var newtag = document.createElement("div")
         newtag.classList.add("col", "tag")
         var a = document.createElement("a")
-        a.innerHTML = "\u274C "
+        a.innerHTML = "❌ "
         a.classList.add("link")
         a.addEventListener("click", removeTag)
         var span = document.createElement("span")
