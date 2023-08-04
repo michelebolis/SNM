@@ -1370,6 +1370,9 @@ export function removeTag(){
     }
 }
 
+/**
+ * Funzione che aggiorna i tag di una playlist
+ */
 export async function updateTag(){
     var tags = []
     var id = this.value

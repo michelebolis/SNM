@@ -318,6 +318,12 @@ export async function putPlaylist(){
     .catch((e) => {console.log(e)})
 }
 
+/**
+ * Funzione che effettua la chiamata all'API per aggiornare i tag di una playlist
+ * @param {String} id id della playlist
+ * @param {Array} tags array di json della forma name:String
+ * @returns 
+ */
 export async function putTags(id, tags){
     return fetch(`${MY_BASE_URL}playlist/tag/${id}?apikey=123456`, {
         method: "PUT",
