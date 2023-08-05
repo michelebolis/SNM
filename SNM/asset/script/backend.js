@@ -280,20 +280,9 @@ export async function searchPlaylistsByTag(tag){
     .catch((e) => console.log(e))
 }
 
-/**
- * Funzione che effettua la chiamata all'API per aggiungere una track, 
- * congiuntamente alla sue informazioni, alla playlist
- * @returns 
- */
-export async function putPlaylist(){
-    id = this.id
-    info = await getTrack(id)
-    track = {"id" : id, "info":info}
-    playlist = this.parentNode.childNodes[0].value
-    if(playlist=="Seleziona una tua playlist"){alert("Seleziona una tua playlist");return}
-    console.log((track))
 
-    result = await fetch(`${MY_BASE_URL}playlists/${playlist}?apikey=123456`, {
+export async function putPlaylist(playlist, track){
+    return await fetch(`${MY_BASE_URL}playlists/${playlist}?apikey=123456`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
@@ -304,14 +293,6 @@ export async function putPlaylist(){
         if(response.status!=200){
             alert(response.statusText)
         }else{
-            alert("Canzone aggiunta alla playlist")
-            select = this.parentNode.childNodes[0]
-            for(let i=0;i<select.childNodes.length;i++){
-                if(select.childNodes[i].value==playlist){
-                    select.childNodes[i].remove()
-                    break
-                }
-            }
             return response.json()
         }
     })

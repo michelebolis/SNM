@@ -98,3 +98,7 @@ body{
     padding:10px; 
     margin: 0 5px;
 }
+
+.pagination{
+    margin-top:10px;
+}

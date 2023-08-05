@@ -1,8 +1,8 @@
-import {putPlaylist, getFollowedPlaylists, getPublicPlaylist, userLogin, getUser, postUser, putUser, postPlaylist, 
+import {getFollowedPlaylists, getPublicPlaylist, userLogin, getUser, postUser, putUser, postPlaylist, 
     deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag, deleteUser, 
-    changePlaylistVisibility, putTags} from "./script/backend.js"
+    changePlaylistVisibility, putTags, putPlaylist} from "./script/backend.js"
 import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, 
-    searchArtist, searchTrack, getGenresSpotify} from "./script/spotify_backend.js"
+    searchArtist, searchTrack, getGenresSpotify, getRecommendations} from "./script/spotify_backend.js"
 
 /**
  * Funzione che verifica se un utente sia loggato o meno
@@ -168,7 +168,7 @@ export function printPlaylist(playlist, idNode, idTemplate){
 export function printTracksCard(playlist, template, id, startCount){
     for (let i=0; i<playlist.length; i++){
         var clone = template.cloneNode(true)
-        //clone.classList.add("link")
+        clone.getElementsByClassName("card-body")[0].value = playlist[i].id
         clone.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToTrack(playlist[i].id)})
         clone.id=id + (i + startCount)
         clone.getElementsByClassName("card-img")[0].classList.add("link")
@@ -306,7 +306,7 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
         var button = document.createElement("button")
         button.innerHTML="Aggiungi"
         button.id = window.location.href.split("?")[1]
-        button.addEventListener("click", putPlaylist)
+        button.addEventListener("click", addTrackToPlaylist)
         button.classList.add("btn","show", "button-small", "btn-primary")
         div.append(button)
         right.append(li)
@@ -686,7 +686,7 @@ export async function printAlbumTrack(tracks){
             var button = document.createElement("button")
             button.id=tracks[i].id
             button.innerHTML="Aggiungi"
-            button.addEventListener("click", putPlaylist)
+            button.addEventListener("click", addTrackToPlaylist)
             button.classList.add("btn", "btn-primary", "show")
             clone.childNodes[1].childNodes[1].append(button)
         }
@@ -783,7 +783,7 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
             var del = document.createElement("div")
             del.classList.add("card-action", "link")
             del.innerHTML = "❌"
-            del.addEventListener("click", async function (){await deletePlaylist(playlists[i]._id); this.innerHTML("Playlist rimossa")})
+            del.addEventListener("click", async function (){deleteThisPlaylist(playlists[i]._id, this)})
             div.getElementsByClassName("nome_playlist")[0].append(del)
         }else{
             var found=false
@@ -815,6 +815,12 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
         node.append(div)
     }
     template.classList.add("visually-hidden")
+}
+
+async function deleteThisPlaylist(id, nodeToRemove){
+    var res = await deletePlaylist(id)
+    console.log(res)
+    nodeToRemove.parentNode.parentNode.parentNode.parentNode.remove();
 }
 
 /**
@@ -880,15 +886,15 @@ export async function printPlaylistInfo(id, idNode){
     div.innerHTML = "Tag:"
     div.classList.add("col-1")
     row.append(div)
+    var taglist = document.createElement("div")
+    taglist.id = "tagList"
+    taglist.classList.add("row", "col-11")
     if(playlist.tags.length==0){
         div = document.createElement("div")
         div.id= "nessuno"
         div.innerHTML = "Nessuno"
-        row.append(div)
+        taglist.append(div)
     }else{
-        var taglist = document.createElement("div")
-        taglist.id = "tagList"
-        taglist.classList.add("row", "col-11")
         for(let i=0;i<playlist.tags.length;i++){
             var divtag = document.createElement("div")
             divtag.classList.add("col-auto", "tag")
@@ -906,8 +912,8 @@ export async function printPlaylistInfo(id, idNode){
             divtag.append(span)
             taglist.append(divtag)
         }
-        row.append(taglist)
     }
+    row.append(taglist)
     li_clone.append(row)
 
     if(isowner){
@@ -971,6 +977,7 @@ export async function printPlaylistInfo(id, idNode){
             button.innerHTML = "Cancella la playlist"
             button.addEventListener("click", async function(){
                 var res = await deletePlaylist(playlist._id);
+                this.remove()
             })
         }else{
             button.innerHTML = "Follow"
@@ -992,6 +999,10 @@ export async function printPlaylistInfo(id, idNode){
     document.getElementById(idNode).append(node)
 
     printPlaylistTracks(playlist.tracks, "trackPlaylist")
+
+    if(isowner){
+        printRecomandations(playlist._id)
+    }
 }
 
 /**
@@ -1099,7 +1110,7 @@ export async function printPlaylistTracks(tracks, idNode){
                 var button = document.createElement("button")
                 button.id=tracks[i].info.id
                 button.innerHTML="Aggiungi in una tua playlist"
-                button.addEventListener("click", putPlaylist)
+                button.addEventListener("click", addTrackToPlaylist)
                 button.classList.add("btn", "btn-primary", "show")
                 button.style = "margin:0;"
                 clone.childNodes[1].childNodes[0].append(button)
@@ -1130,6 +1141,67 @@ export async function printPlaylistTracks(tracks, idNode){
         document.getElementById(idNode).append(tracklist)
         document.getElementById(idNode).prepend(title)
     }
+}
+
+export async function addTrackToPlaylist(){
+    var id = this.id
+    var info = await getTrack(id)
+    var track = {"id" : id, "info":info}
+    var playlist = this.parentNode.childNodes[0].value
+    if(playlist=="Seleziona una tua playlist"){alert("Seleziona una tua playlist");return}
+    console.log((track))
+    var res = await putPlaylist(playlist, track)
+    if(res){
+        alert("Canzone aggiunta alla playlist")
+        select = this.parentNode.childNodes[0]
+        for(let i=0;i<select.childNodes.length;i++){
+            if(select.childNodes[i].value==playlist){
+                select.childNodes[i].remove()
+                break
+            }
+        }
+    }
+}
+
+/**
+ * Funzione che stampa i suggerimenti per un utente
+ */
+export async function printRecomandations(id){
+    var iduser = window.localStorage.getItem("user")
+    if(!iduser){return}
+    var user = await getUser(iduser)
+    var genres = user.favorite_genres[0].name
+    for(let i=1;i<user.favorite_genres.length;i++){
+        genres += ", " +  user.favorite_genres[i].name
+    }
+    var res = await getRecommendations(genres)
+    var recommendations = res.tracks
+    console.log(recommendations)
+    printPlaylist(recommendations, "recommendations", "track-template")
+    var title = document.createElement("h4")
+    title.innerHTML = "Suggerimenti"
+    document.getElementById("recommendations").prepend(title)
+
+    var cards = document.getElementsByClassName("card")
+    for(let i=0; i<cards.length;i++){
+        var add = document.createElement("div")
+        add.classList.add("card-action", "link")
+        add.style = "padding:10px 0; cursor:pointer"
+        add.value = id + ";" + cards[i].getElementsByClassName("card-body")[0].value
+        add.innerHTML = "➕"
+        add.addEventListener("click", addTrackToThisPlaylist)
+        cards[i].append(add)
+    }
+}
+
+export async function addTrackToThisPlaylist(){
+    var idPlaylist = this.value.split(";")[0]
+    var idTrack = this.value.split(";")[1]
+    console.log(idPlaylist)
+    console.log(idTrack)
+    var track = await getTrack(idTrack)
+    track = {"id" : idTrack, "info" : track}
+    var res = await putPlaylist(idPlaylist, track)
 }
 
 /**

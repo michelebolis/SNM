@@ -24,13 +24,20 @@ var access_token = localStorage.getItem("token") // salvo il token nel local sto
  * @param {String} id id di Spotify della traccia
  * @returns json contenente le informazioni sulla track oppure un errore
  */
-/**
- * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni su una track
- * @param {String} id id di Spotify della traccia
- * @returns json contenente le informazioni sulla track oppure un errore
- */
 export async function getTrack(id) {
     return fetch(`${BASE_URL}tracks/${id}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async (response) => { return response.json() })
+    .catch((e) => console.log(e))
+}
+
+
+export async function getRecommendations(genres){
+    return fetch(`${BASE_URL}recommendations?seed_genres=${genres}`, {
         headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer " + access_token,
@@ -136,6 +143,10 @@ export async function getPlaylistSpotify(url){
     .catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che effettua la chiamata all'API di Spotify che restituisce i generi di Spotify
+ * @returns array dei generi
+ */
 export async function getGenresSpotify(){
     return fetch('https://api.spotify.com/v1/recommendations/available-genre-seeds', {
         headers: {
