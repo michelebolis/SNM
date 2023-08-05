@@ -302,11 +302,34 @@ app.put('/playlists/:playlist', auth, async function (req, res) {
     }
 })
 
+app.put('/playlists/remove/:playlist', auth, async function (req, res) {
+    // Ricerca nel database
+    var playlist = req.params.playlist
+    var pwmClient = await new mongoClient(uri).connect()
+    var track = req.body
+    var myplaylist = pwmClient.db("SNM")
+    .collection('Playlists').find({$and:[{"_id" : new ObjectId(playlist)}, {"tracks": track}]})
+    
+    if(!await myplaylist.next()){
+        var newplaylist = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .updateOne(
+            {"_id" : new ObjectId(playlist)},
+            {"$pull" : {"tracks":track}}
+        )
+        console.log(newplaylist)
+        res.json(newplaylist)
+    }else{
+        res.statusMessage = "Canzone non presente nella playlist"
+        res.sendStatus(400)
+    }
+})
+
 app.delete('/playlist/:id', auth, async function (req, res) {
     // Ricerca nel database
     var id = req.params.id
     var pwmClient = await new mongoClient(uri).connect()
-    var myplaylist = pwmClient.db("SNM")
+    var myplaylist = await pwmClient.db("SNM")
     .collection('Playlists').deleteOne({"_id" : new ObjectId(id)})
     return myplaylist
 })

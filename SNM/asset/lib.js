@@ -1,6 +1,6 @@
 import {getFollowedPlaylists, getPublicPlaylist, userLogin, getUser, postUser, putUser, postPlaylist, 
     deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag, deleteUser, 
-    changePlaylistVisibility, putTags, putPlaylist} from "./script/backend.js"
+    changePlaylistVisibility, putTags, putPlaylist, removeTrack} from "./script/backend.js"
 import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, 
     searchArtist, searchTrack, getGenresSpotify, getRecommendations} from "./script/spotify_backend.js"
 
@@ -397,13 +397,6 @@ export async function printArtistInfo(idArtist, idNode){
     li_clone.append(a)
     right.append(li_clone)
 
-    li_clone = li.cloneNode(true)
-    li_clone.innerHTML = "Aggiungi ai preferiti: "
-    var button = document.createElement("button")
-    button.innerHTML="Aggiungi"
-    li_clone.append(button)
-    right.append(li_clone)
-
     node.append(left)
     node.append(right)
     document.getElementById(idNode).append(node)
@@ -528,7 +521,7 @@ export function printAlbum(albums, idNode, idTemplate){
         row.id= newid
         node.append(row)
 
-        printAlbumsCard(albums.slice(i,i+5), template, newid, i)
+        printAlbumsCard(albums.slice(i,i+5), template, newid, i+1)
     }
     if(albums.length>5){
         pagination.childNodes[0].classList.add("active")
@@ -783,7 +776,8 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
             var del = document.createElement("div")
             del.classList.add("card-action", "link")
             del.innerHTML = "❌"
-            del.addEventListener("click", async function (){deleteThisPlaylist(playlists[i]._id, this)})
+            del.value = playlists[i]._id
+            del.addEventListener("click", deleteThisPlaylist)
             div.getElementsByClassName("nome_playlist")[0].append(del)
         }else{
             var found=false
@@ -817,10 +811,12 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
     template.classList.add("visually-hidden")
 }
 
-async function deleteThisPlaylist(id, nodeToRemove){
+async function deleteThisPlaylist(){ // NON VA
+    var id = this.value
     var res = await deletePlaylist(id)
+    window.location.href = "/"
     console.log(res)
-    nodeToRemove.parentNode.parentNode.parentNode.parentNode.remove();
+    this.parentNode.parentNode.parentNode.parentNode.remove();
 }
 
 /**
@@ -998,7 +994,7 @@ export async function printPlaylistInfo(id, idNode){
     node.append(right)
     document.getElementById(idNode).append(node)
 
-    printPlaylistTracks(playlist.tracks, "trackPlaylist")
+    printPlaylistTracks(playlist.tracks, "trackPlaylist", isowner)
 
     if(isowner){
         printRecomandations(playlist._id)
@@ -1055,17 +1051,20 @@ async function handlePlaylist(){
  * Funzione che stampa le tracks nel nodo specificato
  * @param {Array} tracks array di canzoni da stampare
  * @param {String} idNode id del nodo a cui accodare le canzoni della playlist
+ * @param {boolean} isowner
  */
-export async function printPlaylistTracks(tracks, idNode){
+export async function printPlaylistTracks(tracks, idNode, isowner){
     var node = document.getElementById(idNode)
     node.innerHTML = ""
     var title = document.createElement("h4")
+    var tracklist = document.createElement("ul")
+        tracklist.classList.add("container", "list-group", "list-group-flush")
+        tracklist.id="trackList"
     if(tracks.length==0){
         title.innerHTML = "Nessuna canzone nella playlist"
         node.append(title)
+        node.append(tracklist)
     }else{
-        var tracklist = document.createElement("ul")
-        tracklist.classList.add("container", "list-group", "list-group-flush")
         // creo il template degli elementi della lista
         var template = document.createElement("li")
         template.classList.add("list-group-item", "list-group-item-dark")
@@ -1133,6 +1132,17 @@ export async function printPlaylistTracks(tracks, idNode){
                 }
                 clone.childNodes[1].childNodes[1].append(select)
             }
+            if(isowner){
+                var rowdel = document.createElement("div")
+                rowdel.classList.add("text-center")
+                var del = document.createElement("button")
+                del.innerHTML = "Rimuovi canzone dalla playlist"
+                del.classList.add("btn", "btn-danger", "show")
+                del.value = tracks[i].info.id + ";" + window.location.href.split("?")[1]
+                del.addEventListener("click", removeTrackFromPlaylist)
+                rowdel.append(del)
+                clone.append(rowdel)
+            }
             tracklist.append(clone)
         }
 
@@ -1143,6 +1153,10 @@ export async function printPlaylistTracks(tracks, idNode){
     }
 }
 
+/**
+ * Funzione che aggiunge una canzone alla playlist selezionata da una select 
+ * e poi la playlist viene rimossa dalla select 
+ */
 export async function addTrackToPlaylistFromSelect(){
     var id = this.id
     var info = await getTrack(id)
@@ -1163,12 +1177,14 @@ export async function addTrackToPlaylistFromSelect(){
     }
 }
 
+/**
+ * Funzione usata per aggiungere una canzone dalla sua card alla playlist corrente 
+ */
 export async function addTrackToPlaylist(){
     var id = this.id
     var info = await getTrack(id)
     var track = {"id" : id, "info":info}
     var playlist = this.parentNode.childNodes[0].value
-    if(playlist=="Seleziona una tua playlist"){alert("Seleziona una tua playlist");return}
     console.log((track))
     var res = await putPlaylist(playlist, track)
     if(res){
@@ -1176,6 +1192,24 @@ export async function addTrackToPlaylist(){
     }
 }
 
+/**
+ * Funzione che rimuove la canzone dalla playlist attuale
+ */
+export async function removeTrackFromPlaylist(){
+    var idTrack = this.value.split(";")[0]
+    var idPlaylist = this.value.split(";")[1]
+    var res = await removeTrack(idPlaylist, {"id":idTrack})
+    console.log(res)
+    if(res.acknowledged){
+        this.parentNode.parentNode.remove()
+        var tracks = document.getElementById("trackList").childNodes
+        for(let i=0;i<tracks.length;i++){
+            var a = tracks[i].childNodes[0].childNodes[0].childNodes[1]
+            tracks[i].childNodes[0].childNodes[0].innerHTML = "#"+(i+1)+" "
+            tracks[i].childNodes[0].childNodes[0].append(a)
+        }
+    }
+}
 /**
  * Funzione che stampa i suggerimenti per un utente
  */
@@ -1207,6 +1241,9 @@ export async function printRecomandations(id){
     }
 }
 
+/**
+ * Funzione che richiama la funzione backend che aggiunge una track a una playlist
+ */
 export async function addTrackToThisPlaylist(){
     var idPlaylist = this.value.split(";")[0]
     var idTrack = this.value.split(";")[1]
@@ -1215,6 +1252,80 @@ export async function addTrackToThisPlaylist(){
     var track = await getTrack(idTrack)
     track = {"id" : idTrack, "info" : track}
     var res = await putPlaylist(idPlaylist, track)
+    console.log(res)
+    track = track.info
+    if(res.acknowledged){
+        var myplaylist = await getMyPlaylist(window.localStorage.getItem("user"))
+        var tracklist = document.getElementById("trackList")
+        var clone = document.createElement("li")
+        clone.classList.add("list-group-item", "list-group-item-dark")
+        var row = document.createElement("div")
+        row.classList.add("row")
+        var col = document.createElement("div")
+        col.classList.add("col")
+        row.append(col, col.cloneNode(true))
+        clone.append(row, row.cloneNode(true))
+        clone.childNodes[0].childNodes[0].innerHTML = "#" + (tracklist.childNodes.length+1) + " "
+        var a = document.createElement("a")
+        a.innerHTML = track.name
+        console.log(track)
+        a.addEventListener("click", function(){goToTrack(track.id)})
+        a.classList.add("link", "cursor")
+        clone.childNodes[0].childNodes[0].append(a)
+        if(track.preview_url!=null){
+            // la preview per alcuna track non è disponibile
+            var audio = document.createElement("audio")
+            audio.style = "width:100%"
+            audio.controls="controls"
+            var source = document.createElement("source")
+            source.src = track.preview_url
+            source.type = "audio/mpeg"
+            audio.append(source)
+            clone.childNodes[0].childNodes[1].append(audio)
+        }else{
+            clone.childNodes[1].style = "margin-top:10px"
+        }
+        if(logged()){
+            // la possibilità di aggiungere la track ad una playlist è possibile solo SE si è loggati
+            clone.childNodes[1].childNodes[0].classList.add("text-center")
+            clone.childNodes[1].childNodes[1].classList.add("text-center")
+            var button = document.createElement("button")
+            button.id=track.id
+            button.innerHTML="Aggiungi in una tua playlist"
+            button.addEventListener("click", addTrackToPlaylistFromSelect)
+            button.classList.add("btn", "btn-primary", "show")
+            button.style = "margin:0;"
+            clone.childNodes[1].childNodes[0].append(button)
+
+            var select = document.createElement("select")
+            select.classList.add("form-select")
+            select.style = "margin-top:10px;"
+            select.id="myplaylist"
+            var option = document.createElement("option")
+            option.innerHTML = "Seleziona una tua playlist"
+            select.append(option)
+            for (let i=0;i<myplaylist.length;i++){
+                if(myplaylist[i]._id!=window.location.href.split("?")[1]){
+                    option = document.createElement("option")
+                    option.innerHTML = myplaylist[i].name
+                    option.value = myplaylist[i]._id
+                    option.classList.add("playlistToAdd")
+                    select.append(option)
+                }
+            }
+            clone.childNodes[1].childNodes[1].append(select)
+            var rowdel = document.createElement("div")
+            rowdel.classList.add("text-center")
+            var del = document.createElement("button")
+            del.innerHTML = "Rimuovi canzone dalla playlist"
+            del.classList.add("btn", "btn-danger", "show")
+            del.value = track.id + ";" + window.location.href.split("?")[1]
+            del.addEventListener("click", removeTrackFromPlaylist)
+            rowdel.append(del)
+            clone.append(rowdel)
+        }
+        tracklist.append(clone)
+    }
 }
 
 /**

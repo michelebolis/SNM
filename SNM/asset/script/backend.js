@@ -128,7 +128,7 @@ export async function deletePlaylist(id) {
         if (response.ok) {
             return response.json()
         } else {
-            response.text().then( text => alert(text) )
+            return response.text().then( text => alert(text) )
         }
     })
 }
@@ -289,6 +289,24 @@ export async function searchPlaylistsByTag(tag){
  */
 export async function putPlaylist(id, track){
     return await fetch(`${MY_BASE_URL}playlists/${id}?apikey=123456`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(track)
+    })
+    .then(async response => {
+        if(response.status!=200){
+            alert(response.statusText)
+        }else{
+            return response.json()
+        }
+    })
+    .catch((e) => {console.log(e)})
+}
+
+export async function removeTrack(id, track){
+    return await fetch(`${MY_BASE_URL}playlists/remove/${id}?apikey=123456`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
