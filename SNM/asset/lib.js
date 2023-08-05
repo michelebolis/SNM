@@ -1110,7 +1110,7 @@ export async function printPlaylistTracks(tracks, idNode){
                 var button = document.createElement("button")
                 button.id=tracks[i].info.id
                 button.innerHTML="Aggiungi in una tua playlist"
-                button.addEventListener("click", addTrackToPlaylist)
+                button.addEventListener("click", addTrackToPlaylistFromSelect)
                 button.classList.add("btn", "btn-primary", "show")
                 button.style = "margin:0;"
                 clone.childNodes[1].childNodes[0].append(button)
@@ -1143,6 +1143,26 @@ export async function printPlaylistTracks(tracks, idNode){
     }
 }
 
+export async function addTrackToPlaylistFromSelect(){
+    var id = this.id
+    var info = await getTrack(id)
+    var track = {"id" : id, "info":info}
+    var select = this.parentNode.parentNode.childNodes[1].childNodes[0]
+    var playlist = select.value
+    if(playlist=="Seleziona una tua playlist"){alert("Seleziona una tua playlist");return}
+    console.log((track))
+    var res = await putPlaylist(playlist, track)
+    if(res){
+        alert("Canzone aggiunta alla playlist")
+        for(let i=0;i<select.childNodes.length;i++){
+            if(select.childNodes[i].value==playlist){
+                select.childNodes[i].remove()
+                break
+            }
+        }
+    }
+}
+
 export async function addTrackToPlaylist(){
     var id = this.id
     var info = await getTrack(id)
@@ -1153,13 +1173,6 @@ export async function addTrackToPlaylist(){
     var res = await putPlaylist(playlist, track)
     if(res){
         alert("Canzone aggiunta alla playlist")
-        select = this.parentNode.childNodes[0]
-        for(let i=0;i<select.childNodes.length;i++){
-            if(select.childNodes[i].value==playlist){
-                select.childNodes[i].remove()
-                break
-            }
-        }
     }
 }
 

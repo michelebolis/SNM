@@ -281,8 +281,14 @@ export async function searchPlaylistsByTag(tag){
 }
 
 
-export async function putPlaylist(playlist, track){
-    return await fetch(`${MY_BASE_URL}playlists/${playlist}?apikey=123456`, {
+/**
+ * Funzione che effettua la chiamata all'API per aggiungere una canzone ad una playlist
+ * @param {String} id id della playlist
+ * @param {*} track json della forma {id:..., info:...}
+ * @returns 
+ */
+export async function putPlaylist(id, track){
+    return await fetch(`${MY_BASE_URL}playlists/${id}?apikey=123456`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
