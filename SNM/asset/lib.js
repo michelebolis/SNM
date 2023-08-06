@@ -4,12 +4,118 @@ import {getFollowedPlaylists, getPublicPlaylist, userLogin, getUser, postUser, p
 import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, 
     searchArtist, searchTrack, getGenresSpotify, getRecommendations} from "./script/spotify_backend.js"
 
+// USER FUNCTION
 /**
  * Funzione che verifica se un utente sia loggato o meno
  * @returns true SE l'utente è loggato nell'applicativo, false altrimenti
  */
 export function logged(){
     return localStorage.getItem("user") != null
+}
+
+/**
+ * Funzione che, dati i valori contenuti in due input text con id email e password, crea un nuovo utente nel db
+ * SE si verificano degli errori, li stampa in un alert 
+ */
+export async function addUser(){
+    // Nascondo eventuali alert
+    if(document.getElementById("errorAlert").classList.contains("visually-hidden")){
+        document.getElementById("errorAlert").classList.add("visually-hidden")
+        document.getElementById("errorAlert").innerHTML = ""
+    }
+
+    // Recupero le informazioni del nuovo utente
+    var email = document.getElementById("email").value
+    var password = document.getElementById("password").value
+    var nickname = document.getElementById("user").value
+    var genresNode = document.getElementsByClassName("tagSpan")
+    var genres = []
+    Array.prototype.forEach.call(genresNode, function(genre) {
+        genres.push({"name" : genre.innerHTML})
+    });
+
+    // Creo il JSON
+    var user = {
+        email: email,
+        password: password,
+        nickname: nickname,
+        favorite_genres: genres==[] ? "" : genres
+    }
+    console.log(user)
+
+    // Aggiungo il nuovo utente
+    var res = await postUser(user)
+    console.log(res)
+    if (!res.status){
+        // Aggiungo al localStorage l'id dell'utente e il nickname
+        localStorage.setItem("user", res.insertedId)
+        localStorage.setItem("nickname", nickname)
+
+        // Mostro l'alert di successo
+        document.getElementById("successAlert").classList.remove("visually-hidden")
+        document.getElementById("userForm").innerHTML = ""
+    }else{
+        // SE vi è un errore, mostro l'alert di errore con il messaggio di errore
+        document.getElementById("errorAlert").classList.remove("visually-hidden")
+        document.getElementById("errorAlert").innerHTML = res.status + ": " + res.text
+    }
+}
+
+/**
+ * Funzione che cancella l'account dell'utente loggato
+ */
+export async function deleteAccount(){
+    var id = window.localStorage.getItem("user")
+    var res = await deleteUser(id)
+    if(res.ok){
+        logout()
+        window.location.href = "../"
+    }
+}
+
+/**
+ * Funziome che preleva l'email e la password da due input e fa una richiesta al db 
+ * per verificare se mail e password corrispondo ad un utente 
+ */
+export async function login(){
+    // Nascondo eventuali alert di errori precedenti
+    if(document.getElementById("errorAlert").classList.contains("visually-hidden")){
+        document.getElementById("errorAlert").classList.add("visually-hidden")
+        document.getElementById("errorAlert").innerHTML = ""
+    }
+
+    // Recupero le informazioni per il login
+    var email = document.getElementById("login_email").value
+    var password = document.getElementById("login_password").value
+
+    // Creo il JSON
+    var user = {
+        email: email,
+        password: password
+    }
+
+    // Tento il login
+    var res = await userLogin(user)
+    console.log(res)
+    if (!res.status) {
+        // Imposto le variabili nel local storage e cambio pagina a quella precedente
+        localStorage.setItem("user", res.loggedUser._id)
+        localStorage.setItem("nickname", res.loggedUser.nickname)
+        window.location.href = document.referrer
+    } else {
+        // Mostro l'alert di errore
+        document.getElementById("errorAlert").classList.remove("visually-hidden")
+        document.getElementById("errorAlert").innerHTML = res.status + ": " + res.text
+    }
+    
+}
+
+/**
+ * Funzione che effettua il logout rimuovendo dal local storage le informazioni dell'utente
+ */
+export function logout(){
+    localStorage.removeItem("user")
+    localStorage.removeItem("nickname")
 }
 
 /**
@@ -47,20 +153,6 @@ export async function loadAccount(){
             list.append(newtag)
         });
     }
-}
-
-/**
- * Funzione che riempie la select dei generi con quelli ottenuti da Spotify
- */
-export async function loadGenres(){
-    var genres = await getGenresSpotify()
-    var select = document.getElementById("tagInput")
-    console.log(genres)
-    genres.genres.forEach(genre => {
-        var option = document.createElement("option")
-        option.innerHTML = genre
-        select.append(option)
-    });
 }
 
 /**
@@ -105,6 +197,8 @@ export async function cambiaCredenziali(){
     }
     console.log(res)
 }
+
+// TRACKS FUNCTIONS
 
 /**
  * Funzione che stampa le track migliori in Italia
@@ -181,27 +275,6 @@ export function printTracksCard(playlist, template, id, startCount){
         clone.getElementsByClassName("nome_artista")[0].classList.add("cursor")
         document.getElementById(id).appendChild(clone)
     }
-}
-
-/**
- * Cambia la pagina
- */
-export function changePagination(){
-    var n_page = this.innerHTML 
-    var rows = this.parentNode.parentNode.getElementsByClassName("row")
-    for(let i=0;i<rows.length;i++){
-        if(!rows[i].classList.contains("visually-hidden")){
-            document.getElementById(rows[i].id).classList.add("visually-hidden")
-        }
-    }
-    rows[n_page-1].classList.remove("visually-hidden")
-    var pages = this.parentNode.getElementsByClassName("page-item")
-    for(let i=0;i<pages.length;i++){
-        if(pages[i].classList.contains("active")){
-            pages[i].classList.remove("active")
-        }
-    }
-    this.classList.add("active")
 }
 
 /**
@@ -331,16 +404,7 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
     printTopTrackArtist(info.artists[0].id, idTemplate)
 }
 
-/**
- * Funzione che restituisce il tempo in formato minuti:secondi dati dei millisecondi in input
- * @param {int} ms millisecondi 
- * @returns tempo in formato minuti:secondi
- */
-export function msToMinutesAndSeconds(ms) {
-    var min = Math.floor(ms / 60000);
-    var sec = ((ms % 60000) / 1000).toFixed(0);
-    return min + ":" + (sec < 10 ? '0' : '') + sec;
-}
+// ARTISTS FUNCTIONS
 
 /**
  * Funzione che stampa le canzoni migliori di un'artista nel node con id 'topTrackArtist'
@@ -451,6 +515,8 @@ export function printArtists(artists, idNode, idTemplate){
         node.append(pagination)
     }
 }
+
+// ALBUM FUNCTIONS
 
 /**
  * Funzione che stampa gli informazioni degli artisti con le card
@@ -674,6 +740,8 @@ export async function printAlbumTrack(tracks){
     document.getElementById("albumTrack").prepend(title)
     document.getElementById("albumPlaceholder").remove()
 }
+
+// PLAYLIST FUNCTIONS
 
 /**
  * Funzione che stampa le playlist dell'utente
@@ -1384,231 +1452,6 @@ export async function printPublicPlaylists(){
 }
 
 /**
- * Funzione che stampa la navbar nel nodo il cui id è passato come argomento
- * @param {String} id id del nodo in cui stampare la navbar 
- */
-export async function printNavBar(id){
-    var navdiv = document.createElement("div")
-    var titlenav = document.createElement("h3")
-    titlenav.innerHTML = "Menu"
-    navdiv.append(titlenav)
-    if (!logged()){
-        // Navbar limitata per gli utenti non loggati
-        // Link alla home
-        var anav = document.createElement("a")
-        anav.classList.add("nav","nav-link")
-        anav.innerHTML="Home"
-        anav.href="/"
-        navdiv.append(anav)
-
-        // Link per accedere o registrarsi
-        anav = document.createElement("a")
-        anav.classList.add("nav","nav-link")
-        anav.innerHTML = "Accedi o registrati"
-        anav.href = "/src/login.html"
-        navdiv.append(anav)
-
-        // Messaggio
-        var sub = document.createElement("p")
-        sub.innerHTML = "Per accedere alle funzionalità complete, effettua il login o registrati"
-        navdiv.append(sub)
-    }else{
-        // Messaggio
-        titlenav = document.createElement("h4")
-        var nickname = (window.localStorage.getItem("nickname"))
-        if(nickname){
-            titlenav.innerHTML = "Benvenuto " + nickname
-        }
-        navdiv.append(titlenav)
-
-        // Creazione menu
-        var nav = document.createElement("nav")
-        nav.classList.add("nav", "flex-column")
-        
-        // Link alla home
-        anav = document.createElement("a")
-        anav.classList.add("nav-link")
-        anav.innerHTML="Home"
-        anav.href="/"
-        nav.append(anav)
-
-        // Link alla pagina per creare una nuova playlist
-        anav = document.createElement("a")
-        anav.classList.add("nav-link")
-        anav.innerHTML="Crea una playlist"
-        anav.href="/src/newplaylist.html"
-        nav.append(anav)
-
-        // Link alla pagina per gestire le proprie playlist
-        anav = document.createElement("a")
-        anav.classList.add("nav-link")
-        anav.innerHTML="Gestisci le tue playlist"
-        anav.href="/src/playlist.html"
-        nav.append(anav)
-
-        // Link alla pagina per gestire il proprio account
-        anav = document.createElement("a")
-        anav.classList.add("nav-link")
-        anav.innerHTML="Gestisci il tuo account"
-        anav.href="/src/account.html"
-        nav.append(anav)
-
-        // Link per eseguire il logout
-        anav = document.createElement("a")
-        anav.classList.add("nav-link")
-        anav.innerHTML="Logout"
-        anav.addEventListener("click", logout)
-        anav.href=window.location.href
-        nav.append(anav)
-
-        navdiv.append(nav)
-    }
-    document.getElementById(id).append(navdiv)
-}
-
-/**
- * Funzione che stampa in coda al nodo una card placeholder
- * @param {String} id id del node dove fare l'append delle card
- */
-export function printCardPlaceholder(id){
-    var div = document.createElement("div")
-    div.classList.add("card", "col-2")
-
-    var node = document.createElement("div")
-    node.classList.add("card-body")
-    var title = document.createElement("h5")
-    title.classList.add("card-title", "placeholder-glow")
-    var p = document.createElement("p")
-    p.classList.add("card-text", "placeholder-glow")
-
-    var span = document.createElement("span")
-    span.classList.add("placeholder", "col-7")
-    p.append(span)
-    span = document.createElement("span")
-    span.classList.add("placeholder", "col-4")
-    p.append(span)
-    span = document.createElement("span")
-    span.classList.add("placeholder", "col-4")
-    p.append(span)
-    span = document.createElement("span")
-    span.classList.add("placeholder", "col-6")
-    p.append(span)
-    span = document.createElement("span")
-    span.classList.add("placeholder", "col-9")
-    p.append(span)
-
-    node.append(title, p)
-    div.append(node)
-
-    document.getElementById(id).append(div)
-}
-
-/**
- * Funzione che, dati i valori contenuti in due input text con id email e password, crea un nuovo utente nel db
- * SE si verificano degli errori, li stampa in un alert 
- */
-export async function addUser(){
-    // Nascondo eventuali alert
-    if(document.getElementById("errorAlert").classList.contains("visually-hidden")){
-        document.getElementById("errorAlert").classList.add("visually-hidden")
-        document.getElementById("errorAlert").innerHTML = ""
-    }
-
-    // Recupero le informazioni del nuovo utente
-    var email = document.getElementById("email").value
-    var password = document.getElementById("password").value
-    var nickname = document.getElementById("user").value
-    var genresNode = document.getElementsByClassName("tagSpan")
-    var genres = []
-    Array.prototype.forEach.call(genresNode, function(genre) {
-        genres.push({"name" : genre.innerHTML})
-    });
-
-    // Creo il JSON
-    var user = {
-        email: email,
-        password: password,
-        nickname: nickname,
-        favorite_genres: genres==[] ? "" : genres
-    }
-    console.log(user)
-
-    // Aggiungo il nuovo utente
-    var res = await postUser(user)
-    console.log(res)
-    if (!res.status){
-        // Aggiungo al localStorage l'id dell'utente e il nickname
-        localStorage.setItem("user", res.insertedId)
-        localStorage.setItem("nickname", nickname)
-
-        // Mostro l'alert di successo
-        document.getElementById("successAlert").classList.remove("visually-hidden")
-        document.getElementById("userForm").innerHTML = ""
-    }else{
-        // SE vi è un errore, mostro l'alert di errore con il messaggio di errore
-        document.getElementById("errorAlert").classList.remove("visually-hidden")
-        document.getElementById("errorAlert").innerHTML = res.status + ": " + res.text
-    }
-}
-
-/**
- * Funzione che cancella l'account dell'utente loggato
- */
-export async function deleteAccount(){
-    var id = window.localStorage.getItem("user")
-    var res = await deleteUser(id)
-    if(res.ok){
-        logout()
-        window.location.href = "../"
-    }
-}
-
-/**
- * Funziome che preleva l'email e la password da due input e fa una richiesta al db 
- * per verificare se mail e password corrispondo ad un utente 
- */
-export async function login(){
-    // Nascondo eventuali alert di errori precedenti
-    if(document.getElementById("errorAlert").classList.contains("visually-hidden")){
-        document.getElementById("errorAlert").classList.add("visually-hidden")
-        document.getElementById("errorAlert").innerHTML = ""
-    }
-
-    // Recupero le informazioni per il login
-    var email = document.getElementById("login_email").value
-    var password = document.getElementById("login_password").value
-
-    // Creo il JSON
-    var user = {
-        email: email,
-        password: password
-    }
-
-    // Tento il login
-    var res = await userLogin(user)
-    console.log(res)
-    if (!res.status) {
-        // Imposto le variabili nel local storage e cambio pagina a quella precedente
-        localStorage.setItem("user", res.loggedUser._id)
-        localStorage.setItem("nickname", res.loggedUser.nickname)
-        window.location.href = document.referrer
-    } else {
-        // Mostro l'alert di errore
-        document.getElementById("errorAlert").classList.remove("visually-hidden")
-        document.getElementById("errorAlert").innerHTML = res.status + ": " + res.text
-    }
-    
-}
-
-/**
- * Funzione che effettua il logout rimuovendo dal local storage le informazioni dell'utente
- */
-export function logout(){
-    localStorage.removeItem("user")
-    localStorage.removeItem("nickname")
-}
-
-/**
  * Funzione che crea una nuova playlist 
  */
 export async function addPlaylist(){
@@ -1730,27 +1573,7 @@ export async function updateTag(){
     await putTags(id,tags)
 }
 
-/**
- * Funcione che disattiva lo switch all non appena un altro switch viene disattivato
- */
-export function uncheckAllSwitch(){
-    var check = this.checked
-    if(!check){
-        document.getElementById("all").checked = false
-    }
-}
-
-/**
- * Funzione che attiva tutti i parametri di ricercca quando lo switch all viene attivato
- */
-export function checkAll(){
-    var check = this.checked
-    document.getElementById("track").checked = check
-    document.getElementById("artist").checked = check
-    document.getElementById("album").checked = check
-    document.getElementById("playlist").checked = check
-    document.getElementById("tag").checked = check
-}
+// SEARCH FUNCTIONS
 
 /**
  * Funzione che, dato il valore presente nell'input e lo stato dei 4 switch, fa una ricerca 
@@ -1967,6 +1790,196 @@ export async function printSearchTag(input, divSearch){
         document.getElementById("searchTagPlaylist").innerHTML=""
         printContentRows(playlists, "searchPlaylist", "playlist-template", printPlaylistCard)
     }
+}
+
+// UTILITY FUNCTIONS
+
+/**
+ * Funzione che stampa la navbar nel nodo il cui id è passato come argomento
+ * @param {String} id id del nodo in cui stampare la navbar 
+ */
+export async function printNavBar(id){
+    var navdiv = document.createElement("div")
+    var titlenav = document.createElement("h3")
+    titlenav.innerHTML = "Menu"
+    navdiv.append(titlenav)
+    if (!logged()){
+        // Navbar limitata per gli utenti non loggati
+        // Link alla home
+        var anav = document.createElement("a")
+        anav.classList.add("nav","nav-link")
+        anav.innerHTML="Home"
+        anav.href="/"
+        navdiv.append(anav)
+
+        // Link per accedere o registrarsi
+        anav = document.createElement("a")
+        anav.classList.add("nav","nav-link")
+        anav.innerHTML = "Accedi o registrati"
+        anav.href = "/src/login.html"
+        navdiv.append(anav)
+
+        // Messaggio
+        var sub = document.createElement("p")
+        sub.innerHTML = "Per accedere alle funzionalità complete, effettua il login o registrati"
+        navdiv.append(sub)
+    }else{
+        // Messaggio
+        titlenav = document.createElement("h4")
+        var nickname = (window.localStorage.getItem("nickname"))
+        if(nickname){
+            titlenav.innerHTML = "Benvenuto " + nickname
+        }
+        navdiv.append(titlenav)
+
+        // Creazione menu
+        var nav = document.createElement("nav")
+        nav.classList.add("nav", "flex-column")
+        
+        // Link alla home
+        anav = document.createElement("a")
+        anav.classList.add("nav-link")
+        anav.innerHTML="Home"
+        anav.href="/"
+        nav.append(anav)
+
+        // Link alla pagina per creare una nuova playlist
+        anav = document.createElement("a")
+        anav.classList.add("nav-link")
+        anav.innerHTML="Crea una playlist"
+        anav.href="/src/newplaylist.html"
+        nav.append(anav)
+
+        // Link alla pagina per gestire le proprie playlist
+        anav = document.createElement("a")
+        anav.classList.add("nav-link")
+        anav.innerHTML="Gestisci le tue playlist"
+        anav.href="/src/playlist.html"
+        nav.append(anav)
+
+        // Link alla pagina per gestire il proprio account
+        anav = document.createElement("a")
+        anav.classList.add("nav-link")
+        anav.innerHTML="Gestisci il tuo account"
+        anav.href="/src/account.html"
+        nav.append(anav)
+
+        // Link per eseguire il logout
+        anav = document.createElement("a")
+        anav.classList.add("nav-link")
+        anav.innerHTML="Logout"
+        anav.addEventListener("click", logout)
+        anav.href=window.location.href
+        nav.append(anav)
+
+        navdiv.append(nav)
+    }
+    document.getElementById(id).append(navdiv)
+}
+
+/**
+ * Funzione che stampa in coda al nodo una card placeholder
+ * @param {String} id id del node dove fare l'append delle card
+ */
+export function printCardPlaceholder(id){
+    var div = document.createElement("div")
+    div.classList.add("card", "col-2")
+
+    var node = document.createElement("div")
+    node.classList.add("card-body")
+    var title = document.createElement("h5")
+    title.classList.add("card-title", "placeholder-glow")
+    var p = document.createElement("p")
+    p.classList.add("card-text", "placeholder-glow")
+
+    var span = document.createElement("span")
+    span.classList.add("placeholder", "col-7")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-4")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-4")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-6")
+    p.append(span)
+    span = document.createElement("span")
+    span.classList.add("placeholder", "col-9")
+    p.append(span)
+
+    node.append(title, p)
+    div.append(node)
+
+    document.getElementById(id).append(div)
+}
+
+/**
+ * Funzione che riempie la select dei generi con quelli ottenuti da Spotify
+ */
+export async function loadGenres(){
+    var genres = await getGenresSpotify()
+    var select = document.getElementById("tagInput")
+    console.log(genres)
+    genres.genres.forEach(genre => {
+        var option = document.createElement("option")
+        option.innerHTML = genre
+        select.append(option)
+    });
+}
+
+/**
+ * Funcione che disattiva lo switch all non appena un altro switch viene disattivato
+ */
+export function uncheckAllSwitch(){
+    var check = this.checked
+    if(!check){
+        document.getElementById("all").checked = false
+    }
+}
+
+/**
+ * Funzione che attiva tutti i parametri di ricercca quando lo switch all viene attivato
+ */
+export function checkAll(){
+    var check = this.checked
+    document.getElementById("track").checked = check
+    document.getElementById("artist").checked = check
+    document.getElementById("album").checked = check
+    document.getElementById("playlist").checked = check
+    document.getElementById("tag").checked = check
+}
+
+/**
+ * Cambia la pagina
+ */
+export function changePagination(){
+    var n_page = this.innerHTML 
+    var rows = this.parentNode.parentNode.getElementsByClassName("row")
+    for(let i=0;i<rows.length;i++){
+        if(!rows[i].classList.contains("visually-hidden")){
+            document.getElementById(rows[i].id).classList.add("visually-hidden")
+        }
+    }
+    rows[n_page-1].classList.remove("visually-hidden")
+    var pages = this.parentNode.getElementsByClassName("page-item")
+    for(let i=0;i<pages.length;i++){
+        if(pages[i].classList.contains("active")){
+            pages[i].classList.remove("active")
+        }
+    }
+    this.classList.add("active")
+}
+
+/**
+ * Funzione che restituisce il tempo in formato minuti:secondi dati dei millisecondi in input
+ * @param {int} ms millisecondi 
+ * @returns tempo in formato minuti:secondi
+ */
+export function msToMinutesAndSeconds(ms) {
+    var min = Math.floor(ms / 60000);
+    var sec = ((ms % 60000) / 1000).toFixed(0);
+    return min + ":" + (sec < 10 ? '0' : '') + sec;
 }
 
 /**
