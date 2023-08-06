@@ -1,4 +1,6 @@
 const MY_BASE_URL = "http://127.0.0.1:3100/"
+
+// USER FUNCTIONS
 /**
  * Funzione che effettua la chiamata all'API per effettuare il login
  * @param {*} user json contenente email e password
@@ -94,6 +96,8 @@ export async function deleteUser(id){
     })
 }
 
+// PLAYLISTS FUNCTIONS
+
 /**
  * Funzione che effettua la chiamata all'API che aggiunge una nuova playlist
  * @param {*} playlist json contenente la playlist da aggiungere
@@ -181,7 +185,7 @@ export async function getPlaylist(id){
 }
 
 /**
- * 
+ * Funzione che effettua la chiamata all'API che restituisce le informazioni delle playlist pubbliche
  * @returns array di json delle playlist pubbliche
  */
 export async function getPublicPlaylist(){
@@ -305,6 +309,12 @@ export async function putPlaylist(id, track){
     .catch((e) => {console.log(e)})
 }
 
+/**
+ * Funzione che effettua la chiamata all'API per rimuovere una track da una playlist
+ * @param {String} id id della playlist
+ * @param {*} track informazioni sulla track da rimuovere
+ * @returns 
+ */
 export async function removeTrack(id, track){
     return await fetch(`${MY_BASE_URL}playlists/remove/${id}?apikey=123456`, {
         method: "PUT",

@@ -34,7 +34,8 @@ function hash(input) {
         .update(input)
         .digest('hex')
 }
-//Users
+
+// Users
 app.get('/users/:id', auth, async function (req, res) {
     // Ricerca nel database
     var id = req.params.id
@@ -245,7 +246,7 @@ app.delete("/users/:id", auth, async function (req, res) {
     }
 })
 
-//Playlist
+// Playlist
 app.get('/playlists', auth, async function (req, res) {
     var pwmClient = await new mongoClient(uri).connect()
     var playlists = await pwmClient.db("SNM")

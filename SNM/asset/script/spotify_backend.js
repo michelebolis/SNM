@@ -19,6 +19,8 @@ await fetch(URL_TOKEN, {
 )
 var access_token = localStorage.getItem("token") // salvo il token nel local storage
 
+// TRACKS FUNCTIONS
+
 /**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni su una track
  * @param {String} id id di Spotify della traccia
@@ -35,7 +37,11 @@ export async function getTrack(id) {
     .catch((e) => console.log(e))
 }
 
-
+/**
+ * Funzione che effettua la chiamata all'API di Spotify che restituisce le track suggerite dati i propri generi preferiti
+ * @param {String} genres comma separated string 
+ * @returns json contenente le informazioni sulla track oppure un errore
+ */
 export async function getRecommendations(genres){
     return fetch(`${BASE_URL}recommendations?seed_genres=${genres}`, {
         headers: {
@@ -46,6 +52,40 @@ export async function getRecommendations(genres){
     .then(async (response) => { return response.json() })
     .catch((e) => console.log(e))
 }
+
+/**
+ * Funzione che effettua la chiamata all'API di Spotify che restituisce le 50 track piu ascoltate in Italia
+ */
+export async function getTopCharts(){
+    return fetch(`${BASE_URL}search?type=playlist&q=${'Top 50 - Italy'}&limit=1`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then((response) => response.json())
+    .then(async searchResults => {
+        return await getPlaylistSpotify(searchResults.playlists.items[0].tracks.href)}
+    ).catch((e) => console.log(e))
+}
+
+/**
+ * Funzione che effettua la chiamata all'API di Spotify che ricerca le canzoni in base al nome della track data
+ * @param {String} track nome della track da ricercare
+ * @returns array di json contenenti le track risultanti
+ */
+export async function searchTrack(track){
+    return fetch(`${BASE_URL}search?q=${track}&type=track`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+// ALBUM FUNCTIONS
 
 /**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni su un album
@@ -80,6 +120,24 @@ export async function getAlbumByArtist(id) {
 }
 
 /**
+ * Funzione che effettua la chiamata all'API di Spotify che ricerca gli album in base al nome dell'album dato
+ * @param {String} album nome dell'album da ricercare
+ * @returns array di json contenenti gli album risultanti
+ */
+export async function searchAlbum(album){
+    return fetch(`${BASE_URL}search?q=${album}&type=album`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+// ARTISTS FUNCTIONS
+
+/**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni dell'artista
  * @param {String} id id di Spotify dell'artista 
  * @returns json contenente le informazioni dell'artista
@@ -93,22 +151,6 @@ export async function getArtist(id) {
     })
     .then(async response => {return response.json()})
     .catch((e) => console.log(e))
-}
-
-/**
- * Funzione che effettua la chiamata all'API di Spotify che restituisce le 50 track piu ascoltate in Italia
- */
-export async function getTopCharts(){
-    return fetch(`${BASE_URL}search?type=playlist&q=${'Top 50 - Italy'}&limit=1`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then((response) => response.json())
-    .then(async searchResults => {
-        return await getPlaylistSpotify(searchResults.playlists.items[0].tracks.href)}
-    ).catch((e) => console.log(e))
 }
 
 /**
@@ -126,6 +168,24 @@ export async function getTopTracks(id) {
     .then(async response => {return response.json()})
     .catch((e) => console.log(e))
 }
+
+/**
+ * Funzione che effettua la chiamata all'API di Spotify che ricerca gli artist in base al nome dell'artist dato
+ * @param {String} artist nome dell'artist da ricercare
+ * @returns array di json contenenti gli artist risultanti
+ */
+export async function searchArtist(artist){
+    return fetch(`${BASE_URL}search?q=${artist}&type=artist`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token,
+        },
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
+
+// UTILITY FUNCTIONS
 
 /**
  * Funzione che effettua la chiamata all'API di Spotify che restituisce le informazioni sulla playlist di Spotify
@@ -149,54 +209,6 @@ export async function getPlaylistSpotify(url){
  */
 export async function getGenresSpotify(){
     return fetch('https://api.spotify.com/v1/recommendations/available-genre-seeds', {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then(async response => {return response.json()})
-    .catch((e) => console.log(e))
-}
-
-/**
- * Funzione che effettua la chiamata all'API di Spotify che ricerca le canzoni in base al nome della track data
- * @param {String} track nome della track da ricercare
- * @returns array di json contenenti le track risultanti
- */
-export async function searchTrack(track){
-    return fetch(`${BASE_URL}search?q=${track}&type=track`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then(async response => {return response.json()})
-    .catch((e) => console.log(e))
-}
-
-/**
- * Funzione che effettua la chiamata all'API di Spotify che ricerca gli album in base al nome dell'album dato
- * @param {String} album nome dell'album da ricercare
- * @returns array di json contenenti gli album risultanti
- */
-export async function searchAlbum(album){
-    return fetch(`${BASE_URL}search?q=${album}&type=album`, {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + access_token,
-        },
-    })
-    .then(async response => {return response.json()})
-    .catch((e) => console.log(e))
-}
-
-/**
- * Funzione che effettua la chiamata all'API di Spotify che ricerca gli artist in base al nome dell'artist dato
- * @param {String} artist nome dell'artist da ricercare
- * @returns array di json contenenti gli artist risultanti
- */
-export async function searchArtist(artist){
-    return fetch(`${BASE_URL}search?q=${artist}&type=artist`, {
         headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer " + access_token,
