@@ -646,6 +646,7 @@ export async function printAlbumTrack(tracks){
     console.log(tracks)
     var tracklist = document.createElement("ul")
     tracklist.classList.add("container", "list-group", "list-group-flush")
+    tracklist.id = "trackList"
 
     // Creo il template degli elementi della lista
     var template = document.createElement("li")
@@ -661,66 +662,15 @@ export async function printAlbumTrack(tracks){
     var myplaylist
     if(logged()){myplaylist = await getMyPlaylist(window.localStorage.getItem("user"))}
 
+    document.getElementById("albumTrack").append(tracklist)
+    console.log(tracks)
     for(let i=0;i<tracks.length;i++){
-        var clone = template.cloneNode(true) // Clono il template
-        
-        // Titolo della canzone
-        clone.childNodes[0].childNodes[0].innerHTML = "#" + (i+1) + " "
-        var a = document.createElement("a")
-        a.innerHTML = tracks[i].name
-        a.addEventListener("click", function(){goToTrack(tracks[i].id)})
-        a.classList.add("link", "cursor")
-        clone.childNodes[0].childNodes[0].append(a)
-        
-        // Preview della canzone
-        if(tracks[i].preview_url!=null){
-            // la preview per alcuna track non è disponibile
-            var audio = document.createElement("audio")
-            audio.style = "width:100%"
-            audio.controls="controls"
-            var source = document.createElement("source")
-            source.src = tracks[i].preview_url
-            source.type = "audio/mpeg"
-            audio.append(source)
-            clone.childNodes[0].childNodes[1].append(audio)
-        }
-        if(logged()){
-            // Bottone per aggiungere la canzone nella playlist, l'id della canzone è nel value del button
-            clone.childNodes[1].childNodes[0].classList.add("text-center")
-            clone.childNodes[1].childNodes[1].classList.add("text-center")
-            var button = document.createElement("button")
-            button.id=tracks[i].id
-            button.innerHTML="Aggiungi in una tua playlist"
-            button.addEventListener("click", addTrackToPlaylistFromSelect)
-            button.classList.add("btn", "btn-primary", "show")
-            button.style = "margin:0;"
-            clone.childNodes[1].childNodes[0].append(button)
-
-            // Lista contenente le playlist dell'utente
-            var select = document.createElement("select")
-            select.classList.add("form-select")
-            select.style = "margin-top:10px;"
-            select.id="myplaylist"
-            var option = document.createElement("option")
-            option.innerHTML = "Seleziona una tua playlist"
-            select.append(option)
-            for (let i=0;i<myplaylist.length;i++){
-                if(myplaylist[i]._id!=window.location.href.split("?")[1]){
-                    option = document.createElement("option")
-                    option.innerHTML = myplaylist[i].name
-                    option.value = myplaylist[i]._id
-                    option.classList.add("playlistToAdd")
-                    select.append(option)
-                }
-            }
-            clone.childNodes[1].childNodes[1].append(select)
-        }
-        tracklist.append(clone)
+        tracks[i].info = tracks[i]
+        printTrackItemList(tracks[i], "trackList", template, myplaylist, false, i+1)
     }
 
     var title = document.createElement("h4")
     title.innerHTML = "Tracklist dell'album"
-    document.getElementById("albumTrack").append(tracklist)
     document.getElementById("albumTrack").prepend(title)
     document.getElementById("albumPlaceholder").remove()
 }
@@ -1160,85 +1110,99 @@ export async function printPlaylistTracks(tracks, idNode, isowner){
             myplaylist = await getMyPlaylist(window.localStorage.getItem("user"))
         }
 
+        document.getElementById(idNode).append(tracklist)
+
         for(let i=0;i<tracks.length;i++){
-            // Clono il template
-            var clone = template.cloneNode(true)
-            clone.childNodes[0].childNodes[0].innerHTML = "#" + (i+1) + " "
-            
-            // Titolo della canzone
-            var a = document.createElement("a")
-            a.innerHTML = tracks[i].info.name
-            a.addEventListener("click", function(){goToTrack(tracks[i].info.id)})
-            a.classList.add("link", "cursor")
-            clone.childNodes[0].childNodes[0].append(a)
-            
-            // Preview della canzone
-            if(tracks[i].info.preview_url!=null){
-                // la preview per alcuna track non è disponibile
-                var audio = document.createElement("audio")
-                audio.style = "width:100%"
-                audio.controls="controls"
-                var source = document.createElement("source")
-                source.src = tracks[i].info.preview_url
-                source.type = "audio/mpeg"
-                audio.append(source)
-                clone.childNodes[0].childNodes[1].append(audio)
-            }else{
-                clone.childNodes[1].style = "margin-top:10px"
-            }
-
-            if(logged()){
-                // Bottone di aggiungere la canzone ad una playlist
-                clone.childNodes[1].childNodes[0].classList.add("text-center")
-                clone.childNodes[1].childNodes[1].classList.add("text-center")
-                var button = document.createElement("button")
-                button.id=tracks[i].info.id
-                button.innerHTML="Aggiungi in una tua playlist"
-                button.addEventListener("click", addTrackToPlaylistFromSelect)
-                button.classList.add("btn", "btn-primary", "show")
-                button.style = "margin:0;"
-                clone.childNodes[1].childNodes[0].append(button)
-
-                // Lista contenente le playlist dell'utente
-                var select = document.createElement("select")
-                select.classList.add("form-select")
-                select.style = "margin-top:10px;"
-                select.id="myplaylist"
-                var option = document.createElement("option")
-                option.innerHTML = "Seleziona una tua playlist"
-                select.append(option)
-                for (let i=0;i<myplaylist.length;i++){
-                    if(myplaylist[i]._id!=window.location.href.split("?")[1]){
-                        option = document.createElement("option")
-                        option.innerHTML = myplaylist[i].name
-                        option.value = myplaylist[i]._id
-                        option.classList.add("playlistToAdd")
-                        select.append(option)
-                    }
-                }
-                clone.childNodes[1].childNodes[1].append(select)
-            }
-
-            if(isowner){
-                // SE l'utente è il proprietario della playlist, puo rimuovere una canzone da essa con un bottone
-                var rowdel = document.createElement("div")
-                rowdel.classList.add("text-center")
-                var del = document.createElement("button")
-                del.innerHTML = "Rimuovi canzone dalla playlist"
-                del.classList.add("btn", "btn-danger", "show")
-                del.value = tracks[i].info.id + ";" + window.location.href.split("?")[1]
-                del.addEventListener("click", removeTrackFromPlaylist)
-                rowdel.append(del)
-                clone.append(rowdel)
-            }
-            tracklist.append(clone)
+            printTrackItemList(tracks[i], tracklist.id, template, myplaylist, isowner, i+1)
         }
 
         var title = document.createElement("h4")
         title.innerHTML = "Tracklist della playlist"
-        document.getElementById(idNode).append(tracklist)
         document.getElementById(idNode).prepend(title)
     }
+}
+
+/**
+ * Funzione che stampa una canzone di una tracklist
+ * @param {*} track informazioni della canzone
+ * @param {String} idNode id del nodo a cui accodare le informazioni
+ * @param {Node} template template da utilizzare 
+ * @param {Array} myplaylist array contenente le playlist dell'utente
+ * @param {boolean} isowner SE l'utente è anche proprietario della playlist
+ * @param {int} count numero della canzone all'interno della tracklist
+ */
+export function printTrackItemList(track, idNode, template, myplaylist, isowner, count){
+    // Clono il template
+    var clone = template.cloneNode(true)
+    clone.childNodes[0].childNodes[0].innerHTML = "#" + count + " "
+    
+    // Titolo della canzone
+    var a = document.createElement("a")
+    a.innerHTML = track.info.name
+    a.addEventListener("click", function(){goToTrack(track.info.id)})
+    a.classList.add("link", "cursor")
+    clone.childNodes[0].childNodes[0].append(a)
+    
+    // Preview della canzone
+    if(track.info.preview_url!=null){
+        // la preview per alcuna track non è disponibile
+        var audio = document.createElement("audio")
+        audio.style = "width:100%"
+        audio.controls="controls"
+        var source = document.createElement("source")
+        source.src = track.info.preview_url
+        source.type = "audio/mpeg"
+        audio.append(source)
+        clone.childNodes[0].childNodes[1].append(audio)
+    }else{
+        clone.childNodes[1].style = "margin-top:10px"
+    }
+
+    if(logged()){
+        // Bottone di aggiungere la canzone ad una playlist
+        clone.childNodes[1].childNodes[0].classList.add("text-center")
+        clone.childNodes[1].childNodes[1].classList.add("text-center")
+        var button = document.createElement("button")
+        button.id=track.info.id
+        button.innerHTML="Aggiungi in una tua playlist"
+        button.addEventListener("click", addTrackToPlaylistFromSelect)
+        button.classList.add("btn", "btn-primary", "show")
+        button.style = "margin:0;"
+        clone.childNodes[1].childNodes[0].append(button)
+
+        // Lista contenente le playlist dell'utente
+        var select = document.createElement("select")
+        select.classList.add("form-select")
+        select.style = "margin-top:10px;"
+        select.id="myplaylist"
+        var option = document.createElement("option")
+        option.innerHTML = "Seleziona una tua playlist"
+        select.append(option)
+        for (let i=0;i<myplaylist.length;i++){
+            if(myplaylist[i]._id!=window.location.href.split("?")[1]){
+                option = document.createElement("option")
+                option.innerHTML = myplaylist[i].name
+                option.value = myplaylist[i]._id
+                option.classList.add("playlistToAdd")
+                select.append(option)
+            }
+        }
+        clone.childNodes[1].childNodes[1].append(select)
+    }
+
+    if(isowner){
+        // SE l'utente è il proprietario della playlist, puo rimuovere una canzone da essa con un bottone
+        var rowdel = document.createElement("div")
+        rowdel.classList.add("text-center")
+        var del = document.createElement("button")
+        del.innerHTML = "Rimuovi canzone dalla playlist"
+        del.classList.add("btn", "btn-danger", "show")
+        del.value = track.info.id + ";" + window.location.href.split("?")[1]
+        del.addEventListener("click", removeTrackFromPlaylist)
+        rowdel.append(del)
+        clone.append(rowdel)
+    }
+    document.getElementById(idNode).append(clone)
 }
 
 /**
@@ -1350,7 +1314,6 @@ export async function addTrackToThisPlaylist(){
     track = {"id" : idTrack, "info" : track}
     var res = await putPlaylist(idPlaylist, track)
     console.log(res)
-    track = track.info
     if(res.acknowledged){
         // Recupero le playlist dell'utente da aggiungere alla select
         var myplaylist = await getMyPlaylist(window.localStorage.getItem("user"))
@@ -1365,72 +1328,8 @@ export async function addTrackToThisPlaylist(){
         row.append(col, col.cloneNode(true))
         clone.append(row, row.cloneNode(true))
 
-        // Titolo della canzone
-        clone.childNodes[0].childNodes[0].innerHTML = "#" + (tracklist.childNodes.length+1) + " "
-        var a = document.createElement("a")
-        a.innerHTML = track.name
-        a.addEventListener("click", function(){goToTrack(track.id)})
-        a.classList.add("link", "cursor")
-        clone.childNodes[0].childNodes[0].append(a)
-
-        // Preview della canzone
-        if(track.preview_url!=null){
-            // la preview per alcuna track non è disponibile
-            var audio = document.createElement("audio")
-            audio.style = "width:100%"
-            audio.controls="controls"
-            var source = document.createElement("source")
-            source.src = track.preview_url
-            source.type = "audio/mpeg"
-            audio.append(source)
-            clone.childNodes[0].childNodes[1].append(audio)
-        }else{
-            clone.childNodes[1].style = "margin-top:10px"
-        }
-
-        clone.childNodes[1].childNodes[0].classList.add("text-center")
-        clone.childNodes[1].childNodes[1].classList.add("text-center")
-
-        // (L'utente è loggato e owner della playlist) aggiungo un bottone per aggiungere la canzone alla plyalist selezionata
-        var button = document.createElement("button")
-        button.id=track.id
-        button.innerHTML="Aggiungi in una tua playlist"
-        button.addEventListener("click", addTrackToPlaylistFromSelect)
-        button.classList.add("btn", "btn-primary", "show")
-        button.style = "margin:0;"
-        clone.childNodes[1].childNodes[0].append(button)
-
-        // Lista contenente le playlist dell'utente
-        var select = document.createElement("select")
-        select.classList.add("form-select")
-        select.style = "margin-top:10px;"
-        select.id="myplaylist"
-        var option = document.createElement("option")
-        option.innerHTML = "Seleziona una tua playlist"
-        select.append(option)
-        for (let i=0;i<myplaylist.length;i++){
-            if(myplaylist[i]._id!=window.location.href.split("?")[1]){
-                option = document.createElement("option")
-                option.innerHTML = myplaylist[i].name
-                option.value = myplaylist[i]._id
-                option.classList.add("playlistToAdd")
-                select.append(option)
-            }
-        }
-        clone.childNodes[1].childNodes[1].append(select)
-
-        // (L'utente è loggato e owner della playlist) aggiungo un bottone per eliminare la canzone dalla playlist
-        var rowdel = document.createElement("div")
-        rowdel.classList.add("text-center")
-        var del = document.createElement("button")
-        del.innerHTML = "Rimuovi canzone dalla playlist"
-        del.classList.add("btn", "btn-danger", "show")
-        del.value = track.id + ";" + window.location.href.split("?")[1]
-        del.addEventListener("click", removeTrackFromPlaylist)
-        rowdel.append(del)
-        clone.append(rowdel)
-
-        tracklist.append(clone)
+        printTrackItemList(track, "trackList", clone, myplaylist, true, tracklist.childNodes.length+1)
+        
         this.remove()
     }
 }
