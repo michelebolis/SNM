@@ -755,37 +755,48 @@ export async function printMyPlaylists(idNode, idTemplate){
         var title = document.createElement("h4")
         title.innerHTML = "Le tue playlist"
         node.innerHTML = ""
-        
-        // Clono il template
-        var template = document.getElementById(idTemplate).cloneNode(true)
-        template.classList.remove("visually-hidden")
-
-        // Creo la paginazione
-        var pagination = document.createElement("ul")
-        pagination.classList.add("pagination", "justify-content-center")
-        for (let i=0;i<playlists.length;i+=5){ // stampo 5 playlist per ogni riga
-            var row = document.createElement("div")
-            row.classList.add("row", "justify-content-center")
-            i/5 == 0 ? null : row.classList.add("visually-hidden")
-            var newid = "MyPlaylistRow"+(i/5)
-            row.id = newid
-            node.append(row)
-
-            printPlaylistCard(playlists.slice(i,i+5), newid, idTemplate)
-
-            // Aggiungo un nuovo elemento alla paginazione
-            var page = document.createElement("li")
-            page.classList.add("page-item", "page-link", "link")
-            page.style = "cursor: pointer"
-            page.innerHTML = (i/5) +1
-            page.addEventListener("click", changePagination)
-            pagination.append(page)
-        }
-        if(playlists.length>5){ // Attivo la prima pagina
-            pagination.childNodes[0].classList.add("active")
-            document.getElementById(idNode).append(pagination)
-        }
+        printContentRows(playlists, idNode, idTemplate, printPlaylistCard)
         node.parentNode.prepend(title)
+    }
+}
+
+/**
+ * Funzione che predispone paginazione e righe per un contenuto da stampare
+ * @param {Array} content array contenente le informazioni da stampare
+ * @param {String} idNode id del nodo a cui accodare le informazioni
+ * @param {String} idTemplate id del template da clonare
+ * @param {Function} printFunction funzione da utilizzare per stampare i singoli elementi
+ */
+export function printContentRows(content, idNode, idTemplate, printFunction){
+    var node = document.getElementById(idNode)
+    // Clono il template
+    var template = document.getElementById(idTemplate).cloneNode(true)
+    template.classList.remove("visually-hidden")
+
+    // Creo la paginazione
+    var pagination = document.createElement("ul")
+    pagination.classList.add("pagination", "justify-content-center")
+    for (let i=0;i<content.length;i+=5){ // stampo 5 playlist per ogni riga
+        var row = document.createElement("div")
+        row.classList.add("row", "justify-content-center")
+        i/5 == 0 ? null : row.classList.add("visually-hidden")
+        var newid = idNode+(i/5)
+        row.id = newid
+        node.append(row)
+        
+        printFunction(content.slice(i,i+5), newid, idTemplate)
+
+        // Aggiungo un nuovo elemento alla paginazione
+        var page = document.createElement("li")
+        page.classList.add("page-item", "page-link", "link")
+        page.style = "cursor: pointer"
+        page.innerHTML = (i/5) +1
+        page.addEventListener("click", changePagination)
+        pagination.append(page)
+    }
+    if(content.length>5){ // Attivo la prima pagina
+        pagination.childNodes[0].classList.add("active")
+        document.getElementById(idNode).append(pagination)
     }
 }
 
@@ -1448,32 +1459,8 @@ export async function printFollowedPlaylists(){
         document.getElementById("followedPlaylists").innerHTML = ""
         title.innerHTML = "Non segui ancora nessuna playlist"
     }else{
-        // Clono il template
-        var template = document.getElementById("playlist-template").cloneNode(true)
-        template.classList.remove("visually-hidden")
-
-        // Creo la paginazione
-        var pagination = document.createElement("ul")
-        pagination.classList.add("pagination", "justify-content-center")
-        for(let i=0;i<followedPlaylists.length;i+=5){ // 5 card per riga
-            // Creo la nuova row
-            var row = document.createElement("div")
-            row.classList.add("row", "justify-content-center")
-            i/5 == 0 ? null : row.classList.add("visually-hidden")
-            var newid = "FollowedPlaylistsRow"+(i/5)
-            row.id = newid
-            node.append(row)
-
-            printPlaylistCard(followedPlaylists.slice(i, i+5), newid, idTemplate)
-
-            // Creo la nuova pagina
-            var page = document.createElement("li")
-            page.classList.add("page-item", "page-link", "link")
-            page.style = "cursor: pointer"
-            page.innerHTML = (i/5) +1
-            page.addEventListener("click", changePagination)
-            pagination.append(page)
-        }
+        document.getElementById("followedPlaylists").innerHTML = ""
+        printContentRows(followedPlaylists, "followedPlaylists", "playlist-template", printPlaylistCard)
     }
     document.getElementById("followedPlaylists").parentNode.prepend(title)
 }
@@ -1491,33 +1478,7 @@ export async function printPublicPlaylists(){
     if(playlists.length == 0){
         title.innerHTML = "Oh no, non ci sono ancora playlist pubbliche"
     }else{
-        // Clono il template
-        var template = document.getElementById("playlist-template").cloneNode(true)
-        template.classList.remove("visually-hidden")
-
-        // Creo la paginazione
-        var pagination = document.createElement("ul")
-        pagination.classList.add("pagination", "justify-content-center")
-        for(let i=0;i<playlists.length; i+=5){
-            // Creo nuova riga
-            var row = document.createElement("div")
-            row.classList.add("row", "justify-content-center")
-            i/5 == 0 ? null : row.classList.add("visually-hidden")
-            var newid = "FollowedPlaylistsRow"+(i/5)
-            row.id = newid
-            node.append(row)
-
-            printPlaylistCard(playlists.slice(i, i+5), newid, "playlist-template")
-
-            // Creo nuov paginazione
-            var page = document.createElement("li")
-            page.classList.add("page-item", "page-link", "link")
-            page.style = "cursor: pointer"
-            page.innerHTML = (i/5) +1
-            page.addEventListener("click", changePagination)
-            pagination.append(page)
-        }
-
+        printContentRows(playlists, "publicPlaylists", "playlist-template", printPlaylistCard)
         title.innerHTML = "Esplora le playlist pubbliche"
     }
     node.parentNode.prepend(title)
@@ -2069,33 +2030,8 @@ export async function printSearchPlaylist(input, divSearch){
         document.getElementById("searchPlaylist").innerHTML=""
         document.getElementById("titleTemp").innerHTML = "Playlist dalla ricerca: nessun risultato"
     }else{
-        // Clono il template
-        var node = document.getElementById("searchPlaylist")
-        var template = document.getElementById("playlist-template").cloneNode(true)
-        template.classList.remove("visually-hidden")
-        
-        // Creo la paginazione
-        var pagination = document.createElement("ul")
-        pagination.classList.add("pagination", "justify-content-center")
-        for(let i=0;i<playlists.length; i+=5){ // 5 card per riga
-            // Creo la nuova riga
-            var row = document.createElement("div")
-            row.classList.add("row", "justify-content-center")
-            i/5 == 0 ? null : row.classList.add("visually-hidden")
-            var newid = "searchByPlaylistRow"+(i/5)
-            row.id = newid
-            node.append(row)
-
-            printPlaylistCard(playlists.slice(i, i+5), newid, "playlist-template")
-
-            // Creo la nuova pagina
-            var page = document.createElement("li")
-            page.classList.add("page-item", "page-link", "link")
-            page.style = "cursor: pointer"
-            page.innerHTML = (i/5) +1
-            page.addEventListener("click", changePagination)
-            pagination.append(page)
-        }
+        document.getElementById("searchPlaylist").innerHTML=""
+        printContentRows(playlists, "searchPlaylist", "playlist-template", printPlaylistCard)
     }
 }
 
@@ -2112,45 +2048,25 @@ export async function printSearchTag(input, divSearch){
     div.append(title)
 
     var divResults = document.createElement("div")
-    divResults.id="searchPlaylist"
+    divResults.id="searchTagPlaylist"
     divResults.classList.add("row")
     div.append(divResults)
     div.classList.add("container")
     divSearch.append(div)
 
     for(let i=0;i<5;i++){
-        printCardPlaceholder("searchPlaylist")
+        printCardPlaceholder("searchTagPlaylist")
     }
 
     var playlists = await searchPlaylistsByTag(input)
     console.log(playlists)
 
     if(playlists.length==0){
-        document.getElementById("searchPlaylist").innerHTML=""
+        document.getElementById("searchTagPlaylist").innerHTML=""
         document.getElementById("titleTemp").innerHTML = "Playlist dalla ricerca: nessun risultato"
     }else{
-        var node = document.getElementById("searchPlaylist")
-        var template = document.getElementById("playlist-template").cloneNode(true)
-        template.classList.remove("visually-hidden")
-        var pagination = document.createElement("ul")
-        pagination.classList.add("pagination", "justify-content-center")
-        for(let i=0;i<playlists.length; i+=5){
-            var row = document.createElement("div")
-            row.classList.add("row", "justify-content-center")
-            i/5 == 0 ? null : row.classList.add("visually-hidden")
-            var newid = "searchByTagRow"+(i/5)
-            row.id = newid
-            node.append(row)
-
-            printPlaylistCard(playlists.slice(i, i+5), newid, "playlist-template")
-
-            var page = document.createElement("li")
-            page.classList.add("page-item", "page-link", "link")
-            page.style = "cursor: pointer"
-            page.innerHTML = (i/5) +1
-            page.addEventListener("click", changePagination)
-            pagination.append(page)
-        }
+        document.getElementById("searchTagPlaylist").innerHTML=""
+        printContentRows(playlists, "searchPlaylist", "playlist-template", printPlaylistCard)
     }
 }
 
