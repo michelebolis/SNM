@@ -134,7 +134,7 @@ export async function deletePlaylist(id) {
         } else {
             return response.text().then( text => alert(text) )
         }
-    })
+    }).catch((e) => console.log(e))
 }
 
 /**

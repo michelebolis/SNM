@@ -332,7 +332,7 @@ app.delete('/playlist/:id', auth, async function (req, res) {
     var pwmClient = await new mongoClient(uri).connect()
     var myplaylist = await pwmClient.db("SNM")
     .collection('Playlists').deleteOne({"_id" : new ObjectId(id)})
-    return myplaylist
+    res.send(myplaylist)
 })
 
 app.get('/playlists/:user', auth, async function (req, res) {

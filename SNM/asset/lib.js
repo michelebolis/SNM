@@ -887,12 +887,15 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
     template.classList.add("visually-hidden")
 }
 
-async function deleteThisPlaylist(){ // NON VA
+/**
+ * Funzione che elimina la playlist dato il suo id nel nodo attuale
+ */
+async function deleteThisPlaylist(){
     var id = this.value
     var res = await deletePlaylist(id)
-    window.location.href = "/"
-    console.log(res)
-    this.parentNode.parentNode.parentNode.parentNode.remove();
+    if(res.acknowledged){
+        this.parentNode.parentNode.parentNode.parentNode.remove();
+    }
 }
 
 /**
