@@ -1,6 +1,6 @@
 import {getFollowedPlaylists, getPublicPlaylist, userLogin, getUser, postUser, putUser, postPlaylist, 
     deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag, deleteUser, 
-    changePlaylistVisibility, putTags, putPlaylist, removeTrack} from "./script/backend.js"
+    changePlaylistVisibility, putTags, putPlaylist, removeTrack, searchPlaylistsByTrack} from "./script/backend.js"
 import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, 
     searchArtist, searchTrack, getGenresSpotify, getRecommendations} from "./script/spotify_backend.js"
 
@@ -731,7 +731,7 @@ export async function printAlbumTrack(tracks){
     document.getElementById("albumTrack").append(tracklist)
     console.log(tracks)
     for(let i=0;i<tracks.length;i++){
-        tracks[i].info = tracks[i]
+        //tracks[i].info = tracks[i]
         printTrackItemList(tracks[i], "trackList", template, myplaylist, false, i+1)
     }
 
@@ -836,8 +836,8 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
 
         // Imposto come immagine della playlist, quella della prima canzone SE c è
         if(playlists[i].tracks && playlists[i].tracks.length!=0){
-            if (playlists[i].tracks[0].info.album.images[0].url){
-                div.getElementsByClassName("card-img")[0].src = playlists[i].tracks[0].info.album.images[0].url
+            if (playlists[i].tracks[0].album.images[0].url){
+                div.getElementsByClassName("card-img")[0].src = playlists[i].tracks[0].album.images[0].url
             }
         }
         div.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToPlaylist(playlists[i]._id)})
@@ -922,7 +922,7 @@ export async function printPlaylistInfo(id, idNode){
     var img = document.createElement("img")
     img.style="width:100%"
     if(playlist.tracks && playlist.tracks.length!=0){
-        img.src = playlist.tracks[0].info.album.images[0].url
+        img.src = playlist.tracks[0].album.images[0].url
     }else{
         img.src = "../img/music.jpg"
     }
@@ -1210,19 +1210,19 @@ export function printTrackItemList(track, idNode, template, myplaylist, isowner,
     
     // Titolo della canzone
     var a = document.createElement("a")
-    a.innerHTML = track.info.name
-    a.addEventListener("click", function(){goToTrack(track.info.id)})
+    a.innerHTML = track.name
+    a.addEventListener("click", function(){goToTrack(track.id)})
     a.classList.add("link", "cursor")
     clone.childNodes[0].childNodes[0].append(a)
     
     // Preview della canzone
-    if(track.info.preview_url!=null){
+    if(track.preview_url!=null){
         // la preview per alcuna track non è disponibile
         var audio = document.createElement("audio")
         audio.style = "width:100%"
         audio.controls="controls"
         var source = document.createElement("source")
-        source.src = track.info.preview_url
+        source.src = track.preview_url
         source.type = "audio/mpeg"
         audio.append(source)
         clone.childNodes[0].childNodes[1].append(audio)
@@ -1235,7 +1235,7 @@ export function printTrackItemList(track, idNode, template, myplaylist, isowner,
         clone.childNodes[1].childNodes[0].classList.add("text-center")
         clone.childNodes[1].childNodes[1].classList.add("text-center")
         var button = document.createElement("button")
-        button.id=track.info.id
+        button.id=track.id
         button.innerHTML="Aggiungi in una tua playlist"
         button.addEventListener("click", addTrackToPlaylistFromSelect)
         button.classList.add("btn", "btn-primary", "show")
@@ -1269,7 +1269,7 @@ export function printTrackItemList(track, idNode, template, myplaylist, isowner,
         var del = document.createElement("button")
         del.innerHTML = "Rimuovi canzone dalla playlist"
         del.classList.add("btn", "btn-danger", "show")
-        del.value = track.info.id + ";" + window.location.href.split("?")[1]
+        del.value = track.id + ";" + window.location.href.split("?")[1]
         del.addEventListener("click", removeTrackFromPlaylist)
         rowdel.append(del)
         clone.append(rowdel)
@@ -1284,7 +1284,7 @@ export function printTrackItemList(track, idNode, template, myplaylist, isowner,
 export async function addTrackToPlaylistFromSelect(){
     var id = this.id
     var info = await getTrack(id)
-    var track = {"id" : id, "info":info}
+    var track = {info}
     var select = this.parentNode.parentNode.childNodes[1].childNodes[0]
     var playlist = select.value
     if(playlist=="Seleziona una tua playlist"){alert("Seleziona una tua playlist");return}
@@ -1307,7 +1307,7 @@ export async function addTrackToPlaylistFromSelect(){
 export async function addTrackToPlaylist(){
     var id = this.id
     var info = await getTrack(id)
-    var track = {"id" : id, "info":info}
+    var track = {info}
     var playlist = this.parentNode.childNodes[0].value
     console.log((track))
     var res = await putPlaylist(playlist, track)
@@ -1383,7 +1383,6 @@ export async function addTrackToThisPlaylist(){
     var track = await getTrack(idTrack)
 
     // Aggiorno la playlist aggiungendo la canzone
-    track = {"id" : idTrack, "info" : track}
     var res = await putPlaylist(idPlaylist, track)
     console.log(res)
     if(res.acknowledged){
@@ -1645,7 +1644,8 @@ export async function verifySearchPlaylist(){
     // Recupero i vari switch, controllando che almeno uno sia checkato
     var radioPlaylist = document.getElementById("playlist")
     var radioTag = document.getElementById("tag")
-    if(!(radioPlaylist.checked || radioTag.checked)){return}
+    var radioTrack = document.getElementById("track")
+    if(!(radioPlaylist.checked || radioTag.checked || radioTrack.checked)){return}
 
     // Creo il div che conterrà i risultati
     var prevSearch = document.getElementById("searchResult")
@@ -1661,6 +1661,7 @@ export async function verifySearchPlaylist(){
     if(document.getElementById("all").checked){
         printSearchPlaylist(input, divSearch)
         printSearchTag(input, divSearch)
+        printSearchPlaylistByTrack(input, divSearch)
         return
     }
 
@@ -1669,6 +1670,9 @@ export async function verifySearchPlaylist(){
     }
     if(radioTag.checked){
         printSearchTag(input, divSearch)
+    }
+    if(radioTrack.checked){
+        printSearchPlaylistByTrack(input, divSearch)
     }
 }
 
@@ -1832,6 +1836,41 @@ export async function printSearchTag(input, divSearch){
     }else{
         document.getElementById("searchTagPlaylist").innerHTML=""
         printContentRows(playlists, "searchPlaylist", "playlist-template", printPlaylistCard)
+    }
+}
+
+/**
+ * Funzione che, dato il valore presente nell'input, accoda nel nodo le playlist trovate
+ * @param {String} input input utilizzato per la ricerca
+ * @param {Node} divSearch nodo in cui stampare i risultati
+ */
+export async function printSearchPlaylistByTrack(input, divSearch){
+    var div = document.createElement("div")
+    var title = document.createElement("h5")
+    title.id="titleTemp"
+    title.innerHTML = "Playlist dalla ricerca"
+    div.append(title)
+
+    var divResults = document.createElement("div")
+    divResults.id="searchPlaylistByTrack"
+    divResults.classList.add("row")
+    div.append(divResults)
+    div.classList.add("container")
+    divSearch.append(div)
+
+    for(let i=0;i<5;i++){
+        printCardPlaceholder("searchPlaylistByTrack")
+    }
+
+    var playlists = await searchPlaylistsByTrack(input)
+    console.log(playlists)
+
+    if(playlists.length==0){
+        document.getElementById("searchPlaylistByTrack").innerHTML=""
+        document.getElementById("titleTemp").innerHTML = "Playlist dalla ricerca: nessun risultato"
+    }else{
+        document.getElementById("searchPlaylistByTrack").innerHTML=""
+        printContentRows(playlists, "searchPlaylistByTrack", "playlist-template", printPlaylistCard)
     }
 }
 

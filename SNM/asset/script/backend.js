@@ -284,6 +284,21 @@ export async function searchPlaylistsByTag(tag){
     .catch((e) => console.log(e))
 }
 
+/**
+ * Funzione che effettua la chiamata all'API per ricercare una playlist pubblica dato il nome di una track
+ * @param {String} track nome della track
+ * @returns Array di playlist SE ce ne sono con quel tag
+ */
+export async function searchPlaylistsByTrack(track){
+    return fetch(MY_BASE_URL+"playlists/track/"+track+"?apikey=123456", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(async response => {return response.json()})
+    .catch((e) => console.log(e))
+}
 
 /**
  * Funzione che effettua la chiamata all'API per aggiungere una canzone ad una playlist

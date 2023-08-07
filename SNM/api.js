@@ -420,6 +420,18 @@ app.get('/playlists/tag/:tag', auth, async function (req, res) {
     res.json(playlists)
 })
 
+app.get('/playlists/track/:track', auth, async function (req, res) {
+    // Ricerca nel database
+    var track = req.params.track
+    console.log(track)
+    var pwmClient = await new mongoClient(uri).connect()
+    var playlists = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .find({$and:[{ "tracks": {"$elemMatch" :{"name" : track}}} , {"public":true}]})
+        .toArray();
+    res.json(playlists)
+})
+
 app.get('/playlists/followedby/:user', auth, async function (req, res) {
     // Ricerca nel database
     var user = req.params.user
