@@ -367,3 +367,43 @@ export async function putTags(id, tags){
     })
     .catch((e) => {console.log(e)})
 }
+
+/**
+ * Funzione che effettua la chiamata all'API per aggiornare il nome di una playlist
+ * @param {String} id id della playlist
+ * @param {*} name nuovo nome della playlist
+ * @returns 
+ */
+export async function putNamePlaylist(id, name){
+    return fetch(`${MY_BASE_URL}playlist/name/${id}?apikey=123456`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({name: name})
+    })
+    .then(async res => {
+        return res.json()
+    })
+    .catch((e) => {console.log(e)})
+}
+
+/**
+ * Funzione che effettua la chiamata all'API per aggiornare la descrizione di una playlist
+ * @param {String} id id della playlist
+ * @param {*} description nuova descrizione della playlist
+ * @returns 
+ */
+export async function putDescriptionPlaylist(id, description){
+    return fetch(`${MY_BASE_URL}playlist/description/${id}?apikey=123456`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({description: description})
+    })
+    .then(async res => {
+        return res.json()
+    })
+    .catch((e) => {console.log(e)})
+}

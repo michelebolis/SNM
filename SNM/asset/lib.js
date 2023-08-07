@@ -1,6 +1,6 @@
 import {getFollowedPlaylists, getPublicPlaylist, userLogin, getUser, postUser, putUser, postPlaylist, 
     deletePlaylist, getMyPlaylist, getPlaylist, addFollow, removeFollow, searchPlaylist, searchPlaylistsByTag, deleteUser, 
-    changePlaylistVisibility, putTags, putPlaylist, removeTrack, searchPlaylistsByTrack} from "./script/backend.js"
+    changePlaylistVisibility, putTags, putPlaylist, removeTrack, searchPlaylistsByTrack, putNamePlaylist, putDescriptionPlaylist} from "./script/backend.js"
 import {getTrack, getAlbum, getAlbumByArtist, getArtist, getTopCharts, getTopTracks, searchAlbum, 
     searchArtist, searchTrack, getGenresSpotify, getRecommendations} from "./script/spotify_backend.js"
 
@@ -908,12 +908,11 @@ export async function printPlaylistInfo(id, idNode){
     if(playlist==undefined){window.location.href = "/src/playlist.html";return;}
     console.log(playlist)
 
-    // Nome della playlist
     var node = document.createElement("div")
     node.classList.add("row", "justify-content-center")
-    var title = document.createElement("h3")
-    title.innerHTML = "Playlist: " + playlist.name
-    node.append(title)
+    node.style = "margin-top:20px"
+    var loggedUser = window.localStorage.getItem("user")
+    var isowner = loggedUser && playlist.owner == loggedUser
 
     // Divisione in due sezioni della pagina, a sinistra la foto della playlist e a destra le informazioni
     var left = document.createElement("div")
@@ -934,11 +933,56 @@ export async function printPlaylistInfo(id, idNode){
     var li = document.createElement("li")
     li.classList.add("list-group-item", "list-group-item-dark")
     
+    // Nome della playlist
+    var li_clone = li.cloneNode(true)
+    if(isowner){
+        var title = document.createElement("div")
+        title.innerHTML = "Playlist: "
+        title.classList.add("col-2")
+        title.style = "margin-top:8px"
+        li_clone.classList.add("container")
+        var row = document.createElement("div")
+        row.classList.add("row")
+        var form = document.createElement("div")
+        form.classList.add("col-10")
+        var div = document.createElement("div")
+        div.classList.add("row")
+
+        // Input per modificare il nome della playlist
+        var divInput = document.createElement("div")
+        divInput.classList.add("col-6")
+        var input = document.createElement("input")
+        input.classList.add("form-control")
+        input.value = playlist.name
+        input.autocomplete = "off"
+        input.id="name"
+        divInput.append(input)
+        
+        // Bottone per modificare il nome della playlist
+        var divButton = document.createElement("div")
+        divButton.classList.add("col-6")
+        var button = document.createElement("button")
+        button.innerHTML = "Aggiorna nome"
+        button.classList.add("btn", "btn-primary")
+        button.style = "width:100%"
+        button.addEventListener("click", async function (){
+            var res = await putNamePlaylist(playlist._id, document.getElementById("name").value)
+            console.log(res)
+        })
+        divButton.append(button)
+
+        div.append(divInput, divButton)
+        form.append(div)
+        row.append(title, form)
+        li_clone.append(row)
+    }else{
+        li_clone.innerHTML = "Playlist: " + playlist.name
+    }
+    right.append(li_clone)
+
     // Proprietario della playlist
     var li_clone = li.cloneNode(true)
     var autore = ""
-    var loggedUser = window.localStorage.getItem("user")
-    var isowner = loggedUser && playlist.owner == loggedUser
     if(isowner){
         autore="Tu"
     }else{
@@ -950,7 +994,52 @@ export async function printPlaylistInfo(id, idNode){
 
     // Descrizione
     li_clone = li.cloneNode(true)
-    li_clone.innerHTML = "Descrizione: " + (!playlist.description || playlist.description=="" ? "nessuna" : playlist.description)
+    if(isowner){
+        var title = document.createElement("div")
+        title.innerHTML = "Descrizione: "
+        title.classList.add("col-2")
+        title.style = "margin-top:8px"
+        li_clone.classList.add("container")
+        var row = document.createElement("div")
+        row.classList.add("row")
+        var form = document.createElement("div")
+        form.classList.add("col-10")
+        var div = document.createElement("div")
+        div.classList.add("row")
+
+        // Input per modificare la descrizione della playlist
+        var divInput = document.createElement("div")
+        divInput.classList.add("col-6")
+        var input = document.createElement("input")
+        input.classList.add("form-control")
+        input.autocomplete = "off"
+        input.id="description"
+        if(playlist.description==""){
+            input.placeholder = "nessuna"
+        }else{
+            input.value = playlist.description
+        }
+        divInput.append(input)
+
+        // Bottone per modificare la descrizione della playlist
+        var divButton = document.createElement("div")
+        divButton.classList.add("col-6")
+        var button = document.createElement("button")
+        button.innerHTML = "Aggiorna descrizione"
+        button.classList.add("btn", "btn-primary")
+        button.style = "width:100%"
+        button.addEventListener("click", async function (){
+            var res = await putDescriptionPlaylist(playlist._id, document.getElementById("description").value)
+            console.log(res)
+        })
+        divButton.append(button)
+        div.append(divInput, divButton)
+        form.append(div)
+        row.append(title, form)
+        li_clone.append(row)
+    }else{
+        li_clone.innerHTML = "Descrizione: " + (!playlist.description || playlist.description=="" ? "nessuna" : playlist.description)
+    }
     right.append(li_clone)
     
     // Numero dei follower

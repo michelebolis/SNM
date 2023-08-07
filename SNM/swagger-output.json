@@ -59,6 +59,9 @@
                 "email": {
                   "example": "any"
                 },
+                "favorite_genres": {
+                  "example": "any"
+                },
                 "password": {
                   "example": "any"
                 }
@@ -120,6 +123,9 @@
                   "example": "any"
                 },
                 "password": {
+                  "example": "any"
+                },
+                "favorite_genres": {
                   "example": "any"
                 }
               }
@@ -233,6 +239,27 @@
         }
       }
     },
+    "/playlists/remove/{playlist}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "playlist",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
     "/playlist/{id}": {
       "delete": {
         "description": "",
@@ -245,8 +272,8 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -341,6 +368,57 @@
         }
       }
     },
+    "/playlist/name/{id}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "req": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/playlist/description/{id}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/playlists/info/{id}": {
       "get": {
         "description": "",
@@ -383,6 +461,24 @@
         "parameters": [
           {
             "name": "tag",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/playlists/track/{track}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "track",
             "in": "path",
             "required": true,
             "type": "string"
