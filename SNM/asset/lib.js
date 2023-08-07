@@ -731,7 +731,6 @@ export async function printAlbumTrack(tracks){
     document.getElementById("albumTrack").append(tracklist)
     console.log(tracks)
     for(let i=0;i<tracks.length;i++){
-        //tracks[i].info = tracks[i]
         printTrackItemList(tracks[i], "trackList", template, myplaylist, false, i+1)
     }
 
@@ -1327,11 +1326,15 @@ export async function removeTrackFromPlaylist(){
     if(res.acknowledged){
         this.parentNode.parentNode.remove()
         var tracks = document.getElementById("trackList").childNodes
-        // Il numero d'ordine dell'elenco delle canzoni potrebbe non essere piu corretto quindi lo resetto
-        for(let i=0;i<tracks.length;i++){
-            var a = tracks[i].childNodes[0].childNodes[0].childNodes[1]
-            tracks[i].childNodes[0].childNodes[0].innerHTML = "#"+(i+1)+" "
-            tracks[i].childNodes[0].childNodes[0].append(a)
+        if (tracks.length==0){
+            document.getElementById("trackList").parentNode.childNodes[0].innerHTML = "Nessuna canzone nella playlist"
+        }else{
+            // Il numero d'ordine dell'elenco delle canzoni potrebbe non essere piu corretto quindi lo resetto
+            for(let i=0;i<tracks.length;i++){
+                var a = tracks[i].childNodes[0].childNodes[0].childNodes[1]
+                tracks[i].childNodes[0].childNodes[0].innerHTML = "#"+(i+1)+" "
+                tracks[i].childNodes[0].childNodes[0].append(a)
+            }
         }
     }
 }
@@ -1390,6 +1393,9 @@ export async function addTrackToThisPlaylist(){
         var myplaylist = await getMyPlaylist(window.localStorage.getItem("user"))
 
         var tracklist = document.getElementById("trackList")
+        if(tracklist.childNodes.length==0){
+            tracklist.parentNode.childNodes[0].innerHTML = "Tracklist della playlist"
+        }
         var clone = document.createElement("li")
         clone.classList.add("list-group-item", "list-group-item-dark")
         var row = document.createElement("div")
