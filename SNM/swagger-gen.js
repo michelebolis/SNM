@@ -1,8 +1,8 @@
 const swaggerAutogen = require('swagger-autogen')();
 const doc = {
     info: {
-      title: 'My API',
-      description: 'Description',
+      title: 'SNM API',
+      description: 'API dell applicativo web SNM',
     },
     host: 'localhost:3100',
     schemes: ['http'],

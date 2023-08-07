@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "My API",
-    "description": "Description",
+    "title": "SNM API",
+    "description": "API dell applicativo web SNM",
     "version": "1.0.0"
   },
   "host": "localhost:3100",
@@ -13,7 +13,7 @@
   "paths": {
     "/": {
       "get": {
-        "description": "",
+        "description": "Mando la pagina HTML di base, index.html",
         "responses": {
           "200": {
             "description": "OK"

@@ -12,7 +12,8 @@ app.use(cors())
 // app.use(auth) Per avere apikey su tutti gli endpoint
 app.use(express.json())
 
-app.get('/', function (req, res) { // mando la pagina HTML di base
+app.get('/', function (req, res) { 
+    // #swagger.description = 'Mando la pagina HTML di base, index.html'
     res.sendFile(path.join(__dirname, '/index.html'));
 });
 app.listen(3100, "0.0.0.0", () => { // apre il web server sulla porta 3100
