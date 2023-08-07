@@ -306,11 +306,11 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
     img.src = info.album.images[0].url
     left.append(img)
     var right = document.createElement("ul")
-    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group")
 
     // Elenco degli artisti
     var li = document.createElement("li")
-    li.classList.add("list-group-item", "list-group-item-dark")
+    li.classList.add("list-group-item")
     li.innerHTML="Artisti: "
     for (let i=0; i<info.artists.length; i++){
         var a = document.createElement("a")
@@ -324,7 +324,7 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
 
     // Album a cui appartiene la canzone
     var li = document.createElement("li")
-    li.classList.add("list-group-item", "list-group-item-dark")
+    li.classList.add("list-group-item")
     li.innerHTML = "Album: "
     var a = document.createElement("a")
     a.innerHTML = info.album.name
@@ -335,14 +335,14 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
 
     // Durata della canzone
     li = document.createElement("li")
-    li.classList.add("list-group-item", "list-group-item-dark")
+    li.classList.add("list-group-item")
     li.innerHTML = "Durata: " + msToMinutesAndSeconds(info.duration_ms)
     right.append(li)
 
     // Preview della canzone
     if (info.preview_url!=null){
         var li = document.createElement("li")
-        li.classList.add("list-group-item", "list-group-item-dark")
+        li.classList.add("list-group-item")
         li.innerHTML = "Preview: </br>"
         li.style="vertical-align: middle;"
         var audio = document.createElement("audio")
@@ -357,7 +357,7 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
     }
     if (logged()){
         var li = document.createElement("li")
-        li.classList.add("list-group-item", "list-group-item-dark")
+        li.classList.add("list-group-item")
         // Possibilità di aggiungere la canzone ad una playlist
         var div = document.createElement("div")
         div.classList.add("row")
@@ -452,10 +452,10 @@ export async function printArtistInfo(idArtist, idNode){
     img.src = artist.images[0].url
     left.append(img)
     var right = document.createElement("ul")
-    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group")
     // Generi associato all'artista
     var li = document.createElement("li")
-    li.classList.add("list-group-item", "list-group-item-dark")
+    li.classList.add("list-group-item", )
     var li_clone = li.cloneNode(true)
     if(artist.genres.length==0){
         li_clone.innerHTML="Generi: Nessuno"
@@ -658,11 +658,11 @@ export async function printAlbumInfo(idAlbum, idNode){
     img.src = album.images[0].url
     left.append(img)
     var right = document.createElement("ul")
-    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group")
     
     // Creo il template di un item dell'elenco 
     var li = document.createElement("li")
-    li.classList.add("list-group-item", "list-group-item-dark")
+    li.classList.add("list-group-item")
     
     // Nomi degli autori
     var li_clone = li.cloneNode(true)
@@ -711,12 +711,12 @@ export async function printAlbumInfo(idAlbum, idNode){
 export async function printAlbumTrack(tracks){
     console.log(tracks)
     var tracklist = document.createElement("ul")
-    tracklist.classList.add("container", "list-group", "list-group-flush")
+    tracklist.classList.add("container", "list-group")
     tracklist.id = "trackList"
 
     // Creo il template degli elementi della lista
     var template = document.createElement("li")
-    template.classList.add("list-group-item", "list-group-item-dark")
+    template.classList.add("list-group-item")
     var row = document.createElement("div")
     row.classList.add("row")
     var col = document.createElement("div")
@@ -844,14 +844,22 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
         div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
         div.getElementsByClassName("nome_playlist")[0].addEventListener("click", function(){goToPlaylist(playlists[i]._id)})
         div.getElementsByClassName("nome_playlist")[0].classList.add("link", "cursor")
+
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+
         if(!logged()){
             //niente
         }else if(playlists[i].owner==window.localStorage.getItem("user")){ 
             // SE l'utente è il proprietario della playlist, aggiungo la ❌ per cancellare la playlist
-            var del = document.createElement("div")
+            var del = document.createElement('div')
             del.classList.add("card-action", "cursor")
             del.innerHTML = "❌"
             del.value = playlists[i]._id
+            del.setAttribute("data-bs-toggle","popover")
+            del.setAttribute("data-bs-trigger","hover focus")
+            del.setAttribute("data-bs-content","Cancella playlist")
+            del.setAttribute("data-bs-placement", "bottom")
             del.addEventListener("click", deleteThisPlaylist)
             div.getElementsByClassName("nome_playlist")[0].parentNode.append(del)
         }else{
@@ -863,6 +871,10 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
                     var del = document.createElement("div")
                     del.classList.add("card-action", "cursor")
                     del.innerHTML = "❌"
+                    del.setAttribute("data-bs-toggle","popover")
+                    del.setAttribute("data-bs-trigger","hover focus")
+                    del.setAttribute("data-bs-content","Unfollow")
+                    del.setAttribute("data-bs-placement", "bottom")
                     del.addEventListener("click", async function (){
                         await removeFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
                         this.innerHTML = "Follow rimosso"
@@ -877,6 +889,10 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
                 var agg = document.createElement("div")
                 agg.classList.add("card-action", "cursor")
                 agg.innerHTML = "➕"
+                agg.setAttribute("data-bs-toggle","popover")
+                agg.setAttribute("data-bs-trigger","hover focus")
+                agg.setAttribute("data-bs-content","Follow")
+                agg.setAttribute("data-bs-placement", "bottom")
                 agg.addEventListener("click", async function (){
                     await addFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
                     this.innerHTML = "Follow aggiunto"
@@ -930,11 +946,11 @@ export async function printPlaylistInfo(id, idNode){
     left.append(img)
     
     var right = document.createElement("ul")
-    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group","list-group-flush")
+    right.classList.add("col-8","col-sm-12", "col-md-7", "list-group")
     
     // Creo il template per gli elementi della lista
     var li = document.createElement("li")
-    li.classList.add("list-group-item", "list-group-item-dark")
+    li.classList.add("list-group-item")
     
     // Nome della playlist
     var li_clone = li.cloneNode(true)
@@ -1251,7 +1267,7 @@ export async function printPlaylistTracks(tracks, idNode, isowner){
     node.innerHTML = ""
     var title = document.createElement("h4")
     var tracklist = document.createElement("ul")
-        tracklist.classList.add("container", "list-group", "list-group-flush")
+        tracklist.classList.add("container", "list-group")
         tracklist.id="trackList"
     if(tracks.length==0){
         title.innerHTML = "Nessuna canzone nella playlist"
@@ -1260,7 +1276,7 @@ export async function printPlaylistTracks(tracks, idNode, isowner){
     }else{
         // Creo il template degli elementi della lista
         var template = document.createElement("li")
-        template.classList.add("list-group-item", "list-group-item-dark")
+        template.classList.add("list-group-item")
         var row = document.createElement("div")
         row.classList.add("row")
         var col = document.createElement("div")
@@ -1489,7 +1505,7 @@ export async function addTrackToThisPlaylist(){
             tracklist.parentNode.childNodes[0].innerHTML = "Tracklist della playlist"
         }
         var clone = document.createElement("li")
-        clone.classList.add("list-group-item", "list-group-item-dark")
+        clone.classList.add("list-group-item")
         var row = document.createElement("div")
         row.classList.add("row")
         var col = document.createElement("div")

@@ -93,12 +93,17 @@ body{
 }
 
 .tag{
-    border:1px solid white;
+    border:1px solid lightgrey;
     border-radius: 20%;
     padding:10px; 
-    margin: 0 5px;
+    margin: 5px 5px;
 }
 
 .pagination{
     margin-top:10px;
+}
+
+.list-group-item{
+    background-color: white;
+    border-bottom: 1px solid lightgrey;
 }
