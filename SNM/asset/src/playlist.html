@@ -8,12 +8,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="../style/style.css">
     <script type="module">
-        import {logged, printNavBar, printMyPlaylists, printPublicPlaylists, printFollowedPlaylists} from  "../lib.js";
+        import {logged, printNavBar, printMyPlaylists, printPublicPlaylists, printFollowedPlaylists, checkAll, verifySearchPlaylist} from  "../lib.js";
         if(!logged()){window.location.href = "/"}
         printNavBar("left_menu")
         printMyPlaylists("myPlaylists", "playlist-template")
         printFollowedPlaylists()
         printPublicPlaylists()
+        document.getElementById("searchbutton").addEventListener("click", verifySearchPlaylist)
+        document.getElementById("all").addEventListener("click", checkAll)
     </script>
 </head>
 <body>
@@ -23,6 +25,35 @@
             </div>
     
             <div class="col" id="home">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 text-center" id="searchMenu" >
+                        <h5>Ricerca contenuti</h5>
+                        <div id="search">
+                            <input type="text" class="form-control" id="input"> 
+                            <div class="row justify-content-center" id="searchParameters"> 
+                              <div class="form-check form-switch col-10 col-md-5">
+                                <input class="form-check-input switch" type="checkbox" role="switch" id="playlist">
+                                <label class="form-check-label" for="playlist">Playlist</label>
+                              </div>
+                              <div class="form-check form-switch col-10 col-md-5">
+                                <input class="form-check-input switch" type="checkbox" role="switch" id="tag">
+                                <label class="form-check-label" for="tag">Tag Playlist</label>
+                              </div>
+                              <div class="form-check form-switch col-10 col-md-5">
+                                <input class="form-check-input switch" type="checkbox" role="switch" id="tag">
+                                <label class="form-check-label" for="tag">Titolo canzone</label>
+                              </div>
+                              <div class="form-check form-switch col-10 col-md-5">
+                                <input class="form-check-input switch" type="checkbox" role="switch" id="all">
+                                <label class="form-check-label" for="all">All</label>
+                              </div>
+                            </div>
+                            <button class="btn btn-primary show" value="Ricerca" id="searchbutton">Ricerca</button>
+                        </div>
+                    </div>
+                </div>
+                
+
                 <h4>Playlist</h4>
                 <div class="container">
                     <div id="myPlaylists"class="row">

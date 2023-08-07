@@ -1075,6 +1075,7 @@ export async function printPlaylistInfo(id, idNode){
             button.addEventListener("click", async function(){
                 var res = await deletePlaylist(playlist._id);
                 this.remove()
+                window.location.href = "/src/playlist.html"
             })
         }else{
             // SE l'utente non è il proprietario, aggiungo un bottone per seguire/smettere di seguire la playlist
@@ -1579,7 +1580,7 @@ export async function updateTag(){
 // SEARCH FUNCTIONS
 
 /**
- * Funzione che, dato il valore presente nell'input e lo stato dei 4 switch, fa una ricerca 
+ * Funzione che, dato il valore presente nell'input e lo stato dei 5 switch, fa una ricerca 
  * in base all'input per ogni categoria selezionata
  */
 export async function verifySearch(){
@@ -1624,6 +1625,45 @@ export async function verifySearch(){
     if(radioAlbum.checked){
         printSearchAlbum(input, divSearch)
     }
+    if(radioPlaylist.checked){
+        printSearchPlaylist(input, divSearch)
+    }
+    if(radioTag.checked){
+        printSearchTag(input, divSearch)
+    }
+}
+
+/**
+ * Funzione che, dato il valore presente nell'input e lo stato dei 3 switch, fa una ricerca 
+ * in base all'input per ogni categoria selezionata
+ */
+export async function verifySearchPlaylist(){
+    // Verifico che l'input della ricerca non sia vuoto
+    var input = document.getElementById("input").value
+    if(input==""){return}
+
+    // Recupero i vari switch, controllando che almeno uno sia checkato
+    var radioPlaylist = document.getElementById("playlist")
+    var radioTag = document.getElementById("tag")
+    if(!(radioPlaylist.checked || radioTag.checked)){return}
+
+    // Creo il div che conterrà i risultati
+    var prevSearch = document.getElementById("searchResult")
+    if(prevSearch){prevSearch.remove()}
+    var divSearch = document.createElement("div")
+    divSearch.id="searchResult"
+    var title = document.createElement("h4")
+    title.innerHTML = "Risultati ricerca"
+    divSearch.append(title)
+    document.getElementById("myPlaylists").parentNode.prepend(divSearch)
+
+    // A seconda degli switch checkati, stampo i risultati delle varie categorie
+    if(document.getElementById("all").checked){
+        printSearchPlaylist(input, divSearch)
+        printSearchTag(input, divSearch)
+        return
+    }
+
     if(radioPlaylist.checked){
         printSearchPlaylist(input, divSearch)
     }
@@ -1946,11 +1986,10 @@ export function uncheckAllSwitch(){
  */
 export function checkAll(){
     var check = this.checked
-    document.getElementById("track").checked = check
-    document.getElementById("artist").checked = check
-    document.getElementById("album").checked = check
-    document.getElementById("playlist").checked = check
-    document.getElementById("tag").checked = check
+    var switchs = document.getElementsByClassName("switch")
+    for(let i=0;i<switchs.length;i++){
+        switchs[i].checked = check
+    }
 }
 
 /**
