@@ -265,7 +265,7 @@ export function printTracksCard(playlist, template, id, startCount){
         clone.getElementsByClassName("card-body")[0].value = playlist[i].id
         clone.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToTrack(playlist[i].id)})
         clone.id=id + (i + startCount)
-        clone.getElementsByClassName("card-img")[0].classList.add("link")
+        clone.getElementsByClassName("card-img")[0].classList.add("cursor")
         clone.getElementsByClassName("card-img")[0].src = playlist[i].album.images[0].url
         clone.getElementsByClassName("nome_traccia")[0].innerHTML = "#" + (i+startCount) + " " +playlist[i].name
         clone.getElementsByClassName("nome_traccia")[0].addEventListener("click", function(){goToTrack(playlist[i].id)})
@@ -529,7 +529,7 @@ export function printArtistsCard(artists, template, idNode, startCount){
     for(let i=0;i<artists.length;i++){
         var clone = template.cloneNode(true)
         clone.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToArtist(artists[i].id)})
-        clone.getElementsByClassName("card-img")[0].classList.add("link", "cursor")
+        clone.getElementsByClassName("card-img")[0].classList.add("cursor")
         if(artists[i].images.length!=0){
             clone.getElementsByClassName("card-img")[0].src = artists[i].images[0].url
         }else{
@@ -619,7 +619,7 @@ export function printAlbumsCard(albums, template, idNode, startCount){
         var clone = template.cloneNode(true)
         clone.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToAlbum(albums[i].id)})
         clone.getElementsByClassName("card-img")[0].src = albums[i].images[0].url
-        clone.getElementsByClassName("card-img")[0].classList.add("link")
+        clone.getElementsByClassName("card-img")[0].classList.add("cursor")
         clone.getElementsByClassName("nome_album")[0].innerHTML = "#" + (i+startCount) + " " +albums[i].name
         clone.getElementsByClassName("nome_album")[0].addEventListener("click", function(){goToAlbum(albums[i].id)})
         clone.getElementsByClassName("nome_album")[0].classList.add("link", "cursor")
@@ -840,17 +840,20 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
             }
         }
         div.getElementsByClassName("card-img")[0].addEventListener("click", function(){goToPlaylist(playlists[i]._id)})
+        div.getElementsByClassName("card-img")[0].classList.add("cursor")
         div.getElementsByClassName("nome_playlist")[0].innerHTML = playlists[i].name
+        div.getElementsByClassName("nome_playlist")[0].addEventListener("click", function(){goToPlaylist(playlists[i]._id)})
+        div.getElementsByClassName("nome_playlist")[0].classList.add("link", "cursor")
         if(!logged()){
             //niente
         }else if(playlists[i].owner==window.localStorage.getItem("user")){ 
             // SE l'utente è il proprietario della playlist, aggiungo la ❌ per cancellare la playlist
             var del = document.createElement("div")
-            del.classList.add("card-action", "link")
+            del.classList.add("card-action", "cursor")
             del.innerHTML = "❌"
             del.value = playlists[i]._id
             del.addEventListener("click", deleteThisPlaylist)
-            div.getElementsByClassName("nome_playlist")[0].append(del)
+            div.getElementsByClassName("nome_playlist")[0].parentNode.append(del)
         }else{
             // Essendo loggato, controllo SE l'utente segue già la playlist
             var found=false
@@ -858,13 +861,13 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
                 if(window.localStorage.getItem("user") == playlists[i].followers[k].id){
                     // SE segue la playlist, aggiungo la ❌ per smettere di seguire la playlist
                     var del = document.createElement("div")
-                    del.classList.add("card-action", "link")
+                    del.classList.add("card-action", "cursor")
                     del.innerHTML = "❌"
                     del.addEventListener("click", async function (){
                         await removeFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
                         this.innerHTML = "Follow rimosso"
                     })
-                    div.getElementsByClassName("nome_playlist")[0].append(del)
+                    div.getElementsByClassName("nome_playlist")[0].parentNode.append(del)
                     found = true
                     break
                 }
@@ -872,13 +875,13 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
             if(!found){
                 // SE non segue la playlist, aggiungo il ➕ per iniziare a seguire la playlist
                 var agg = document.createElement("div")
-                agg.classList.add("card-action", "link")
+                agg.classList.add("card-action", "cursor")
                 agg.innerHTML = "➕"
                 agg.addEventListener("click", async function (){
                     await addFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
                     this.innerHTML = "Follow aggiunto"
                 })
-                div.getElementsByClassName("nome_playlist")[0].append(agg)
+                div.getElementsByClassName("nome_playlist")[0].parentNode.append(agg)
             }
         }
         node.append(div)
@@ -2006,6 +2009,7 @@ export async function printNavBar(id){
         var nickname = (window.localStorage.getItem("nickname"))
         if(nickname){
             titlenav.innerHTML = "Benvenuto " + nickname
+            titlenav.style = "font-style: italic;"
         }
         navdiv.append(titlenav)
 
