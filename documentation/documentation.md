@@ -175,7 +175,7 @@ Vengono poi presentate le migliori canzoni dell'artista e gli album dell'artista
 - Utente non loggato  
 La pagina presenta le informazioni dell'album e l'elenco delle canzoni contenuto in esso.
 
-- Utente loggato
+- Utente loggato  
 Oltre agli elementi sopra citati, è possibile aggiungere ogni canzone ad una propria playlist.
 
 ![album](img/album.png)
