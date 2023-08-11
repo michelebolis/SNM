@@ -291,7 +291,9 @@ app.put('/playlists/:playlist', auth, async function (req, res) {
     
     if(await myplaylist.next()){
         res.statusMessage = "Canzone gia presente nella playlist"
-        res.sendStatus(400)
+        res.status(400)
+        res.send()
+        return
     }else{
         var newplaylist = await pwmClient.db("SNM")
         .collection('Playlists')

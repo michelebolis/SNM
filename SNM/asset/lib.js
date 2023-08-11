@@ -987,8 +987,14 @@ export async function printPlaylistInfo(id, idNode){
         button.addEventListener("click", async function (){
             var res = await putNamePlaylist(playlist._id, document.getElementById("name").value)
             console.log(res)
+            if(res.acknowledged){
+                showSuccessAlert("Nome della playlist modificato correttamente") 
+            }else{
+                showErrorAlert(res.status, res.text)
+            }
         })
         divButton.append(button)
+
 
         div.append(divInput, divButton)
         form.append(div)
@@ -1050,6 +1056,11 @@ export async function printPlaylistInfo(id, idNode){
         button.addEventListener("click", async function (){
             var res = await putDescriptionPlaylist(playlist._id, document.getElementById("description").value)
             console.log(res)
+            if(res.acknowledged){
+                showSuccessAlert("Descrizione modificata correttamente")
+            }else{
+                showErrorAlert(res.status, res.error)
+            }
         })
         divButton.append(button)
         div.append(divInput, divButton)
@@ -1218,42 +1229,71 @@ async function handlePlaylist(){
     var user = window.localStorage.getItem("user")
     switch(this.innerHTML){
         case "Follow": 
-            try {
-                var res = await addFollow(this.value, {"id":user})
+            var res = await addFollow(this.value, {"id":user})
+            if(res.acknowledged){
+                showSuccessAlert("Playlist seguita correttamente")
                 this.innerHTML = "Unfollow"
-            } catch (error) {
-
             }
             break;
         case "Unfollow":
-            try {
-                var res = await removeFollow(this.value, {"id":user})
+            var res = await removeFollow(this.value, {"id":user})
+            if(res.acknowledged){
+                showSuccessAlert("Rimozione follow seguita correttamente")
                 this.innerHTML = "Follow"
-            } catch (error) {
-
             }
             break;
         case "Rendi pubblica":
-            try {
-                var res = await changePlaylistVisibility(this.value, true)
+            var res = await changePlaylistVisibility(this.value, true)
+            if(res.acknowledged){
                 this.innerHTML = "Rendi privata"
                 var visibility = document.getElementById("public")
                 visibility.innerHTML = "Playlist pubblica"
-            } catch (error) {
-
+                showSuccessAlert("Playlist resa pubblica correttamente")
             }
             break;
         case "Rendi privata":
-            try {
-                var res = await changePlaylistVisibility(this.value, false)
+            var res = await changePlaylistVisibility(this.value, false)
+            if(res.acknowledged){
                 this.innerHTML = "Rendi pubblica"
                 var visibility = document.getElementById("public")
                 visibility.innerHTML = "Playlist privata"
-            } catch (error) {
-
+                showSuccessAlert("Playlist resa privata correttamente")
             }
             break;
     }
+}
+
+/**
+ * Funzione che nasconde gli oggetti con id errorAlert e successAlert
+*/
+function hideAlerts(){
+    if(!document.getElementById("errorAlert").classList.contains("visually-hidden")){
+        document.getElementById("errorAlert").classList.add("visually-hidden")
+    }
+    if(!document.getElementById("successAlert").classList.contains("visually-hidden")){
+        document.getElementById("successAlert").classList.add("visually-hidden")
+    }
+}
+
+/**
+ * Funzione che mostra in errorAlert l'errore che si è verificato
+ * @param {int} errorStatus codice di errore
+ * @param {String} message messaggio di errore
+ */
+function showErrorAlert(errorStatus, message){
+    hideAlerts()
+    document.getElementById("errorAlert").classList.remove("visually-hidden")
+    document.getElementById("errorAlert").innerHTML = errorStatus + ": " + message
+}
+
+/**
+ * Funzione che mostra in successAlert il messaggio di successo
+ * @param {String} message messaggio di conferma della corretta esecuzione
+ */
+function showSuccessAlert(message){
+    hideAlerts()
+    document.getElementById("successAlert").classList.remove("visually-hidden")
+    document.getElementById("successAlert").innerHTML = message
 }
 
 /**
@@ -1390,21 +1430,23 @@ export function printTrackItemList(track, idNode, template, myplaylist, isowner,
  */
 export async function addTrackToPlaylistFromSelect(){
     var id = this.id
-    var info = await getTrack(id)
-    var track = {info}
+    var track = await getTrack(id)
     var select = this.parentNode.parentNode.childNodes[1].childNodes[0]
     var playlist = select.value
-    if(playlist=="Seleziona una tua playlist"){alert("Seleziona una tua playlist");return}
+    if(playlist=="Seleziona una tua playlist"){return}
     console.log((track))
     var res = await putPlaylist(playlist, track)
-    if(res){
-        alert("Canzone aggiunta alla playlist")
+    console.log(res)
+    if(res.acknowledged){
+        showSuccessAlert("Canzone aggiunta alla playlist")
         for(let i=0;i<select.childNodes.length;i++){
             if(select.childNodes[i].value==playlist){
                 select.childNodes[i].remove()
                 break
             }
         }
+    }else{
+        showErrorAlert(res.status, res.text)
     }
 }
 
@@ -1415,10 +1457,14 @@ export async function addTrackToPlaylist(){
     var id = this.id
     var track = await getTrack(id)
     var playlist = this.parentNode.parentNode.childNodes[0].childNodes[0].value
+    if(playlist == "Seleziona una tua playlist"){return}
     console.log((track))
     var res = await putPlaylist(playlist, track)
-    if(res){
-        alert("Canzone aggiunta alla playlist")
+    console.log(res)
+    if(res.acknowledged){
+        showSuccessAlert("Canzone aggiunta correttamente alla playlist")
+    }else{
+        showErrorAlert(res.status, res.text)
     }
 }
 
@@ -1443,6 +1489,9 @@ export async function removeTrackFromPlaylist(){
                 tracks[i].childNodes[0].childNodes[0].append(a)
             }
         }
+        showSuccessAlert("Canzone rimossa dalla playlist correttamente")
+    }else{
+        showErrorAlert(res.status, res.text)
     }
 }
 /**
@@ -1513,8 +1562,10 @@ export async function addTrackToThisPlaylist(){
         clone.append(row, row.cloneNode(true))
 
         printTrackItemList(track, "trackList", clone, myplaylist, true, tracklist.childNodes.length+1)
-        
-        this.remove()
+    
+        showSuccessAlert("Canzone aggiunta alla playlist correttamente")
+    }else{
+        showErrorAlert(res.status, res.text)
     }
 }
 
@@ -1686,7 +1737,13 @@ export async function updateTag(){
     });
 
     // Aggiorno i tag della playlist
-    await putTags(id,tags)
+    var res = await putTags(id,tags)
+    console.log(res)
+    if(res.acknowledged){
+        showSuccessAlert("Tag della playlist modificati correttamente") 
+    }else{
+        showErrorAlert(res.status, res.text)
+    }
 }
 
 // SEARCH FUNCTIONS

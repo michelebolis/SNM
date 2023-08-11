@@ -314,11 +314,11 @@ export async function putPlaylist(id, track){
         },
         body: JSON.stringify(track)
     })
-    .then(async response => {
-        if(response.status!=200){
-            alert(response.statusText)
+    .then(async res => {
+        if(res.status!=200){
+            return {text: res.statusText, status: res.status}
         }else{
-            return response.json()
+            return res.json()
         }
     })
     .catch((e) => {console.log(e)})
@@ -363,7 +363,11 @@ export async function putTags(id, tags){
         body: JSON.stringify({tags: tags})
     })
     .then(async res => {
-        return res.json()
+        if(res.ok){
+            return res.json()
+        }else{
+            return {text: res.statusText, status: res.status}
+        }
     })
     .catch((e) => {console.log(e)})
 }
@@ -383,7 +387,12 @@ export async function putNamePlaylist(id, name){
         body: JSON.stringify({name: name})
     })
     .then(async res => {
-        return res.json()
+        if(res.ok){
+            return res.json()
+        }else{
+            return {text: res.statusText, status: res.status}
+        }
+        
     })
     .catch((e) => {console.log(e)})
 }
