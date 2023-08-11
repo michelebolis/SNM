@@ -90,6 +90,8 @@ La pagina base contiene:
 - la visualizzazione delle 50 canzoni migliori al momento in Italia, di cui è possibile visualizzarne le informazioni cliccando sull'immagine della card o sul titolo, oppure le informazioni dell'autore cliccando sul suo nome.
 - la possibilità di ricercare canzoni, artisti, album, playlist e tag dei playlist mediamente un menu di ricerca.
 
+![home](img/home.png)
+
 - Utente loggato
 
 Oltre agli elementi sopra elencati, vengono visualizzate anche le playlist dell'utente e le playlist che segue l'utente.  
@@ -99,6 +101,8 @@ Inoltre per ogni playlist è possibili eseguire delle azioni in base al ruolo ri
 - ❌ per cancellare la playlist SE l'utente è il proprietario della playlist
 - ❌ per togliere il follow alla playlist SE si seguiva già la playlist
 - ➕ per aggiungere il follow alla playlist SE non si seguiva ancora la playlist
+
+![home](img/homeLogged.png)
 
 ---
 
@@ -116,6 +120,10 @@ E' divisa in due parti consentendo:
 
 Nel caso di errori nella compilazioni dei campi, viene visualizzato un paragrafo contenente il messaggio e il codice di errore.
 
+![login](img/login.png)
+
+![loginNewUtente](img/loginNewUtente.png)
+
 ---
 
 ### Pagina per la modifica delle informazioni del proprio account: account.html
@@ -132,6 +140,8 @@ Nel caso di errori nella compilazioni dei campi, viene visualizzato un paragrafo
 
 E' anche possibile cancellare del tutto il proprio account, causando la cancellazione di tutte le playlist di cui si era proprietari e viene tolto il proprio follow a tutte le playlist in cui era presente.
 
+![account](img/account.png)
+
 ---
 
 ### Pagina per la visualizzazione di una canzone: track.html
@@ -147,12 +157,16 @@ Oltre agli elementi sopra citati, è possibile anche aggiungere la canzone ad un
 
 Sia nel caso di errore, se la canzone era già presente nella playlist, sia nel caso di successo, viene visualizzato in alert.
 
+![track](img/track.png)
+
 ---
 
 ### Pagina per la visualizzazione di un artista: artist.html
 
 La pagina presenta le informazioni dell'artista quali i generi associati e il numero di follower.  
 Vengono poi presentate le migliori canzoni dell'artista e gli album dell'artista, di cui si possono visualizzare le informazioni cliccando sull'immagine della card o sul titolo dell'album.
+
+![artist](img/artist.png)
 
 ---
 
@@ -163,6 +177,8 @@ La pagina presenta le informazioni dell'album e l'elenco delle canzoni contenuto
 
 - Utente loggato
 Oltre agli elementi sopra citati, è possibile aggiungere ogni canzone ad una propria playlist.
+
+![album](img/album.png)
 
 ---
 
@@ -177,6 +193,10 @@ Questa pagina è accessibile solo se l'utente è loggato.
 Per creare una nuova playlist è necessario almeno compilare il campo del nome della playlist, mentre gli altri sono opzionali.  
 
 E' possibile aggiungere una descrizione, una lista di tag ed eventualmente rendere privata la playlist (di default è pubblica).
+
+![newplaylist](img/newplaylist.png)
+
+![newplaylist](img/newplaylistES.png)
 
 ---
 
@@ -198,12 +218,18 @@ E' anche presente eseguire una ricerca delle playlist pubbliche, filtrandole dat
 
 Questa pagina presenta le informazioni della playlist e l'elenco delle canzoni contenute in essa, con eventualmente una preview.
 
+![playlist](img/playlist.png)
+
 - Utente loggato non proprietario
 
 Oltre gli elementi del punto precedente, l'utente puo seguire la playlist (se non la seguiva) o smettere di seguirla (se gia la seguiva) e puo aggiungere ogni canzone presente nella playlist in una sua playlist.
+
+![playlist](img/playlistnoowner.png)
 
 - Utente loggato proprietario
 
 Oltre agli elementi del prunto precedente, l'utente puo modificare i tag associati alla playlist, aggiungendone o togliendone di già presenti, puo rendere pubblica/privata la playlist o puo cancellarla definitivamente.
 
 Puo poi rimuovere una canzone presente nella playlist o puo aggiungerne di nuove, dato un elenco di canzoni suggerite, in base ai generi preferiti presenti nel suo profilo utente.
+
+![playlist](img/playlistowner.png)
