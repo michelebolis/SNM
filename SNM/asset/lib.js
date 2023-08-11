@@ -877,7 +877,7 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
                     del.setAttribute("data-bs-placement", "bottom")
                     del.addEventListener("click", async function (){
                         await removeFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
-                        this.innerHTML = "Follow rimosso"
+                        this.parentNode.innerHTML = "Follow rimosso"
                     })
                     div.getElementsByClassName("nome_playlist")[0].parentNode.append(del)
                     found = true
@@ -895,7 +895,7 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
                 agg.setAttribute("data-bs-placement", "bottom")
                 agg.addEventListener("click", async function (){
                     await addFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
-                    this.innerHTML = "Follow aggiunto"
+                    this.parentNode.innerHTML = "Follow aggiunto"
                 })
                 div.getElementsByClassName("nome_playlist")[0].parentNode.append(agg)
             }
@@ -912,7 +912,7 @@ async function deleteThisPlaylist(){
     var id = this.value
     var res = await deletePlaylist(id)
     if(res.acknowledged){
-        this.parentNode.parentNode.parentNode.parentNode.remove();
+        this.parentNode.parentNode.parentNode.remove();
     }
 }
 
@@ -1413,9 +1413,8 @@ export async function addTrackToPlaylistFromSelect(){
  */
 export async function addTrackToPlaylist(){
     var id = this.id
-    var info = await getTrack(id)
-    var track = {info}
-    var playlist = this.parentNode.childNodes[0].value
+    var track = await getTrack(id)
+    var playlist = this.parentNode.parentNode.childNodes[0].childNodes[0].value
     console.log((track))
     var res = await putPlaylist(playlist, track)
     if(res){
