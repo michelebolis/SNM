@@ -2,22 +2,27 @@ const BASE_URL = "https://api.spotify.com/v1/"
 const client_id = "8c847d5d66cd43f28e29a4e4f8d5f1cc"
 const client_secret = "62d9042a1da54e519cee47245ccfa8c5"
 var URL_TOKEN = "https://accounts.spotify.com/api/token"
+var access_token
 /**
  * Collegamento alle API di spotify attraverso l'id e codice segreto del client, 
  * ottenendo un token per effettuare le chiamate API
  */
-await fetch(URL_TOKEN, {
-    method: "POST",
-    headers: {
-        Authorization: "Basic " + btoa(`${client_id}:${client_secret}`),
-        "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({ grant_type: "client_credentials" }),
-})
-.then((response) => response.json()).then((tokenResponse) =>
-    localStorage.setItem("token", tokenResponse.access_token)
-)
-var access_token = localStorage.getItem("token") // salvo il token nel local storage
+async function connect(){
+    await fetch(URL_TOKEN, {
+        method: "POST",
+        headers: {
+            Authorization: "Basic " + btoa(`${client_id}:${client_secret}`),
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ grant_type: "client_credentials" }),
+    })
+    .then((res) => res.json()).then((tokenResponse) => {
+        localStorage.setItem("token", tokenResponse.access_token)
+        access_token = localStorage.getItem("token") // salvo il token nel local storage
+    })
+}
+connect()
+access_token = localStorage.getItem("token") // salvo il token nel local storage
 
 // TRACKS FUNCTIONS
 
@@ -33,7 +38,13 @@ export async function getTrack(id) {
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async (response) => { return response.json() })
+    .then(async (res) => { 
+        if(res.status==401){
+            connect()
+            return await getTrack(id)
+        }
+        return res.json() 
+    })
     .catch((e) => console.log(e))
 }
 
@@ -49,7 +60,13 @@ export async function getRecommendations(genres){
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async (response) => { return response.json() })
+    .then(async (res) => { 
+        if(res.status==401){
+            connect()
+            return await getRecommendations(genres)
+        }
+        return res.json() 
+    })
     .catch((e) => console.log(e))
 }
 
@@ -63,7 +80,13 @@ export async function getTopCharts(){
             Authorization: "Bearer " + access_token,
         },
     })
-    .then((response) => response.json())
+    .then(async (res) => {
+        if (res.status==401){
+            connect()
+            return await getTopCharts()
+        }
+        return res.json()
+    })
     .then(async searchResults => {
         return await getPlaylistSpotify(searchResults.playlists.items[0].tracks.href)}
     ).catch((e) => console.log(e))
@@ -81,7 +104,13 @@ export async function searchTrack(track){
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async response => {return response.json()})
+    .then(async res => {
+        if (res.status==401){
+            connect()
+            return await searchTrack(track)
+        }
+        return res.json()
+    })
     .catch((e) => console.log(e))
 }
 
@@ -99,7 +128,13 @@ export async function getAlbum(id) {
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async response => {return response.json()})
+    .then(async res => {
+        if (res.status==401){
+            connect()
+            return await getAlbum(id)
+        }
+        return res.json()
+    })
     .catch((e) => console.log(e))
 }
 
@@ -115,7 +150,13 @@ export async function getAlbumByArtist(id) {
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async response => {return response.json()})
+    .then(async res => {
+        if (res.status==401){
+            connect()
+            return await getAlbumByArtist(id)
+        }
+        return res.json()
+    })
     .catch((e) => console.log(e))
 }
 
@@ -131,7 +172,13 @@ export async function searchAlbum(album){
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async response => {return response.json()})
+    .then(async res => {
+        if (res.status==401){
+            connect()
+            return await searchAlbum(album)
+        }
+        return res.json()
+    })
     .catch((e) => console.log(e))
 }
 
@@ -149,7 +196,13 @@ export async function getArtist(id) {
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async response => {return response.json()})
+    .then(async res => {
+        if (res.status==401){
+            connect()
+            return await getArtist(id)
+        }
+        return res.json()
+    })
     .catch((e) => console.log(e))
 }
 
@@ -165,7 +218,13 @@ export async function getTopTracks(id) {
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async response => {return response.json()})
+    .then(async res => {
+        if (res.status==401){
+            connect()
+            return await getTopTracks(id)
+        }
+        return res.json()
+    })
     .catch((e) => console.log(e))
 }
 
@@ -181,7 +240,13 @@ export async function searchArtist(artist){
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async response => {return response.json()})
+    .then(async res => {
+        if (res.status==401){
+            connect()
+            return await searchArtist(artist)
+        }
+        return res.json()
+    })
     .catch((e) => console.log(e))
 }
 
@@ -199,7 +264,13 @@ export async function getPlaylistSpotify(url){
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async response => {return response.json()})
+    .then(async res => {
+        if (res.status==401){
+            connect()
+            return await getPlaylistSpotify(url)
+        }
+        return res.json()
+    })
     .catch((e) => console.log(e))
 }
 
@@ -214,6 +285,12 @@ export async function getGenresSpotify(){
             Authorization: "Bearer " + access_token,
         },
     })
-    .then(async response => {return response.json()})
+    .then(async res => {
+        if (res.status==401){
+            connect()
+            return await getGenresSpotify()
+        }
+        return res.json()
+    })
     .catch((e) => console.log(e))
 }
