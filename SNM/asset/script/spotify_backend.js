@@ -21,8 +21,11 @@ async function connect(){
         access_token = localStorage.getItem("token") // salvo il token nel local storage
     })
 }
-connect()
+
 access_token = localStorage.getItem("token") // salvo il token nel local storage
+if (!access_token){
+    connect()
+}
 
 // TRACKS FUNCTIONS
 
@@ -94,11 +97,10 @@ export async function getTopCharts(){
         if(res.status==429){
             return {"error" : {"message" : "API rate excedded"}}
         }
-        return res.json()
+        var searchResults = await res.json()
+        return await getPlaylistSpotify(searchResults.playlists.items[0].tracks.href)
     })
-    .then(async searchResults => {
-        return await getPlaylistSpotify(searchResults.playlists.items[0].tracks.href)}
-    ).catch((e) => console.log(e))
+    .catch((e) => console.log(e))
 }
 
 /**
