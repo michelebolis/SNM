@@ -14,7 +14,7 @@ app.use(express.json())
 
 app.get('/', function (req, res) { 
     // #swagger.description = 'Mando la pagina HTML di base, index.html'
-    res.sendFile(path.join(__dirname, '/index.html'));
+    res.sendFile(path.join(__dirname, '/asset/src/index.html'));
 });
 app.listen(3100, "0.0.0.0", () => { // apre il web server sulla porta 3100
     console.log("Listening on 3100")
