@@ -30,7 +30,6 @@ Lato server:
 
 - [api.js](../SNM/api.js) file JavaScript che contiene sia gli endpoint delle mie API che la configurazione del server, definendo la porta su cui aprire il web server, caricando i file statici e definendo la pagina HTML di base.
 - [authentication.js](../SNM/authentication.js) file JavaScript che contiene la funzione per controllare l'API utilizzata negli endpoint delle mie API.
-- [index.html](../SNM/index.html) è la pagina HTML di base che viene mandata inviata sia allo startup che all'indirizzo base "/".
 - [swagger-gen.js](../SNM/swagger-gen.js) file JavaScript utilizzato per generari il file JSON "swagger-output" per la visualizzazione della documentazione delle API all'indirizzo [/api-docs/](http://localhost:3100/api-docs/).
 
 Lato client: [directory asset](../SNM/asset/)
