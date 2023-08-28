@@ -205,6 +205,10 @@ export async function cambiaCredenziali(){
  */
 export async function printTopCharts() {
     var playlist = await getTopCharts()
+    if(playlist.error){
+        alert(playlist.error.status)
+        return
+    }
     playlist=playlist.items
     for(let i=0;i<playlist.length;i++){
         playlist[i]=playlist[i].track
@@ -1431,6 +1435,10 @@ export function printTrackItemList(track, idNode, template, myplaylist, isowner,
 export async function addTrackToPlaylistFromSelect(){
     var id = this.id
     var track = await getTrack(id)
+    if(info.error){
+        alert(info.error.message)
+        return
+    }
     var select = this.parentNode.parentNode.childNodes[1].childNodes[0]
     var playlist = select.value
     if(playlist=="Seleziona una tua playlist"){return}
@@ -1456,6 +1464,10 @@ export async function addTrackToPlaylistFromSelect(){
 export async function addTrackToPlaylist(){
     var id = this.id
     var track = await getTrack(id)
+    if(info.error){
+        alert(info.error.message)
+        return
+    }
     var playlist = this.parentNode.parentNode.childNodes[0].childNodes[0].value
     if(playlist == "Seleziona una tua playlist"){return}
     console.log((track))
@@ -1510,6 +1522,10 @@ export async function printRecomandations(id){
 
     // Recupero le canzoni consigliate da spotify dati i generi preferiti dell'utente
     var res = await getRecommendations(genres)
+    if(res.error){
+        alert(res.error.message)
+        return
+    }
     var recommendations = res.tracks
     console.log(recommendations)
     
@@ -1540,6 +1556,10 @@ export async function addTrackToThisPlaylist(){
     var idPlaylist = this.value.split(";")[0]
     var idTrack = this.value.split(";")[1]
     var track = await getTrack(idTrack)
+    if(info.error){
+        alert(info.error.message)
+        return
+    }
 
     // Aggiorno la playlist aggiungendo la canzone
     var res = await putPlaylist(idPlaylist, track)
@@ -1870,6 +1890,10 @@ export async function printSearchTrack(input, divSearch){
 
     // Ricerco le track
     var tracks = await searchTrack(input)
+    if(tracks.error){
+        alert(tracks.error.message)
+        return
+    }
     tracks=tracks.tracks.items
     console.log(tracks)
 
@@ -1901,6 +1925,10 @@ export async function printSearchArtist(input, divSearch){
 
     // Ricerco gli artisti
     var artists = await searchArtist(input)
+    if(artists.error){
+        alert(artists.error.message)
+        return
+    }
     artists=artists.artists.items
     console.log(artists)
         
@@ -1932,6 +1960,10 @@ export async function printSearchAlbum(input, divSearch){
     
     // Ricerco gli album
     var albums = await searchAlbum(input)
+    if(albums.error){
+        alert(albums.error.message)
+        return
+    }
     albums=albums.albums.items
     console.log(albums)
 
@@ -2172,6 +2204,10 @@ export function printCardPlaceholder(id){
  */
 export async function loadGenres(){
     var genres = await getGenresSpotify()
+    if(genres.error){
+        alert(genres.error.message)
+        return
+    }
     var select = document.getElementById("tagInput")
     console.log(genres)
     genres.genres.forEach(genre => {

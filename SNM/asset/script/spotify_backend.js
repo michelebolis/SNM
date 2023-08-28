@@ -43,6 +43,9 @@ export async function getTrack(id) {
             connect()
             return await getTrack(id)
         }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
+        }
         return res.json() 
     })
     .catch((e) => console.log(e))
@@ -65,6 +68,9 @@ export async function getRecommendations(genres){
             connect()
             return await getRecommendations(genres)
         }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
+        }
         return res.json() 
     })
     .catch((e) => console.log(e))
@@ -84,6 +90,9 @@ export async function getTopCharts(){
         if (res.status==401){
             connect()
             return await getTopCharts()
+        }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
         }
         return res.json()
     })
@@ -109,6 +118,9 @@ export async function searchTrack(track){
             connect()
             return await searchTrack(track)
         }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
+        }
         return res.json()
     })
     .catch((e) => console.log(e))
@@ -132,6 +144,9 @@ export async function getAlbum(id) {
         if (res.status==401){
             connect()
             return await getAlbum(id)
+        }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
         }
         return res.json()
     })
@@ -177,6 +192,9 @@ export async function searchAlbum(album){
             connect()
             return await searchAlbum(album)
         }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
+        }
         return res.json()
     })
     .catch((e) => console.log(e))
@@ -201,6 +219,9 @@ export async function getArtist(id) {
             connect()
             return await getArtist(id)
         }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
+        }
         return res.json()
     })
     .catch((e) => console.log(e))
@@ -223,6 +244,9 @@ export async function getTopTracks(id) {
             connect()
             return await getTopTracks(id)
         }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
+        }
         return res.json()
     })
     .catch((e) => console.log(e))
@@ -244,6 +268,9 @@ export async function searchArtist(artist){
         if (res.status==401){
             connect()
             return await searchArtist(artist)
+        }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
         }
         return res.json()
     })
@@ -269,6 +296,9 @@ export async function getPlaylistSpotify(url){
             connect()
             return await getPlaylistSpotify(url)
         }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
+        }
         return res.json()
     })
     .catch((e) => console.log(e))
@@ -289,6 +319,9 @@ export async function getGenresSpotify(){
         if (res.status==401){
             connect()
             return await getGenresSpotify()
+        }
+        if(res.status==429){
+            return {"error" : {"message" : "API rate excedded"}}
         }
         return res.json()
     })
