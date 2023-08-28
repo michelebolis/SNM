@@ -1435,8 +1435,8 @@ export function printTrackItemList(track, idNode, template, myplaylist, isowner,
 export async function addTrackToPlaylistFromSelect(){
     var id = this.id
     var track = await getTrack(id)
-    if(info.error){
-        alert(info.error.message)
+    if(track.error){
+        alert(track.error.message)
         return
     }
     var select = this.parentNode.parentNode.childNodes[1].childNodes[0]
@@ -1464,8 +1464,8 @@ export async function addTrackToPlaylistFromSelect(){
 export async function addTrackToPlaylist(){
     var id = this.id
     var track = await getTrack(id)
-    if(info.error){
-        alert(info.error.message)
+    if(track.error){
+        alert(track.error.message)
         return
     }
     var playlist = this.parentNode.parentNode.childNodes[0].childNodes[0].value
@@ -1556,8 +1556,8 @@ export async function addTrackToThisPlaylist(){
     var idPlaylist = this.value.split(";")[0]
     var idTrack = this.value.split(";")[1]
     var track = await getTrack(idTrack)
-    if(info.error){
-        alert(info.error.message)
+    if(track.error){
+        alert(track.error.message)
         return
     }
 
