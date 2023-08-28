@@ -38,7 +38,7 @@ Lato client: [directory asset](../SNM/asset/)
 - [Directory: script](../SNM/asset/script) cartella contenente 2 file JavaScript:
   - [backend.js](../SNM/asset/script/backend.js) contiene le funzioni per utilizzare le mie API
   - [spotify_backend.js](../SNM/asset/script/spotify_backend.js) contiene le funzioni per utilizzare le API di Spotify
-- [Directory: src](../SNM/asset/src) cartella contenente tutte le altre pagine HTML oltre a index.html.
+- [Directory: src](../SNM/asset/src) cartella contenente tutte le altre pagine HTML.
 - [Directory: style](../SNM/asset/style) cartella contenente il file CSS [style](../SNM/asset/style.ccs)
 - [File: lib.js](../SNM/asset/lib.js) file JavaScript contenente le funzioni per popolare le varie pagine HTML e per utilizzare le funzioni definite nei file della cartella script.
 
