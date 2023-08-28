@@ -63,6 +63,8 @@ Ho creato quindi un database SNM con 2 collezioni:
 
 ## Schema generale dell'applicativo web
 
+![map](img/map.png)
+
 ## Scelte implementativi
 
 In generale quasi tutti i componenti delle pagine HTML vengono generati con una funzione di print... definita in [lib.js](../SNM/asset/lib.js) in quanto il contenuto degli stessi e la loro eventuale presenza dipende da vari fattori quali:
