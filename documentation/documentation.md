@@ -72,12 +72,18 @@ In generale quasi tutti i componenti delle pagine HTML vengono generati con una 
 - L'accesso con le proprie credenziali da parte dell'utilizzatore consente di eseguire azioni precluse se non si effettua l'accesso.
 - Il ruolo che ricopre l'utente nella playlist: follower, proprietario o utilizzatore non registrato.
 
-Per verificare che l'utente sia loggato o meno all'interno dell'applicativo, utilizzo due variabili nel localStorage, "user" che contiene l'id dell'utente e "nickname" che utilizzo nel menu (per questioni di ottimizzazione lo salvo nel localStorage invece che effettuare una chiamata API per recuperare le informazioni dell'utente ogni volta che carico una pagina con la navbar).  
+Inoltre ciò ha permesso una **fattorizzazione** delle funzione che vengono riutilizzate nelle varie pagine (es stampare le playlist seguite o le playlist pubbliche o le mie playlist equivale ad eseguire la stessa operazione) e una suddivisione logica maggiore.
+
+Gli elementi visualizzati tramite card sono gestiti con una **paginazione** che ne consente la visualizzazione di 5 elementi alla volta, per evitare un'eccessiva presenza di card.
+
+Per verificare che l'utente sia loggato o meno all'interno dell'applicativo, utilizzo due variabili nel **localStorage**, "user" che contiene l'id dell'utente e "nickname" che utilizzo nel menu (per questioni di ottimizzazione lo salvo nel localStorage invece che effettuare una chiamata API per recuperare le informazioni dell'utente ogni volta che carico una pagina con la navbar).  
 
 Le pagine utilizzate per la visualizzazione delle informazioni di canzoni, artisti, album e playlist hanno l'id del oggetto di interessa nell'url in modo che sia facilmente reperibile.  
 es <http://localhost:3100/src/track.html?0JONs2ETXIHvYVxNris8Bf>, in questo caso "0JONs2ETXIHvYVxNris8Bf" è l'id della canzone che si vuole visualizzare.  
 
-Gli elementi visualizzati tramite card sono gestiti con una paginazione che ne consente la visualizzazione di 5 elementi alla volta, per evitare un'eccessiva presenza di card.
+Tuttavia qualora si verificasse un **codice di errore di spotify**, sia per token errato(401)/API rate raggiunto (429) sia per un id sbagliato, questi vengono opportunamente gestiti dall'applicativo. In particolare se il token non è piu valido, allora si richiama la funzione che ne richiede uno nuovo e successivamente si richiama la funzione che si stava eseguendo.
+
+I dati riguardanti le playlist, presenti nel db, sono memorizzati per intero per evitare molteplici e ripetute chiamate all'API di Spotify, presupponendo che tali informazioni non cambino nel tempo.
 
 ## Applicativo web: realizzazione
 
@@ -89,7 +95,7 @@ La pagina base contiene:
 
 - la visualizzazione delle playlist pubbliche, di cui è possibile visualizzarne le informazioni cliccando sull'immagine della card.
 - la visualizzazione delle 50 canzoni migliori al momento in Italia, di cui è possibile visualizzarne le informazioni cliccando sull'immagine della card o sul titolo, oppure le informazioni dell'autore cliccando sul suo nome.
-- la possibilità di ricercare canzoni, artisti, album, playlist e tag dei playlist mediamente un menu di ricerca.
+- la possibilità di ricercare canzoni, artisti, album, nome della playlist e tag dei playlist mediamente un menu di ricerca.
 
 ![home](img/home.png)
 
@@ -112,12 +118,12 @@ Inoltre per ogni playlist è possibili eseguire delle azioni in base al ruolo ri
 Questa pagina è accessibile solo ad utilizzatore non ancora loggati.  
 E' divisa in due parti consentendo:
 
-- La registrazione di un nuovo utente: dovranno essere specificati:
+- La **registrazione** di un nuovo utente: dovranno essere specificati:
   - nickname: non vuoto
   - email: non vuota, unica e contenente @
   - password: non vuota
   - generi preferiti: almeno un genere preferito, selezionabile da una lista contenente i generi forniti da Spotify
-- L'accesso con le proprie credenziale: email e password
+- L'**accesso** con le proprie credenziale: email e password
 
 Nel caso di errori nella compilazioni dei campi, viene visualizzato un paragrafo contenente il messaggio e il codice di errore.
 
@@ -139,7 +145,7 @@ Qui è possibile modificare le informazioni associate al proprio account che ven
 
 Nel caso di errori nella compilazioni dei campi, viene visualizzato un paragrafo contenente il messaggio e il codice di errore.
 
-E' anche possibile cancellare del tutto il proprio account, causando la cancellazione di tutte le playlist di cui si era proprietari e viene tolto il proprio follow a tutte le playlist in cui era presente.
+E' anche possibile cancellare del tutto il proprio account, causando la cancellazione di tutte le playlist di cui si era proprietari e viene **rimosso il proprio follow a tutte le playlist in cui era presente**.
 
 ![account](img/account.png)
 
