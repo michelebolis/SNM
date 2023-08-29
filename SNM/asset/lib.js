@@ -836,6 +836,7 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
         var div = template.cloneNode(true)
         div.id=""
         div.getElementsByClassName("card-img")[0].src = "../img/music.jpg"
+        div.classList.add(playlists[i]._id)
 
         // Imposto come immagine della playlist, quella della prima canzone SE c è
         if(playlists[i].tracks && playlists[i].tracks.length!=0){
@@ -916,7 +917,11 @@ async function deleteThisPlaylist(){
     var id = this.value
     var res = await deletePlaylist(id)
     if(res.acknowledged){
-        this.parentNode.parentNode.parentNode.remove();
+        while(true){
+            let card = document.getElementsByClassName(id)
+            if(card[0]==undefined){break}
+            card[0].remove()
+        }
     }
 }
 
