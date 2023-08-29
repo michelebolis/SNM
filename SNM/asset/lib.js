@@ -51,6 +51,7 @@ export async function addUser(){
         localStorage.setItem("user", res.insertedId)
         localStorage.setItem("nickname", nickname)
 
+        document.getElementById("errorAlert").classList.add("visually-hidden")
         // Mostro l'alert di successo
         document.getElementById("successAlert").classList.remove("visually-hidden")
         document.getElementById("userForm").innerHTML = ""
@@ -69,7 +70,7 @@ export async function deleteAccount(){
     var res = await deleteUser(id)
     if(res.ok){
         logout()
-        window.location.href = "../"
+        window.location.href = "/"
     }
 }
 
@@ -368,7 +369,6 @@ export async function printTrackInfo(idTrack, idNode, idTemplate){
         var divselect = document.createElement("div")
         divselect.classList.add("col-5")
         var select = document.createElement("select")
-        select.id = "myplaylist"
         select.classList.add("form-select")
         select.style = "margin-top:30px"
         var option = document.createElement("option")
@@ -1092,6 +1092,7 @@ export async function printPlaylistInfo(id, idNode){
     
     // Numero dei follower
     li_clone = li.cloneNode(true)
+    li_clone.id="followers"
     li_clone.innerHTML = "Numero follower: " + playlist.followers.length
     right.append(li_clone)
     
@@ -1251,6 +1252,9 @@ async function handlePlaylist(){
             if(res.acknowledged){
                 showSuccessAlert("Playlist seguita correttamente")
                 this.innerHTML = "Unfollow"
+                var followdiv = document.getElementById("followers")
+                var count = parseInt(followdiv.innerHTML.split(":")[1])
+                followdiv.innerHTML = "Numero follower: " + (count+1)
             }
             break;
         case "Unfollow":
@@ -1258,6 +1262,9 @@ async function handlePlaylist(){
             if(res.acknowledged){
                 showSuccessAlert("Rimozione follow seguita correttamente")
                 this.innerHTML = "Follow"
+                var followdiv = document.getElementById("followers")
+                var count = parseInt(followdiv.innerHTML.split(":")[1])
+                followdiv.innerHTML = "Numero follower: " + (count-1)
             }
             break;
         case "Rendi pubblica":
@@ -1411,7 +1418,6 @@ export function printTrackItemList(track, idNode, template, myplaylist, isowner,
         var select = document.createElement("select")
         select.classList.add("form-select")
         select.style = "margin-top:10px;"
-        select.id="myplaylist"
         var option = document.createElement("option")
         option.innerHTML = "Seleziona una tua playlist"
         select.append(option)

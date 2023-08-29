@@ -111,9 +111,10 @@ app.post("/users", auth, async function (req, res) {
         res.json(items)
     }
     catch (e) {
-        console.log('catch in test');
         if (e.code == 11000) {
-            res.status(400).send("Utente già presente")
+            res.status(400)
+            res.statusMessage = "Utente già presente"
+            res.send()
             return
         }
         res.status(500).send(`Errore generico: ${e}`)
@@ -237,14 +238,11 @@ app.put("/users/:id", auth, async function (req, res) {
 app.delete("/users/:id", auth, async function (req, res) {
     var id = req.params.id
     var pwmClient = await new mongoClient(uri).connect()
-    var user = await pwmClient.db("SNM").collection('Users').find({"_id":new ObjectId(id)})
-    if (await user.hasNext()) {
-        pwmClient.db("SNM").collection('Users').deleteOne({"_id":new ObjectId(id)})
-        pwmClient.db("SNM").collection('Playlists').updateMany({"followers":{"id":id}}, {$pull : {"followers":{"id":id}}})
-    }else{
-        res.status(404).send("User not found")
-        return
-    }
+
+    pwmClient.db("SNM").collection('Users').deleteOne({"_id":new ObjectId(id)})
+    pwmClient.db("SNM").collection('Playlists').updateMany({"followers":{"id":id}}, {$pull : {"followers":{"id":id}}})
+
+    res.send()
 })
 
 // Playlist
