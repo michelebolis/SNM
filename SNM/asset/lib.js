@@ -1994,8 +1994,8 @@ export async function printSearchPlaylist(input, divSearch){
     // Creo la struttura per i risultati
     var div = document.createElement("div")
     var title = document.createElement("h5")
-    title.id="titleTemp"
-    title.innerHTML = "Playlist dalla ricerca"
+    title.id="titleTemp1"
+    title.innerHTML = "Playlist dalla ricerca per nome"
     div.append(title)
     var divResults = document.createElement("div")
     divResults.id="searchPlaylist"
@@ -2013,7 +2013,7 @@ export async function printSearchPlaylist(input, divSearch){
 
     if(playlists.length==0){
         document.getElementById("searchPlaylist").innerHTML=""
-        document.getElementById("titleTemp").innerHTML = "Playlist dalla ricerca: nessun risultato"
+        document.getElementById("titleTemp1").innerHTML = "Playlist dalla ricerca per nome: nessun risultato"
     }else{
         document.getElementById("searchPlaylist").innerHTML=""
         printContentRows(playlists, "searchPlaylist", "playlist-template", printPlaylistCard)
@@ -2028,8 +2028,8 @@ export async function printSearchPlaylist(input, divSearch){
 export async function printSearchTag(input, divSearch){
     var div = document.createElement("div")
     var title = document.createElement("h5")
-    title.id="titleTemp"
-    title.innerHTML = "Playlist dalla ricerca"
+    title.id="titleTemp2"
+    title.innerHTML = "Playlist dalla ricerca per tag"
     div.append(title)
 
     var divResults = document.createElement("div")
@@ -2048,7 +2048,7 @@ export async function printSearchTag(input, divSearch){
 
     if(playlists.length==0){
         document.getElementById("searchTagPlaylist").innerHTML=""
-        document.getElementById("titleTemp").innerHTML = "Playlist dalla ricerca: nessun risultato"
+        document.getElementById("titleTemp2").innerHTML = "Playlist dalla ricerca per tag: nessun risultato"
     }else{
         document.getElementById("searchTagPlaylist").innerHTML=""
         printContentRows(playlists, "searchPlaylist", "playlist-template", printPlaylistCard)
