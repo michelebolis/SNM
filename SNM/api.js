@@ -353,6 +353,12 @@ app.put('/playlist/add/follow/:id', auth, async function (req, res) {
     // Ricerca nel database
     var id = req.params.id
     var pwmClient = await new mongoClient(uri).connect()
+    var playlist = await pwmClient.db("SNM")
+        .collection('Playlists')
+        .find({$and:[{"_id" : new ObjectId(id)}, {"followers":req.body}]})
+    if(await playlist.next()){
+        return
+    }
     var playlists = await pwmClient.db("SNM")
         .collection('Playlists')
         .updateOne({"_id" : new ObjectId(id)}, {"$push" : {"followers":req.body}})

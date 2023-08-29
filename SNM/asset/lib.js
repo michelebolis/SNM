@@ -876,14 +876,12 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
                     var del = document.createElement("div")
                     del.classList.add("card-action", "cursor")
                     del.innerHTML = "❌"
+                    del.value = playlists[i]._id
                     del.setAttribute("data-bs-toggle","popover")
                     del.setAttribute("data-bs-trigger","hover focus")
                     del.setAttribute("data-bs-content","Unfollow")
                     del.setAttribute("data-bs-placement", "bottom")
-                    del.addEventListener("click", async function (){
-                        await removeFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
-                        this.parentNode.innerHTML = "Follow rimosso"
-                    })
+                    del.addEventListener("click", handleFollow)
                     div.getElementsByClassName("nome_playlist")[0].parentNode.append(del)
                     found = true
                     break
@@ -894,20 +892,31 @@ export function printPlaylistCard(playlists, idNode, idTemplate){
                 var agg = document.createElement("div")
                 agg.classList.add("card-action", "cursor")
                 agg.innerHTML = "➕"
+                agg.value = playlists[i]._id
                 agg.setAttribute("data-bs-toggle","popover")
                 agg.setAttribute("data-bs-trigger","hover focus")
                 agg.setAttribute("data-bs-content","Follow")
                 agg.setAttribute("data-bs-placement", "bottom")
-                agg.addEventListener("click", async function (){
-                    await addFollow(playlists[i]._id, {"id" : window.localStorage.getItem("user")});
-                    this.parentNode.innerHTML = "Follow aggiunto"
-                })
+                agg.addEventListener("click", handleFollow)
                 div.getElementsByClassName("nome_playlist")[0].parentNode.append(agg)
             }
         }
         node.append(div)
     }
     template.classList.add("visually-hidden")
+}
+
+/**
+ * Funzione che, in base all'INNER HTML del nodo, aggiunge o toglie il follow dell'utente alla playlist il cui id è il value del nodo
+ */
+async function handleFollow(){
+    if(this.innerHTML == "❌"){
+        await removeFollow(this.value, {"id" : window.localStorage.getItem("user")});
+        this.innerHTML = "➕"
+    }else if(this.innerHTML == "➕"){
+        await addFollow(this.value, {"id" : window.localStorage.getItem("user")});
+        this.innerHTML = "❌"
+    }
 }
 
 /**
