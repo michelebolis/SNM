@@ -72,16 +72,16 @@ In generale quasi tutti i componenti delle pagine HTML vengono generati con una 
 - L'accesso con le proprie credenziali da parte dell'utilizzatore consente di eseguire azioni precluse se non si effettua l'accesso.
 - Il ruolo che ricopre l'utente nella playlist: follower, proprietario o utilizzatore non registrato.
 
-Inoltre ciò ha permesso una **fattorizzazione** delle funzione che vengono riutilizzate nelle varie pagine (es stampare le playlist seguite o le playlist pubbliche o le mie playlist equivale ad eseguire la stessa operazione) e una suddivisione logica maggiore.
+Inoltre ciò ha permesso una **fattorizzazione** delle funzioni che vengono riutilizzate nelle varie pagine (es stampare le playlist seguite o le playlist pubbliche o le mie playlist equivale ad eseguire la stessa operazione) e una suddivisione logica maggiore.
 
 Gli elementi visualizzati tramite card sono gestiti con una **paginazione** che ne consente la visualizzazione di 5 elementi alla volta, per evitare un'eccessiva presenza di card.
 
 Per verificare che l'utente sia loggato o meno all'interno dell'applicativo, utilizzo due variabili nel **localStorage**, "user" che contiene l'id dell'utente e "nickname" che utilizzo nel menu (per questioni di ottimizzazione lo salvo nel localStorage invece che effettuare una chiamata API per recuperare le informazioni dell'utente ogni volta che carico una pagina con la navbar).  
 
-Le pagine utilizzate per la visualizzazione delle informazioni di canzoni, artisti, album e playlist hanno l'id del oggetto di interessa nell'url in modo che sia facilmente reperibile.  
+Le pagine utilizzate per la visualizzazione delle informazioni di canzoni, artisti, album e playlist hanno l'id dell'oggetto di interessa nell'url in modo che sia facilmente reperibile.  
 es <http://localhost:3100/src/track.html?0JONs2ETXIHvYVxNris8Bf>, in questo caso "0JONs2ETXIHvYVxNris8Bf" è l'id della canzone che si vuole visualizzare.  
 
-Tuttavia qualora si verificasse un **codice di errore di spotify**, sia per token errato(401)/API rate raggiunto (429) sia per un id sbagliato, questi vengono opportunamente gestiti dall'applicativo. In particolare se il token non è piu valido, allora si richiama la funzione che ne richiede uno nuovo e successivamente si richiama la funzione che si stava eseguendo.
+Tuttavia, qualora si verificasse un **codice di errore di spotify**, sia per token errato(401)/API rate raggiunto (429) sia per un id sbagliato, questi vengono opportunamente gestiti dall'applicativo. In particolare se il token non è piu valido, allora si richiama la funzione che ne richiede uno nuovo e successivamente si richiama la funzione che si stava eseguendo.
 
 I dati riguardanti le playlist, presenti nel db, sono memorizzati per intero per evitare molteplici e ripetute chiamate all'API di Spotify, presupponendo che tali informazioni non cambino nel tempo.
 
