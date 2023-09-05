@@ -1810,9 +1810,12 @@ export async function verifySearch(){
     if(prevSearch){prevSearch.remove()}
     var divSearch = document.createElement("div")
     divSearch.id="searchResult"
-    var title = document.createElement("h4")
-    title.innerHTML = "Risultati ricerca"
-    document.getElementById("searchDiv").parentNode.append(title, divSearch)
+    document.getElementById("searchDiv").append(divSearch)
+    if (document.getElementById("searchDiv").parentNode.childNodes.length == 3){
+        var title = document.createElement("h4")
+        title.innerHTML = "Risultati ricerca"
+        document.getElementById("searchDiv").parentNode.prepend(title)
+    }
 
     // A seconda degli switch checkati, stampo i risultati delle varie categorie
     if(document.getElementById("all").checked){
