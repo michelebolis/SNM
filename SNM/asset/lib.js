@@ -1812,8 +1812,7 @@ export async function verifySearch(){
     divSearch.id="searchResult"
     var title = document.createElement("h4")
     title.innerHTML = "Risultati ricerca"
-    divSearch.append(title)
-    document.getElementById("myPlaylists").parentNode.prepend(divSearch)
+    document.getElementById("searchDiv").parentNode.append(title, divSearch)
 
     // A seconda degli switch checkati, stampo i risultati delle varie categorie
     if(document.getElementById("all").checked){
